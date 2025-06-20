@@ -196,8 +196,8 @@ pub fn get_definition(
                 Some(ffi::DefinitionLocation {
                     in_std: false,
                     position: ffi::SourcePosition {
-                        line: source.byte_to_line(start).unwrap(),
-                        column: source.byte_to_column(start).unwrap(),
+                        line: source.lines().byte_to_line(start).unwrap(),
+                        column: source.lines().byte_to_column(start).unwrap(),
                     },
                 })
             } else {
@@ -243,8 +243,8 @@ fn find_text_position_for_span(source: &Source, span: Span) -> Option<ffi::Sourc
 
     source.range(span).and_then(|span| {
         Some(ffi::SourcePosition {
-            line: source.byte_to_line(span.start)?,
-            column: source.byte_to_column(span.start)?,
+            line: source.lines().byte_to_line(span.start)?,
+            column: source.lines().byte_to_column(span.start)?,
         })
     })
 }

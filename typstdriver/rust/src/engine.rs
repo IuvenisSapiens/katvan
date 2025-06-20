@@ -103,7 +103,7 @@ impl<'a> EngineImpl<'a> {
                 .pages
                 .iter()
                 .map(|page| ffi::PreviewPageDataInternal {
-                    page_num: page.number,
+                    page_num: page.number as usize,
                     width_pts: page.frame.width().abs().to_pt(),
                     height_pts: page.frame.height().abs().to_pt(),
                     fingerprint: calc_fingerprint(&page.frame),
@@ -275,7 +275,7 @@ impl<'a> EngineImpl<'a> {
         let document = self.result.as_ref().context("Invalid state")?;
         let main = self.world.main_source();
 
-        let cursor = main
+        let cursor = main.lines()
             .line_column_to_byte(line, column)
             .context("No such position")?;
 
@@ -301,8 +301,8 @@ impl<'a> EngineImpl<'a> {
                 let source = self.world.main_source();
 
                 Some(ffi::SourcePosition {
-                    line: source.byte_to_line(cursor)?,
-                    column: source.byte_to_column(cursor)?,
+                    line: source.lines().byte_to_line(cursor)?,
+                    column: source.lines().byte_to_column(cursor)?,
                 })
             }
             _ => None,
@@ -323,7 +323,7 @@ impl<'a> EngineImpl<'a> {
 
     pub fn get_tooltip(&self, line: usize, column: usize) -> Result<ffi::ToolTip> {
         let main = self.world.main_source();
-        let cursor = main
+        let cursor = main.lines()
             .line_column_to_byte(line, column)
             .context("No such position")?;
 
@@ -338,7 +338,7 @@ impl<'a> EngineImpl<'a> {
         implicit: bool,
     ) -> Result<ffi::Completions> {
         let main = self.world.main_source();
-        let cursor = main
+        let cursor = main.lines()
             .line_column_to_byte(line, column)
             .context("No such position")?;
 
@@ -348,8 +348,8 @@ impl<'a> EngineImpl<'a> {
 
         Ok(ffi::Completions {
             from: ffi::SourcePosition {
-                line: main.byte_to_line(start_crusor).unwrap(),
-                column: main.byte_to_column(start_crusor).unwrap(),
+                line: main.lines().byte_to_line(start_crusor).unwrap(),
+                column: main.lines().byte_to_column(start_crusor).unwrap(),
             },
             completions_json: serde_json::to_string(&completions)?,
         })
@@ -357,7 +357,7 @@ impl<'a> EngineImpl<'a> {
 
     pub fn get_definition(&self, line: usize, column: usize) -> Result<ffi::DefinitionLocation> {
         let main = self.world.main_source();
-        let cursor = main
+        let cursor = main.lines()
             .line_column_to_byte(line, column)
             .context("No such position")?;
 
@@ -391,8 +391,8 @@ fn position_to_file_location(
     source: &typst::syntax::Source,
     byte_idx: usize,
 ) -> Option<DiagnosticFileLocation> {
-    let line = source.byte_to_line(byte_idx)?;
-    let column = source.byte_to_column(byte_idx)?;
+    let line = source.lines().byte_to_line(byte_idx)?;
+    let column = source.lines().byte_to_column(byte_idx)?;
 
     Some(DiagnosticFileLocation {
         line: i64::try_from(line).unwrap_or(-1),
