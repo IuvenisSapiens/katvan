@@ -135,10 +135,7 @@ fn process_gradient_stops(stops: &[(Color, Ratio)]) -> Vec<(Color, Ratio)> {
 }
 
 fn process_color(color: &Color) -> Color {
-    if let Color::Hsl(mut hsl) = color.to_hsl() {
-        hsl.color.lightness = 1.0 - hsl.color.lightness;
-        Color::Hsl(hsl)
-    } else {
-        *color
-    }
+    let mut hsl = color.to_hsl();
+    hsl.color.lightness = 1.0 - hsl.color.lightness;
+    Color::Hsl(hsl)
 }
