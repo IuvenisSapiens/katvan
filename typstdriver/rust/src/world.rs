@@ -75,8 +75,8 @@ impl<'a> KatvanWorld<'a> {
     }
 
     pub fn apply_edit(&mut self, from_utf16_idx: usize, to_utf16_idx: usize, text: &str) {
-        let from = self.source.utf16_to_byte(from_utf16_idx);
-        let to = self.source.utf16_to_byte(to_utf16_idx);
+        let from = self.source.lines().utf16_to_byte(from_utf16_idx);
+        let to = self.source.lines().utf16_to_byte(to_utf16_idx);
 
         if let (Some(from), Some(to)) = (from, to) {
             self.source.edit(from..to, text);
@@ -164,6 +164,21 @@ impl typst::World for KatvanWorld<'_> {
             }
         };
         Some(typst::foundations::Datetime::Date(in_offset.date()))
+    }
+
+    fn now(&self, offset: Option<i64>) -> Option<typst::foundations::Datetime> {
+        let now = self.now?;
+
+        let in_offset = match offset {
+            None => now,
+            Some(offset) => {
+                let hours: i8 = offset.try_into().ok()?;
+                let offset = time::UtcOffset::from_hms(hours, 0, 0).ok()?;
+                now.to_offset(offset)
+            }
+        };
+        // Some(typst::foundations::Datetime::Time(in_offset.time()))
+        Some(typst::foundations::Datetime::Datetime(time::PrimitiveDateTime::new(in_offset.date(), in_offset.time())))
     }
 }
 
