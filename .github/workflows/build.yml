@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgmock-dev libhunspell-dev libarchive-dev  libasound2-dev
+          sudo apt-get install -y libgmock-dev libhunspell-dev libarchive-dev
           pip install --user mistletoe
 
       - name: Setup Rust toolchain
@@ -59,11 +59,6 @@ jobs:
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
-
-      - name: Install Windows SDK
-        run: |
-          choco install windows-sdk-10-version-2104 --version=10.0.21394.0
-        shell: pwsh
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
