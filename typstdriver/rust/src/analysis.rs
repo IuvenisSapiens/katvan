@@ -24,7 +24,7 @@ use typst::{
     Document,
 };
 use typst_ide::{analyze_expr, IdeWorld, Tooltip};
-
+use typst::model::Outlinable;
 use crate::bridge::ffi;
 
 const ONLINE_DOCS_PREFIX: &str = "https://typst.app/docs";
@@ -225,7 +225,7 @@ pub fn get_metadata(
         }
 
         if let Some(heading) = item.to_packed::<HeadingElem>() {
-            if !heading.outlined(styles) {
+            if !heading.outlined() {
                 continue;
             }
 
