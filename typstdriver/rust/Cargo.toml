@@ -11,6 +11,7 @@ crate-type = ["staticlib"]
 cxx = "1.0.160"
 codex = "0.1.1"
 typst = { git = "https://github.com/IuvenisSapiens/typst" , branch = "feat_enhanced", package = "typst"}
+typst-syntax = { git = "https://github.com/IuvenisSapiens/typst" , branch = "feat_enhanced", package = "typst-syntax"}
 typst-pdf = { git = "https://github.com/IuvenisSapiens/typst", branch = "feat_enhanced", package = "typst-pdf"}
 typst-render = { git = "https://github.com/IuvenisSapiens/typst", branch = "feat_enhanced", package = "typst-render"}
 typst-ide = { git = "https://github.com/IuvenisSapiens/typst", branch = "feat_enhanced", package = "typst-ide"}
