@@ -8,7 +8,7 @@ rust-version = "1.88"
 crate-type = ["staticlib"]
 
 [dependencies]
-cxx = "1.0.160"
+cxx = "1.0.161"
 codex = "0.1.1"
 typst = { git = "https://github.com/IuvenisSapiens/typst" , branch = "feat_enhanced", package = "typst"}
 typst-syntax = { git = "https://github.com/IuvenisSapiens/typst" , branch = "feat_enhanced", package = "typst-syntax"}
