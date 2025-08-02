@@ -153,12 +153,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "byteorder"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
-
-[[package]]
 name = "byteorder-lite"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -166,9 +160,9 @@ checksum = "8f1fe948ff07f4bd06c30984e69f5b4899c516a3ef74f34df92a2df2ab535495"
 
 [[package]]
 name = "cc"
-version = "1.2.30"
+version = "1.2.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "deec109607ca693028562ed836a5f1c4b8bd77755c4e132fc5ce11b0b6211ae7"
+checksum = "c3a42d84bb6b69d3a8b3eaacf0d88f179e1929695e1ad012b6cf64d9caaa5fd2"
 dependencies = [
  "shlex",
 ]
@@ -236,18 +230,18 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.41"
+version = "4.5.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be92d32e80243a54711e5d7ce823c35c41c9d929dc4ab58e1276f625841aadf9"
+checksum = "ed87a9d530bb41a67537289bafcac159cb3ee28460e0a4571123d2a778a6a882"
 dependencies = [
  "clap_builder",
 ]
 
 [[package]]
 name = "clap_builder"
-version = "4.5.41"
+version = "4.5.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "707eab41e9622f9139419d573eca0900137718000c517d47da73045f54331c3d"
+checksum = "64f4f3f3c77c94aff3c7e9aac9a2ca1974a5adf392a8bb751e827d6d127ab966"
 dependencies = [
  "anstyle",
  "clap_lex",
@@ -299,21 +293,22 @@ checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
 
 [[package]]
 name = "comemo"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df6916408a724339aa77b18214233355f3eb04c42eb895e5f8909215bd8a7a91"
+checksum = "649d7b2d867b569729c03c0f6968db10bc95921182a1f2b2012b1b549492f39d"
 dependencies = [
  "comemo-macros",
- "once_cell",
  "parking_lot",
+ "rustc-hash",
  "siphasher",
+ "slab",
 ]
 
 [[package]]
 name = "comemo-macros"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8936e42f9b4f5bdfaf23700609ac1f11cb03ad4c1ec128a4ee4fd0903e228db"
+checksum = "51c87fc7e85487493ddedae1a3a34b897c77ad8825375b79265a8a162c28d535"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -643,15 +638,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e13624c2627564efccf4934284bdd98cbaa14e79b0b5a141218e507b3a823456"
 dependencies = [
  "percent-encoding",
-]
-
-[[package]]
-name = "fxhash"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c31b6d751ae2c7f11320402d34e41349dd1016f8d5d45e48c4312bc8625af50c"
-dependencies = [
- "byteorder",
 ]
 
 [[package]]
@@ -1119,14 +1105,13 @@ dependencies = [
 [[package]]
 name = "krilla"
 version = "0.4.0"
-source = "git+https://github.com/LaurenzV/krilla?rev=37b9a00#37b9a00bfac87ed0b347b7cf8e9d37a6f68fcccd"
+source = "git+https://github.com/LaurenzV/krilla?rev=abdf031#abdf031c9e5ba89d606f6f145fad648c75812aec"
 dependencies = [
  "base64",
  "bumpalo",
  "comemo",
  "flate2",
  "float-cmp 0.10.0",
- "fxhash",
  "gif",
  "hayro-write",
  "image-webp",
@@ -1135,6 +1120,7 @@ dependencies = [
  "pdf-writer",
  "png",
  "rayon",
+ "rustc-hash",
  "rustybuzz",
  "siphasher",
  "skrifa",
@@ -1149,7 +1135,7 @@ dependencies = [
 [[package]]
 name = "krilla-svg"
 version = "0.1.0"
-source = "git+https://github.com/LaurenzV/krilla?rev=37b9a00#37b9a00bfac87ed0b347b7cf8e9d37a6f68fcccd"
+source = "git+https://github.com/LaurenzV/krilla?rev=abdf031#abdf031c9e5ba89d606f6f145fad648c75812aec"
 dependencies = [
  "flate2",
  "fontdb",
@@ -1900,9 +1886,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.141"
+version = "1.0.142"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30b9eff21ebe718216c6ec64e1d9ac57087aad11efc64e32002bce4a0d4c03d3"
+checksum = "030fedb782600dcbd6f02d479bf0d817ac3bb40d644745b769d6a96bc3afc5a7"
 dependencies = [
  "itoa",
  "memchr",
@@ -1968,6 +1954,12 @@ dependencies = [
  "bytemuck",
  "read-fonts",
 ]
+
+[[package]]
+name = "slab"
+version = "0.4.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "04dc19736151f35336d325007ac991178d504a119863a2fcb3758cdb5e52c50d"
 
 [[package]]
 name = "slotmap"
@@ -2058,11 +2050,11 @@ dependencies = [
 
 [[package]]
 name = "subsetter"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35539e8de3dcce8dd0c01f3575f85db1e5ac1aea1b996d2d09d89f148bc91497"
+checksum = "35725d9d2d056905865f8a36146e45be43691b15fc5d973bd7f79dd438288544"
 dependencies = [
- "fxhash",
+ "rustc-hash",
 ]
 
 [[package]]
@@ -2269,9 +2261,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "toml"
-version = "0.9.3"
+version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e06723639aaded957e5a80be250c1f82f274b9d23ebb4d94163668470623461c"
+checksum = "41ae868b5a0f67631c14589f7e250c1ea2c574ee5ba21c6c8dd4b1485705a5a1"
 dependencies = [
  "serde",
  "serde_spanned",
@@ -2334,10 +2326,11 @@ checksum = "6af6ae20167a9ece4bcb41af5b80f8a1f1df981f6391189ce00fd257af04126a"
 [[package]]
 name = "typst"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "comemo",
  "ecow",
+ "rustc-hash",
  "typst-eval",
  "typst-html",
  "typst-layout",
@@ -2357,11 +2350,12 @@ source = "git+https://github.com/typst/typst-assets?rev=fbf00f9#fbf00f9539fdb082
 [[package]]
 name = "typst-eval"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "comemo",
  "ecow",
  "indexmap",
+ "rustc-hash",
  "stacker",
  "toml",
  "typst-library",
@@ -2375,12 +2369,13 @@ dependencies = [
 [[package]]
 name = "typst-html"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "bumpalo",
  "comemo",
  "ecow",
  "palette",
+ "rustc-hash",
  "time",
  "typst-assets",
  "typst-library",
@@ -2394,11 +2389,12 @@ dependencies = [
 [[package]]
 name = "typst-ide"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "comemo",
  "ecow",
  "pathdiff",
+ "rustc-hash",
  "serde",
  "typst",
  "typst-eval",
@@ -2408,7 +2404,7 @@ dependencies = [
 [[package]]
 name = "typst-kit"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "ecow",
  "fontdb",
@@ -2425,7 +2421,7 @@ dependencies = [
 [[package]]
 name = "typst-layout"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "az",
  "bumpalo",
@@ -2440,6 +2436,7 @@ dependencies = [
  "icu_segmenter",
  "kurbo",
  "memchr",
+ "rustc-hash",
  "rustybuzz",
  "smallvec",
  "ttf-parser",
@@ -2458,7 +2455,7 @@ dependencies = [
 [[package]]
 name = "typst-library"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "az",
  "bitflags 2.9.1",
@@ -2492,6 +2489,7 @@ dependencies = [
  "regex-syntax",
  "roxmltree",
  "rust_decimal",
+ "rustc-hash",
  "rustybuzz",
  "serde",
  "serde_json",
@@ -2522,7 +2520,7 @@ dependencies = [
 [[package]]
 name = "typst-macros"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -2533,7 +2531,7 @@ dependencies = [
 [[package]]
 name = "typst-pdf"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "bytemuck",
  "comemo",
@@ -2542,6 +2540,7 @@ dependencies = [
  "infer",
  "krilla",
  "krilla-svg",
+ "rustc-hash",
  "serde",
  "typst-assets",
  "typst-library",
@@ -2554,7 +2553,7 @@ dependencies = [
 [[package]]
 name = "typst-realize"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "arrayvec",
  "bumpalo",
@@ -2571,7 +2570,7 @@ dependencies = [
 [[package]]
 name = "typst-render"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "bytemuck",
  "comemo",
@@ -2590,7 +2589,7 @@ dependencies = [
 [[package]]
 name = "typst-svg"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "base64",
  "comemo",
@@ -2598,6 +2597,7 @@ dependencies = [
  "flate2",
  "hayro",
  "image",
+ "rustc-hash",
  "ttf-parser",
  "typst-assets",
  "typst-library",
@@ -2611,9 +2611,10 @@ dependencies = [
 [[package]]
 name = "typst-syntax"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "ecow",
+ "rustc-hash",
  "serde",
  "toml",
  "typst-timing",
@@ -2628,7 +2629,7 @@ dependencies = [
 [[package]]
 name = "typst-timing"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "parking_lot",
  "serde",
@@ -2638,11 +2639,12 @@ dependencies = [
 [[package]]
 name = "typst-utils"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#57c4e77e7b5069591812210d5bb512d992ea3df9"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f3e69fff33d6e3f6bc3dd416df2214b685475778"
 dependencies = [
  "once_cell",
  "portable-atomic",
  "rayon",
+ "rustc-hash",
  "siphasher",
  "thin-vec",
  "unicode-math-class",
@@ -3361,9 +3363,9 @@ checksum = "3f423a2c17029964870cfaabb1f13dfab7d092a62a29a89264f4d36990ca414a"
 
 [[package]]
 name = "zune-jpeg"
-version = "0.4.19"
+version = "0.4.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c9e525af0a6a658e031e95f14b7f889976b74a11ba0eca5a5fc9ac8a1c43a6a"
+checksum = "fc1f7e205ce79eb2da3cd71c5f55f3589785cb7c79f6a03d1c8d1491bda5d089"
 dependencies = [
  "zune-core",
 ]
