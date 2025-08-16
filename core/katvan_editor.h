@@ -54,6 +54,8 @@ public:
     void updateEditorTheme();
     void setSourceDiagnostics(QList<typstdriver::Diagnostic> diagnostics);
 
+    QRect adjustedCursorRect(const QTextCursor& cursor);
+
     QMenu* createInsertMenu();
 
 public slots:
@@ -75,8 +77,11 @@ public slots:
 
     void insertSymbol(const QString& symbolName);
     void insertColor(const QColor& color);
+    void insertLabelRef(const QString& label);
 
 protected:
+    bool canInsertFromMimeData(const QMimeData* source) const override;
+    void insertFromMimeData(const QMimeData* source) override;
     bool event(QEvent* event) override;
     void contextMenuEvent(QContextMenuEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
