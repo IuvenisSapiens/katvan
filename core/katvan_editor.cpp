@@ -17,6 +17,7 @@
  */
 #include "katvan_codemodel.h"
 #include "katvan_completionmanager.h"
+#include "katvan_constants.h"
 #include "katvan_document.h"
 #include "katvan_editor.h"
 #include "katvan_editorlayout.h"
@@ -26,6 +27,7 @@
 #include "katvan_text_utils.h"
 
 #include <QMenu>
+#include <QMimeData>
 #include <QPainter>
 #include <QRegularExpression>
 #include <QScrollBar>
@@ -93,8 +95,10 @@ Editor::Editor(Document* doc, QWidget* parent)
     setMinimumSize(300, 100);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+    EditorLayout* layout = new EditorLayout(doc, d_codeModel);
+
     setDocument(doc);
-    doc->setDocumentLayout(new EditorLayout(doc, d_codeModel));
+    doc->setDocumentLayout(layout);
 
     connect(SpellChecker::instance(), &SpellChecker::suggestionsReady, this, &Editor::spellingSuggestionsReady);
     connect(SpellChecker::instance(), &SpellChecker::dictionaryChanged, this, &Editor::forceRehighlighting);
@@ -106,6 +110,7 @@ Editor::Editor(Document* doc, QWidget* parent)
     d_rightLineNumberGutter = new LineNumberGutter(this);
 
     connect(doc, &QTextDocument::blockCountChanged, this, &Editor::updateLineNumberGutterWidth);
+    connect(layout, &EditorLayout::fullRelayoutDone, this, &Editor::updateLineNumberGutters);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &Editor::updateLineNumberGutters);
     connect(this, &QTextEdit::textChanged, this, &Editor::updateLineNumberGutters);
     connect(this, &QTextEdit::cursorPositionChanged, this, &Editor::updateLineNumberGutters);
@@ -195,7 +200,7 @@ void Editor::applyEffectiveSettings()
 
     document()->setLayoutEnabled(true);
 
-    d_completionManager->setImplictCompletionAllowed(d_effectiveSettings.autoTriggerCompletions());
+    d_completionManager->setImplicitCompletionAllowed(d_effectiveSettings.autoTriggerCompletions());
 }
 
 static EditorTheme& themeForColorScheme(const QString& scheme)
@@ -471,7 +476,7 @@ void Editor::showToolTipAtLocation(int line, int column, const QString& text, co
 
     d_pendingTooltipPos.reset();
 
-    QRect r = cursorRect(cursor);
+    QRect r = adjustedCursorRect(cursor);
     r.moveTopLeft(viewport()->mapToGlobal(r.topLeft()));
 
     EditorToolTip::showByKeyboard(r, this, text, detailsUrl);
@@ -483,7 +488,7 @@ void Editor::triggerToolTipByKeyboard()
 
     QString tooltip = predefinedTooltipAtPosition(cursor.position());
     if (!tooltip.isEmpty()) {
-        QRect r = cursorRect(cursor);
+        QRect r = adjustedCursorRect(cursor);
         r.moveTopLeft(viewport()->mapToGlobal(r.topLeft()));
 
         EditorToolTip::showByKeyboard(r, this, tooltip);
@@ -872,7 +877,9 @@ void Editor::keyPressEvent(QKeyEvent* event)
 
     if (CLOSING_BRACKETS->contains(event->text())) {
         QTextCursor cursor = textCursor();
-        if (!cursor.atBlockEnd() && cursor.block().text().at(cursor.positionInBlock()) == event->text().at(0)) {
+        if (!cursor.atBlockEnd()
+                && d_effectiveSettings.autoBrackets()
+                && cursor.block().text().at(cursor.positionInBlock()) == event->text().at(0)) {
             cursor.movePosition(QTextCursor::NextCharacter);
             setTextCursor(cursor);
             return;
@@ -1050,6 +1057,25 @@ void Editor::resizeEvent(QResizeEvent* event)
     }
 }
 
+QRect Editor::adjustedCursorRect(const QTextCursor& cursor)
+{
+    EditorLayout* layout = qobject_cast<EditorLayout*>(document()->documentLayout());
+    QRect orig = cursorRect(cursor);
+
+    // Correct the top-left position of the cursor bounding rectangle to
+    // accommodate for automatic isolates which are invisible to
+    // QWidgetTextControlPrivate::rectForPosition.
+    QPointF adjPos = layout->cursorPositionPoint(cursor.position());
+    if (adjPos.isNull()) {
+        return orig;
+    }
+
+    orig.setX(qRound(adjPos.x()) - horizontalScrollBar()->value());
+    orig.setY(qRound(adjPos.y()) - verticalScrollBar()->value());
+
+    return orig;
+}
+
 void Editor::popupInsertMenu()
 {
     QMenu* insertMenu = createInsertMenu();
@@ -1059,7 +1085,8 @@ void Editor::popupInsertMenu()
         d_completionManager->close();
     }
 
-    QPoint globalPos = viewport()->mapToGlobal(cursorRect().topLeft());
+    QRect r = adjustedCursorRect(textCursor());
+    QPoint globalPos = viewport()->mapToGlobal(r.topLeft());
     insertMenu->exec(globalPos);
 }
 
@@ -1174,6 +1201,34 @@ void Editor::insertColor(const QColor& color)
 
     cursor.insertText(expression);
     setTextCursor(cursor);
+}
+
+void Editor::insertLabelRef(const QString& label)
+{
+    QTextCursor cursor = textCursor();
+    QString expression = d_codeModel->getLabelRefExpression(label, cursor.position());
+
+    cursor.insertText(expression);
+    setTextCursor(cursor);
+}
+
+bool Editor::canInsertFromMimeData(const QMimeData* source) const
+{
+    return QTextEdit::canInsertFromMimeData(source)
+        || source->hasFormat(LABEL_REF_MIME_TYPE);
+}
+
+void Editor::insertFromMimeData(const QMimeData* source)
+{
+    if (source->hasFormat(LABEL_REF_MIME_TYPE)) {
+        QString label = QString::fromUtf8(source->data(LABEL_REF_MIME_TYPE));
+        if (!label.isEmpty()) {
+            insertLabelRef(label);
+        }
+    }
+    else {
+        QTextEdit::insertFromMimeData(source);
+    }
 }
 
 int Editor::lineNumberGutterWidth()
