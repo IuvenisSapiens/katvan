@@ -17,11 +17,13 @@
  */
 #import "macshell_editorview.h"
 
+#include <QInputDialog>
 #include <QMenu>
 
 @interface KatvanEditorView ()
 
 @property katvan::Editor* editor;
+@property QInputDialog* goToLineDialog;
 
 @end
 
@@ -32,12 +34,15 @@
     self = [super init];
     if (self) {
         self.editor = new katvan::Editor(textDocument);
+        self.goToLineDialog = nullptr;
     }
     return self;
 }
 
 - (void)dealloc
 {
+    [self.view removeObserver:self forKeyPath:@"effectiveAppearance"];
+
     delete self.editor;
 }
 
@@ -48,6 +53,7 @@
     NSView* editorView = (__bridge NSView *)reinterpret_cast<void*>(self.editor->winId());
 
     [self.view addSubview:editorView];
+    [self.view addObserver:self forKeyPath:@"effectiveAppearance" options:0 context:nil];
 
     editorView.translatesAutoresizingMaskIntoConstraints = NO;
 
@@ -61,6 +67,16 @@
     ]];
 
     self.editor->show();
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary*)change context:(void*)context
+{
+    if ([keyPath isEqualToString:@"effectiveAppearance"]) {
+        self.editor->updateEditorTheme();
+    }
+    else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 - (NSMenu*)createInsertMenu
@@ -85,6 +101,12 @@
     }
     if (action == @selector(paste:)) {
         return self.editor->canPaste();
+    }
+    if (action == @selector(goBack:)) {
+        return self.editor->isGoBackAvailable();
+    }
+    if (action == @selector(goForward:)) {
+        return self.editor->isGoForwardAvailable();
     }
     return YES;
 }
@@ -138,6 +160,45 @@
 - (void)zoomOutFont:(id)sender
 {
     self.editor->decreaseFontSize();
+}
+
+- (void)goBack:(id)sender
+{
+    self.editor->goBack();
+}
+
+- (void)goForward:(id)sender
+{
+    self.editor->goForward();
+}
+
+- (void)goToLine:(id)sender
+{
+    if (!self.goToLineDialog) {
+        self.goToLineDialog = new QInputDialog(self.editor, Qt::Sheet);
+        self.goToLineDialog->setInputMode(QInputDialog::IntInput);
+
+        __weak __typeof__(self) weakSelf = self;
+        QObject::connect(self.goToLineDialog, &QInputDialog::accepted,
+                        self.goToLineDialog, [weakSelf]() {
+            int lineNumber = weakSelf.goToLineDialog->intValue();
+            weakSelf.editor->goToBlock(lineNumber - 1, 0);
+        });
+    }
+
+    int lineCount = self.editor->document()->blockCount();
+    NSString* msg = [NSString stringWithFormat:NSLocalizedString(@"Enter a line number (up to %d):", nil), lineCount];
+
+    self.goToLineDialog->setLabelText(QString::fromNSString(msg));
+    self.goToLineDialog->setIntRange(1, lineCount);
+    self.goToLineDialog->open();
+}
+
+- (void)showColorPicker
+{
+    NSColorPanel* panel = [NSColorPanel sharedColorPanel];
+    [panel setContinuous:NO];
+    [panel makeKeyAndOrderFront:self];
 }
 
 @end
