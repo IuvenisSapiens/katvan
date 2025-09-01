@@ -2370,7 +2370,7 @@ checksum = "6af6ae20167a9ece4bcb41af5b80f8a1f1df981f6391189ce00fd257af04126a"
 [[package]]
 name = "typst"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "comemo",
  "ecow",
@@ -2394,7 +2394,7 @@ source = "git+https://github.com/typst/typst-assets?rev=fbf00f9#fbf00f9539fdb082
 [[package]]
 name = "typst-eval"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "comemo",
  "ecow",
@@ -2413,7 +2413,7 @@ dependencies = [
 [[package]]
 name = "typst-html"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "bumpalo",
  "comemo",
@@ -2433,7 +2433,7 @@ dependencies = [
 [[package]]
 name = "typst-ide"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "comemo",
  "ecow",
@@ -2448,7 +2448,7 @@ dependencies = [
 [[package]]
 name = "typst-kit"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "ecow",
  "fontdb",
@@ -2465,7 +2465,7 @@ dependencies = [
 [[package]]
 name = "typst-layout"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "az",
  "bumpalo",
@@ -2499,7 +2499,7 @@ dependencies = [
 [[package]]
 name = "typst-library"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "az",
  "bitflags 2.9.3",
@@ -2526,7 +2526,7 @@ dependencies = [
  "memchr",
  "palette",
  "phf 0.13.1",
- "png 0.18.0",
+ "png 0.17.16",
  "qcms",
  "rayon",
  "regex",
@@ -2564,7 +2564,7 @@ dependencies = [
 [[package]]
 name = "typst-macros"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -2575,7 +2575,7 @@ dependencies = [
 [[package]]
 name = "typst-pdf"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "bytemuck",
  "comemo",
@@ -2597,7 +2597,7 @@ dependencies = [
 [[package]]
 name = "typst-realize"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "arrayvec",
  "bumpalo",
@@ -2614,7 +2614,7 @@ dependencies = [
 [[package]]
 name = "typst-render"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "bytemuck",
  "comemo",
@@ -2633,7 +2633,7 @@ dependencies = [
 [[package]]
 name = "typst-svg"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "base64",
  "comemo",
@@ -2655,7 +2655,7 @@ dependencies = [
 [[package]]
 name = "typst-syntax"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "ecow",
  "rustc-hash",
@@ -2673,7 +2673,7 @@ dependencies = [
 [[package]]
 name = "typst-timing"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "parking_lot",
  "serde",
@@ -2683,7 +2683,7 @@ dependencies = [
 [[package]]
 name = "typst-utils"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#f70fec87e6dc977908602cf66437ecfa592016b3"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#ff50c4e477a112720f292b0c2918c8df66032278"
 dependencies = [
  "once_cell",
  "portable-atomic",
