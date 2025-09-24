@@ -40,6 +40,8 @@ class CompletionManager;
 class Document;
 class Highlighter;
 
+namespace utils { class WheelTracker; }
+
 class Editor : public QTextEdit
 {
     Q_OBJECT
@@ -67,6 +69,7 @@ public slots:
     void goToBlock(int blockNum, int charOffset);
     void goBack();
     void goForward();
+    void showPosition(int charPos);
 
     void increaseFontSize();
     void decreaseFontSize();
@@ -152,13 +155,13 @@ private:
     Highlighter* d_highlighter;
     CodeModel* d_codeModel;
     CompletionManager* d_completionManager;
+    utils::WheelTracker* d_wheelTracker;
 
     EditorSettings d_appSettings;
     EditorSettings d_fileMode;
     EditorSettings d_effectiveSettings;
     EditorTheme d_theme;
     qreal d_fontZoomFactor;
-    qreal d_accumulatedWheelUnits;
 
     QList<typstdriver::Diagnostic> d_sourceDiagnostics;
     QPointer<QMenu> d_contextMenu;

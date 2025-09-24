@@ -18,6 +18,7 @@
 #include "katvan_codemodel.h"
 #include "katvan_completionmanager.h"
 #include "katvan_constants.h"
+#include "katvan_coreutils.h"
 #include "katvan_document.h"
 #include "katvan_editor.h"
 #include "katvan_editorlayout.h"
@@ -95,7 +96,6 @@ Editor::Editor(Document* doc, QWidget* parent)
     , d_codeModel(doc->codeModel())
     , d_theme(EditorTheme::defaultTheme())
     , d_fontZoomFactor(1.0)
-    , d_accumulatedWheelUnits(0)
     , d_pendingSuggestionsPosition(-1)
 {
     setAcceptRichText(false);
@@ -112,6 +112,7 @@ Editor::Editor(Document* doc, QWidget* parent)
 
     d_highlighter = new Highlighter(doc, SpellChecker::instance(), d_theme);
     d_completionManager = new CompletionManager(this);
+    d_wheelTracker = new utils::WheelTracker(this);
 
     d_leftLineNumberGutter = new LineNumberGutter(this);
     d_rightLineNumberGutter = new LineNumberGutter(this);
@@ -123,6 +124,10 @@ Editor::Editor(Document* doc, QWidget* parent)
     connect(this, &QTextEdit::cursorPositionChanged, this, &Editor::updateLineNumberGutters);
     connect(this, &QTextEdit::cursorPositionChanged, this, &Editor::updateExtraSelections);
     connect(doc, &Document::contentReset, this, &Editor::resetNavigationData);
+
+    connect(d_wheelTracker, &utils::WheelTracker::scrolled, this, [this](int units) {
+        setFontZoomFactor(d_fontZoomFactor + 0.1 * units);
+    });
 
     updateLineNumberGutters();
 
@@ -290,6 +295,7 @@ void Editor::setCurrentLandmark(const QTextCursor& target, bool takeFocus)
 {
     d_currentLandmark = EditorLocation { target };
     setTextCursor(target);
+    showPosition(target.position());
     if (takeFocus) {
         setFocus();
     }
@@ -371,10 +377,26 @@ void Editor::goForward()
     setCurrentLandmark(targetCursor, true);
 }
 
+void Editor::showPosition(int charPos)
+{
+    katvan::EditorLayout* layout = qobject_cast<katvan::EditorLayout*>(document()->documentLayout());
+    QScrollBar* scrollBar = verticalScrollBar();
+
+    QPointF pos = layout->cursorPositionPoint(charPos);
+    int y = qRound(pos.y());
+    int viewportHeight = viewport()->height();
+    int margin = qRound(0.6 * viewportHeight);
+
+    if (y - margin < scrollBar->value()) {
+        scrollBar->setValue(qMax(0, y - margin));
+    }
+    else if (y > scrollBar->value() + viewportHeight - margin) {
+        scrollBar->setValue(qMin(y - viewportHeight + margin, scrollBar->maximum()));
+    }
+}
+
 void Editor::setFontZoomFactor(qreal factor)
 {
-    d_accumulatedWheelUnits = 0;
-
     qreal newFactor = qBound(0.1, factor, 5.0);
     if (qFuzzyCompare(d_fontZoomFactor, newFactor)) {
         return;
@@ -1049,23 +1071,8 @@ void Editor::mouseReleaseEvent(QMouseEvent* event)
 
 void Editor::wheelEvent(QWheelEvent* event)
 {
-    int yAngle = event->angleDelta().y();
-    if (event->modifiers() == Qt::ControlModifier && yAngle != 0) {
-        // yAngle is in 1/8ths of a degree. 15 degrees are typically considered
-        // to be one "unit" of scroll. Therefore each 120 1/8ths should change
-        // the font zoom factor by 0.1. However - those can accumulate over
-        // multiple events - if the scrolling device has high precision (e.g.
-        // a laptop trackpad)
-        d_accumulatedWheelUnits += yAngle / 120.0;
-
-        qreal units = std::trunc(d_accumulatedWheelUnits);
-        if (!qFuzzyCompare(units, 0)) {
-            if (event->inverted()) {
-                units = -units;
-            }
-
-            setFontZoomFactor(d_fontZoomFactor + 0.1 * units);
-        }
+    if (event->modifiers() == Qt::ControlModifier) {
+        d_wheelTracker->processEvent(event);
         return;
     }
     QTextEdit::wheelEvent(event);
