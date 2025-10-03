@@ -161,9 +161,9 @@ checksum = "8f1fe948ff07f4bd06c30984e69f5b4899c516a3ef74f34df92a2df2ab535495"
 
 [[package]]
 name = "cc"
-version = "1.2.39"
+version = "1.2.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1354349954c6fc9cb0deab020f27f783cf0b604e8bb754dc4658ecf0d29c35f"
+checksum = "e1d05d92f4b1fd76aad469d46cdd858ca761576082cd37df81416691e50199fb"
 dependencies = [
  "find-msvc-tools",
  "shlex",
@@ -398,7 +398,7 @@ dependencies = [
  "cxxbridge-cmd",
  "cxxbridge-flags",
  "cxxbridge-macro",
- "foldhash 0.2.0",
+ "foldhash",
  "link-cplusplus",
 ]
 
@@ -582,9 +582,9 @@ dependencies = [
 
 [[package]]
 name = "find-msvc-tools"
-version = "0.1.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ced73b1dacfc750a6db6c0a0c3a3853c8b41997e2e2c563dc90804ae6867959"
+checksum = "0399f9d26e5191ce32c498bebd31e7a3ceabc2745f0ac54af3f335126c3f24b3"
 
 [[package]]
 name = "flate2"
@@ -617,12 +617,6 @@ name = "fnv"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
-
-[[package]]
-name = "foldhash"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
 name = "foldhash"
@@ -706,15 +700,6 @@ checksum = "459196ed295495a68f7d7fe1d84f6c4b7ff0e21fe3017b2f283c6fac3ad803c9"
 dependencies = [
  "cfg-if",
  "crunchy",
-]
-
-[[package]]
-name = "hashbrown"
-version = "0.15.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1"
-dependencies = [
- "foldhash 0.1.5",
 ]
 
 [[package]]
@@ -1126,7 +1111,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4b0f83760fb341a774ed326568e19f5a863af4a952def8c39f9ab92fd95b88e5"
 dependencies = [
  "equivalent",
- "hashbrown 0.16.0",
+ "hashbrown",
  "serde",
  "serde_core",
 ]
@@ -1217,12 +1202,6 @@ dependencies = [
  "euclid",
  "smallvec",
 ]
-
-[[package]]
-name = "leb128fmt"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2"
 
 [[package]]
 name = "libc"
@@ -2098,16 +2077,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "string-interner"
-version = "0.19.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23de088478b31c349c9ba67816fa55d9355232d63c3afea8bf513e31f0f1d2c0"
-dependencies = [
- "hashbrown 0.15.5",
- "serde",
-]
-
-[[package]]
 name = "strsim"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2394,7 +2363,7 @@ checksum = "6af6ae20167a9ece4bcb41af5b80f8a1f1df981f6391189ce00fd257af04126a"
 [[package]]
 name = "typst"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "comemo",
  "ecow",
@@ -2418,7 +2387,7 @@ source = "git+https://github.com/typst/typst-assets?rev=fbf00f9#fbf00f9539fdb082
 [[package]]
 name = "typst-eval"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "comemo",
  "ecow",
@@ -2437,7 +2406,7 @@ dependencies = [
 [[package]]
 name = "typst-html"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "bumpalo",
  "comemo",
@@ -2457,7 +2426,7 @@ dependencies = [
 [[package]]
 name = "typst-ide"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "comemo",
  "ecow",
@@ -2472,7 +2441,7 @@ dependencies = [
 [[package]]
 name = "typst-kit"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "ecow",
  "fontdb",
@@ -2489,7 +2458,7 @@ dependencies = [
 [[package]]
 name = "typst-layout"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "az",
  "bumpalo",
@@ -2523,7 +2492,7 @@ dependencies = [
 [[package]]
 name = "typst-library"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "az",
  "bitflags 2.9.4",
@@ -2588,7 +2557,7 @@ dependencies = [
 [[package]]
 name = "typst-macros"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -2599,7 +2568,7 @@ dependencies = [
 [[package]]
 name = "typst-pdf"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "az",
  "bytemuck",
@@ -2624,7 +2593,7 @@ dependencies = [
 [[package]]
 name = "typst-realize"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "arrayvec",
  "bumpalo",
@@ -2641,7 +2610,7 @@ dependencies = [
 [[package]]
 name = "typst-render"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "bytemuck",
  "comemo",
@@ -2660,7 +2629,7 @@ dependencies = [
 [[package]]
 name = "typst-svg"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "base64",
  "comemo",
@@ -2682,7 +2651,7 @@ dependencies = [
 [[package]]
 name = "typst-syntax"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "ecow",
  "rustc-hash",
@@ -2700,7 +2669,7 @@ dependencies = [
 [[package]]
 name = "typst-timing"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "parking_lot",
  "serde",
@@ -2710,7 +2679,7 @@ dependencies = [
 [[package]]
 name = "typst-utils"
 version = "0.13.1"
-source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#eae38dabd38497e81149d02d0a4316c0d5fa061e"
+source = "git+https://github.com/IuvenisSapiens/typst?branch=feat_enhanced#413aeebaf8374beef8b255b67d7c20da9695b7b8"
 dependencies = [
  "once_cell",
  "portable-atomic",
@@ -2970,16 +2939,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
 
 [[package]]
-name = "wasm-encoder"
-version = "0.239.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5be00faa2b4950c76fe618c409d2c3ea5a3c9422013e079482d78544bb2d184c"
-dependencies = [
- "leb128fmt",
- "wasmparser 0.239.0",
-]
-
-[[package]]
 name = "wasmi"
 version = "0.51.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2989,8 +2948,7 @@ dependencies = [
  "wasmi_collections",
  "wasmi_core",
  "wasmi_ir",
- "wasmparser 0.228.0",
- "wat",
+ "wasmparser",
 ]
 
 [[package]]
@@ -2998,9 +2956,6 @@ name = "wasmi_collections"
 version = "0.51.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a4a11fa090c4d742e5a77dbbc8efbbe1aa151db7335ca6850232e6cafbb1023"
-dependencies = [
- "string-interner",
-]
 
 [[package]]
 name = "wasmi_core"
@@ -3027,39 +2982,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4abf1132c1fdf747d56bbc1bb52152400c70f336870f968b85e89ea422198ae3"
 dependencies = [
  "bitflags 2.9.4",
- "indexmap",
-]
-
-[[package]]
-name = "wasmparser"
-version = "0.239.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c9d90bb93e764f6beabf1d02028c70a2156a6583e63ac4218dd07ef733368b0"
-dependencies = [
- "bitflags 2.9.4",
- "indexmap",
-]
-
-[[package]]
-name = "wast"
-version = "239.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9139176fe8a2590e0fb174cdcaf373b224cb93c3dde08e4297c1361d2ba1ea5d"
-dependencies = [
- "bumpalo",
- "leb128fmt",
- "memchr",
- "unicode-width",
- "wasm-encoder",
-]
-
-[[package]]
-name = "wat"
-version = "1.239.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e1c941927d34709f255558166f8901a2005f8ab4a9650432e9281b7cc6f3b75"
-dependencies = [
- "wast",
 ]
 
 [[package]]
