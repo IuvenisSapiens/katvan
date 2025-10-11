@@ -218,7 +218,7 @@ impl<'a> EngineImpl<'a> {
         let document = self.result.as_ref().context("Invalid state")?;
 
         let options = typst_pdf::PdfOptions {
-            disable_tags: false,
+            tagged: true,
             ident: typst::foundations::Smart::Auto,
             timestamp: None,
             page_ranges: None,
