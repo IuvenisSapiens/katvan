@@ -19,12 +19,11 @@ use pulldown_cmark::{BrokenLink, CowStr, Event, Tag};
 use typst::{
     foundations::{Func, StyleChain, Value},
     layout::{Frame, PagedDocument},
-    model::HeadingElem,
+    model::{HeadingElem, Outlinable},
     syntax::{ast, LinkedNode, Side, Source, Span, SyntaxKind},
     Document,
 };
 use typst_ide::{analyze_expr, IdeWorld, Tooltip};
-use typst::model::Outlinable;
 use crate::bridge::ffi;
 
 const ONLINE_DOCS_PREFIX: &str = "https://typst.app/docs";

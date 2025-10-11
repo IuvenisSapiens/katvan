@@ -9,7 +9,7 @@ crate-type = ["staticlib"]
 
 [dependencies]
 cxx = "1.0.186"
-codex = "0.1.1"
+codex = "0.2.0"
 typst = { git = "https://github.com/IuvenisSapiens/typst" , branch = "feat_enhanced", package = "typst"}
 typst-syntax = { git = "https://github.com/IuvenisSapiens/typst" , branch = "feat_enhanced", package = "typst-syntax"}
 typst-pdf = { git = "https://github.com/IuvenisSapiens/typst", branch = "feat_enhanced", package = "typst-pdf"}

@@ -21,7 +21,6 @@ use std::{
     pin::Pin,
     sync::{LazyLock, Mutex},
 };
-use typst::LibraryExt;
 
 use time::{format_description::well_known::Iso8601, OffsetDateTime};
 use typst::{
@@ -30,7 +29,7 @@ use typst::{
     syntax::{package::PackageSpec, FileId, Source, VirtualPath},
     text::{Font, FontBook},
     utils::LazyHash,
-    Library,
+    Library, LibraryExt,
 };
 use typst_kit::fonts::{FontSlot, Fonts};
 

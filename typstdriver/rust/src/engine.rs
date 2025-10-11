@@ -102,7 +102,7 @@ impl<'a> EngineImpl<'a> {
                 .pages
                 .iter()
                 .map(|page| ffi::PreviewPageDataInternal {
-                    page_num: page.number as usize,
+                    page_num: page.number as u64,
                     width_pts: page.frame.width().abs().to_pt(),
                     height_pts: page.frame.height().abs().to_pt(),
                     fingerprint: calc_fingerprint(&(&page.frame, &page.fill)),
@@ -217,13 +217,7 @@ impl<'a> EngineImpl<'a> {
     pub fn export_pdf(&self, path: &str) -> Result<bool> {
         let document = self.result.as_ref().context("Invalid state")?;
 
-        let options = typst_pdf::PdfOptions {
-            tagged: true,
-            ident: typst::foundations::Smart::Auto,
-            timestamp: None,
-            page_ranges: None,
-            standards: typst_pdf::PdfStandards::default(),
-        };
+        let options = typst_pdf::PdfOptions::default();
 
         let start = std::time::Instant::now();
         let result = typst_pdf::pdf(document, &options);
@@ -265,7 +259,8 @@ impl<'a> EngineImpl<'a> {
         let document = self.result.as_ref().context("Invalid state")?;
         let main = self.world.main_source();
 
-        let cursor = main.lines()
+        let cursor = main
+            .lines()
             .line_column_to_byte(line, column)
             .context("No such position")?;
 
@@ -313,7 +308,8 @@ impl<'a> EngineImpl<'a> {
 
     pub fn get_tooltip(&self, line: usize, column: usize) -> Result<ffi::ToolTip> {
         let main = self.world.main_source();
-        let cursor = main.lines()
+        let cursor = main
+            .lines()
             .line_column_to_byte(line, column)
             .context("No such position")?;
 
@@ -328,7 +324,8 @@ impl<'a> EngineImpl<'a> {
         implicit: bool,
     ) -> Result<ffi::Completions> {
         let main = self.world.main_source();
-        let cursor = main.lines()
+        let cursor = main
+            .lines()
             .line_column_to_byte(line, column)
             .context("No such position")?;
 
@@ -347,7 +344,8 @@ impl<'a> EngineImpl<'a> {
 
     pub fn get_definition(&self, line: usize, column: usize) -> Result<ffi::DefinitionLocation> {
         let main = self.world.main_source();
-        let cursor = main.lines()
+        let cursor = main
+            .lines()
             .line_column_to_byte(line, column)
             .context("No such position")?;
 
