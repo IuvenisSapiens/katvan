@@ -2,7 +2,7 @@
 name = "typstdriver_rs"
 edition = "2024"
 publish = false
-rust-version = "1.90"
+rust-version = "1.91"
 
 [lib]
 crate-type = ["staticlib"]
