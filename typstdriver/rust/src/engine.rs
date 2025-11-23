@@ -19,9 +19,9 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 use std::pin::Pin;
 
 use anyhow::{Context, Result};
+use typst::World;
 use typst::ecow::EcoString;
 use typst::layout::{Abs, PagedDocument, Point};
-use typst::World;
 
 use crate::analysis;
 use crate::bridge::ffi;
@@ -214,10 +214,15 @@ impl<'a> EngineImpl<'a> {
         })
     }
 
-    pub fn export_pdf(&self, path: &str) -> Result<bool> {
+    pub fn export_pdf(
+        &self,
+        path: &str,
+        pdf_version: &str,
+        pdfa_standard: &str,
+        tagged: bool,
+    ) -> Result<bool> {
         let document = self.result.as_ref().context("Invalid state")?;
-
-        let options = typst_pdf::PdfOptions::default();
+        let options = pdf_options(pdf_version, pdfa_standard, tagged).context("Invalid options")?;
 
         let start = std::time::Instant::now();
         let result = typst_pdf::pdf(document, &options);
@@ -401,6 +406,34 @@ fn calc_fingerprint<H: Hash>(item: &H) -> u64 {
     let mut hasher = DefaultHasher::new();
     item.hash(&mut hasher);
     hasher.finish()
+}
+
+fn pdf_options(
+    pdf_version: &str,
+    pdfa_standard: &str,
+    tagged: bool,
+) -> Result<typst_pdf::PdfOptions<'static>> {
+    let mut standards: Vec<typst_pdf::PdfStandard> = vec![];
+    if !pdf_version.is_empty() {
+        standards.push(serde_json::from_str(&format!("\"{pdf_version}\""))?);
+    }
+    if !pdfa_standard.is_empty() {
+        standards.push(serde_json::from_str(&format!("\"{pdfa_standard}\""))?);
+    }
+
+    let standards = if standards.is_empty() {
+        typst_pdf::PdfStandards::default()
+    } else {
+        typst_pdf::PdfStandards::new(&standards)
+            .ok()
+            .context("Incompatible version and PDF/A standard")?
+    };
+
+    Ok(typst_pdf::PdfOptions {
+        standards,
+        tagged,
+        ..Default::default()
+    })
 }
 
 fn is_in_sandbox() -> bool {
