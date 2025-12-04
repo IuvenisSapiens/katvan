@@ -63,8 +63,8 @@ impl<'a> KatvanWorld<'a> {
             package_manager: Mutex::new(PackageManagerWrapper::new(package_manager)),
             packages_list: once_cell::sync::OnceCell::new(),
             library: LazyHash::new(Library::default()),
-            book: LazyHash::new(fonts.book),
-            fonts: fonts.fonts,
+            book: fonts.book,
+            fonts: fonts.slots,
             source,
             now: None,
         }

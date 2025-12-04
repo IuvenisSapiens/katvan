@@ -22,6 +22,7 @@ use anyhow::{Context, Result};
 use typst::World;
 use typst::ecow::EcoString;
 use typst::layout::{Abs, PagedDocument, Point};
+use typst_syntax::Spanned;
 
 use crate::analysis;
 use crate::bridge::ffi;
@@ -379,7 +380,7 @@ fn get_diagnostic_hints(diag: &typst::diag::SourceDiagnostic) -> Vec<&str> {
             ]
         }
     } else {
-        diag.hints.iter().map(EcoString::as_str).collect()
+        diag.hints.iter().map(|arg0: &Spanned<EcoString>| arg0.v.as_str()).collect()
     }
 }
 

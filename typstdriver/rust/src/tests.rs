@@ -47,8 +47,8 @@ impl TestWorld {
 
         Self {
             library: LazyHash::new(Library::default()),
-            book: LazyHash::new(fonts.book),
-            fonts: fonts.fonts,
+            book: fonts.book,
+            fonts: fonts.slots,
             source,
         }
     }
@@ -80,6 +80,10 @@ impl World for TestWorld {
     }
 
     fn today(&self, _offset: Option<i64>) -> Option<typst::foundations::Datetime> {
+        None
+    }
+
+    fn now(&self, _offset: Option<i64>) -> Option<typst::foundations::Datetime> {
         None
     }
 }
