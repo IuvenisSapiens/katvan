@@ -243,7 +243,7 @@ impl<'a> EngineImpl<'a> {
         let page = document.pages.get(pos.page).context("Missing page")?;
         let click = Point::new(Abs::pt(pos.x_pts), Abs::pt(pos.y_pts));
 
-        let jump = typst_ide::jump_from_click(&self.world, document, &page.frame, click)
+        let jump = typst_ide::jump_from_click_in_frame(&self.world, document, &page.frame, click)
             .context("Inverse search failed")?;
 
         self.convert_jump_to_source_position(jump)
