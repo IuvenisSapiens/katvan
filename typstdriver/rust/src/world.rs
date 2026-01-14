@@ -27,7 +27,7 @@ use typst::{
     Feature, Library, LibraryExt,
     diag::{EcoString, FileError, FileResult, PackageError},
     foundations::Bytes,
-    syntax::{FileId, Source, VirtualPath, package::PackageSpec},
+    syntax::{FileId, Source, VirtualRoot, VirtualPath, package::PackageSpec},
     text::{Font, FontBook},
     utils::LazyHash,
 };
@@ -36,7 +36,7 @@ use typst_kit::fonts::{FontSlot, Fonts};
 use crate::bridge::ffi;
 use crate::pathmap;
 
-pub static MAIN_ID: LazyLock<FileId> = LazyLock::new(|| FileId::new_fake(VirtualPath::new("MAIN")));
+pub static MAIN_ID: LazyLock<FileId> = LazyLock::new(|| FileId::new_fake(VirtualRoot::Project, VirtualPath::new("MAIN").unwrap()));
 
 pub struct KatvanWorld<'a> {
     path_mapper: pathmap::PathMapper,

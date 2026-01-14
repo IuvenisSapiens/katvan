@@ -20,14 +20,14 @@ use std::sync::LazyLock;
 use typst::{
     Library, LibraryExt, World,
     diag::FileResult,
-    syntax::{FileId, Source, VirtualPath},
+    syntax::{FileId, Source, VirtualPath, VirtualRoot},
     text::FontBook,
     utils::LazyHash,
 };
 use typst_ide::IdeWorld;
 use typst_kit::fonts::{FontSlot, Fonts};
 
-static TEST_ID: LazyLock<FileId> = LazyLock::new(|| FileId::new_fake(VirtualPath::new("TEST")));
+static TEST_ID: LazyLock<FileId> = LazyLock::new(|| FileId::new_fake(VirtualRoot::Project,VirtualPath::new("TEST").unwrap()));
 
 pub(crate) struct TestWorld {
     library: LazyHash<Library>,
