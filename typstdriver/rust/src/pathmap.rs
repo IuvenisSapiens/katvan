@@ -51,7 +51,7 @@ impl PathMapper {
             ))));
         }
 
-        let displayed_path = join_and_normalize_path(&self.root.displayed, path.as_rootless_path());
+        let displayed_path = join_and_normalize_path(&self.root.displayed, std::path::Path::new(path.get_without_slash()));
 
         let allowed_roots = std::iter::once(&self.root).chain(self.allowed_paths.iter());
         for root in allowed_roots {

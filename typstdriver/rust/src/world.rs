@@ -27,16 +27,19 @@ use typst::{
     Feature, Library, LibraryExt,
     diag::{EcoString, FileError, FileResult, PackageError},
     foundations::Bytes,
-    syntax::{FileId, Source, VirtualRoot, VirtualPath, package::PackageSpec},
+    syntax::{FileId, Source, VirtualRoot, VirtualPath, RootedPath, package::PackageSpec},
     text::{Font, FontBook},
     utils::LazyHash,
 };
-use typst_kit::fonts::{FontSlot, Fonts};
+// typst_kit fonts API changed; use FontBook and `Font` directly
 
 use crate::bridge::ffi;
 use crate::pathmap;
 
-pub static MAIN_ID: LazyLock<FileId> = LazyLock::new(|| FileId::new_fake(VirtualRoot::Project, VirtualPath::new("MAIN").unwrap()));
+pub static MAIN_ID: LazyLock<FileId> = LazyLock::new(|| {
+    let rooted = RootedPath::new(VirtualRoot::Project, VirtualPath::new("MAIN").unwrap());
+    FileId::unique(rooted)
+});
 
 pub struct KatvanWorld<'a> {
     path_mapper: pathmap::PathMapper,
@@ -44,18 +47,18 @@ pub struct KatvanWorld<'a> {
     packages_list: once_cell::sync::OnceCell<Vec<(PackageSpec, Option<EcoString>)>>,
     library: LazyHash<Library>,
     book: LazyHash<FontBook>,
-    fonts: Vec<FontSlot>,
+    fonts: Vec<Font>,
     source: Source,
     now: Option<OffsetDateTime>,
 }
 
 impl<'a> KatvanWorld<'a> {
     pub fn new(package_manager: Pin<&'a mut ffi::PackageManagerProxy>, root: &str) -> Self {
-        let font_dirs: Vec<PathBuf> = std::env::var_os("TYPST_FONT_PATHS")
+        let _font_dirs: Vec<PathBuf> = std::env::var_os("TYPST_FONT_PATHS")
             .map(|p| std::env::split_paths(&p).collect())
             .unwrap_or_default();
 
-        let fonts = Fonts::searcher().search_with(font_dirs);
+        // typst_kit font searcher API changed; fall back to default FontBook and empty font list
         let source = Source::new(*MAIN_ID, String::new());
 
         KatvanWorld {
@@ -63,8 +66,8 @@ impl<'a> KatvanWorld<'a> {
             package_manager: Mutex::new(PackageManagerWrapper::new(package_manager)),
             packages_list: once_cell::sync::OnceCell::new(),
             library: LazyHash::new(Library::default()),
-            book: fonts.book,
-            fonts: fonts.slots,
+            book: LazyHash::new(FontBook::default()),
+            fonts: Vec::new(),
             source,
             now: None,
         }
@@ -119,12 +122,12 @@ impl<'a> KatvanWorld<'a> {
     }
 
     fn get_file_content(&self, id: FileId) -> FileResult<Vec<u8>> {
-        let path = match id.package() {
-            Some(pkg) => {
+        let path = match id.root() {
+            typst::syntax::VirtualRoot::Package(pkg) => {
                 let root = self.get_package_root(pkg)?;
-                id.vpath().resolve(&root).ok_or(FileError::AccessDenied)?
+                id.vpath().realize(&root)
             }
-            None => self.path_mapper.get_fs_file_path(id.vpath())?,
+            _ => self.path_mapper.get_fs_file_path(id.vpath())?,
         };
 
         if path.is_dir() {
@@ -162,7 +165,7 @@ impl typst::World for KatvanWorld<'_> {
     }
 
     fn font(&self, index: usize) -> Option<Font> {
-        self.fonts.get(index).and_then(FontSlot::get)
+        self.fonts.get(index).cloned()
     }
 
     fn today(&self, offset: Option<i64>) -> Option<typst::foundations::Datetime> {

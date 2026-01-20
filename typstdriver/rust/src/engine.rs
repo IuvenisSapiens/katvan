@@ -352,11 +352,11 @@ fn span_to_location(span: typst::syntax::Span, world: &dyn World) -> DiagnosticL
 
     let source = world.source(id).unwrap();
 
-    let package = id
-        .package()
-        .map(|pkg| pkg.to_string() + "/")
-        .unwrap_or_default();
-    let file = id.vpath().as_rootless_path().to_string_lossy();
+    let package = match id.root() {
+        typst::syntax::VirtualRoot::Package(pkg) => pkg.to_string() + "/",
+        _ => String::new(),
+    };
+    let file = id.vpath().get_without_slash().to_string();
 
     let range = source.range(span).unwrap_or_default();
     let start = position_to_file_location(&source, range.start).unwrap_or_default();

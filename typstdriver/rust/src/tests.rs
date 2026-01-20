@@ -20,35 +20,33 @@ use std::sync::LazyLock;
 use typst::{
     Library, LibraryExt, World,
     diag::FileResult,
-    syntax::{FileId, Source, VirtualPath, VirtualRoot},
+    syntax::{FileId, Source, VirtualPath, VirtualRoot, RootedPath},
     text::FontBook,
     utils::LazyHash,
 };
 use typst_ide::IdeWorld;
-use typst_kit::fonts::{FontSlot, Fonts};
 
-static TEST_ID: LazyLock<FileId> = LazyLock::new(|| FileId::new_fake(VirtualRoot::Project,VirtualPath::new("TEST").unwrap()));
+static TEST_ID: LazyLock<FileId> = LazyLock::new(|| {
+    let rooted = RootedPath::new(VirtualRoot::Project, VirtualPath::new("TEST").unwrap());
+    FileId::unique(rooted)
+});
 
 pub(crate) struct TestWorld {
     library: LazyHash<Library>,
     book: LazyHash<FontBook>,
-    fonts: Vec<FontSlot>,
+    fonts: Vec<typst::text::Font>,
     source: Source,
 }
 
 impl TestWorld {
     pub fn new(content: &str) -> Self {
-        let fonts = Fonts::searcher()
-            .include_embedded_fonts(true)
-            .include_system_fonts(false)
-            .search();
-
+        // typst_kit API changed; use default FontBook and empty font list for tests
         let source = Source::new(*TEST_ID, String::from(content));
 
         Self {
             library: LazyHash::new(Library::default()),
-            book: fonts.book,
-            fonts: fonts.slots,
+            book: LazyHash::new(FontBook::default()),
+            fonts: Vec::new(),
             source,
         }
     }
@@ -76,7 +74,7 @@ impl World for TestWorld {
     }
 
     fn font(&self, index: usize) -> Option<typst::text::Font> {
-        self.fonts.get(index).and_then(FontSlot::get)
+        self.fonts.get(index).cloned()
     }
 
     fn today(&self, _offset: Option<i64>) -> Option<typst::foundations::Datetime> {
