@@ -17,7 +17,7 @@
  */
 use std::{
     collections::HashMap,
-    path::PathBuf,
+    path::{PathBuf, Path},
     pin::Pin,
     sync::{LazyLock, Mutex},
 };
@@ -54,11 +54,72 @@ pub struct KatvanWorld<'a> {
 
 impl<'a> KatvanWorld<'a> {
     pub fn new(package_manager: Pin<&'a mut ffi::PackageManagerProxy>, root: &str) -> Self {
-        let _font_dirs: Vec<PathBuf> = std::env::var_os("TYPST_FONT_PATHS")
+        let font_dirs: Vec<PathBuf> = std::env::var_os("TYPST_FONT_PATHS")
             .map(|p| std::env::split_paths(&p).collect())
             .unwrap_or_default();
 
-        // typst_kit font searcher API changed; fall back to default FontBook and empty font list
+        // Prepare book and fonts vector.
+        let mut book_local = FontBook::new();
+        let mut fonts_local: Vec<Font> = Vec::new();
+
+        // Helper to load fonts from a directory recursively.
+        fn load_from_dir(path: &Path, book: &mut FontBook, fonts: &mut Vec<Font>) {
+            if !path.exists() {
+                return;
+            }
+
+            let entries = match std::fs::read_dir(path) {
+                Ok(e) => e,
+                Err(_) => return,
+            };
+
+            for entry in entries.filter_map(Result::ok) {
+                let p = entry.path();
+                if p.is_dir() {
+                    load_from_dir(&p, book, fonts);
+                    continue;
+                }
+
+                if let Some(ext) = p.extension().and_then(|s| s.to_str()) {
+                    let ext = ext.to_ascii_lowercase();
+                    if ext == "ttf" || ext == "otf" || ext == "ttc" || ext == "otc" {
+                        if let Ok(data) = std::fs::read(&p) {
+                            let bytes = Bytes::new(data);
+                            for font in Font::iter(bytes.clone()) {
+                                book.push(font.info().clone());
+                                fonts.push(font);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Load from environment-specified dirs
+        for dir in &font_dirs {
+            load_from_dir(dir, &mut book_local, &mut fonts_local);
+        }
+
+        // If none provided or nothing loaded, try common system font dirs.
+        if font_dirs.is_empty() || book_local.info(0).is_none() {
+            #[cfg(target_os = "windows")]
+            {
+                load_from_dir(&PathBuf::from(r"C:\\Windows\\Fonts"), &mut book_local, &mut fonts_local);
+            }
+            #[cfg(target_os = "macos")]
+            {
+                load_from_dir(&PathBuf::from("/System/Library/Fonts"), &mut book_local, &mut fonts_local);
+                load_from_dir(&PathBuf::from("/Library/Fonts"), &mut book_local, &mut fonts_local);
+            }
+            #[cfg(all(unix, not(target_os = "macos")))]
+            {
+                load_from_dir(&PathBuf::from("/usr/share/fonts"), &mut book_local, &mut fonts_local);
+                if let Some(home) = dirs::home_dir() {
+                    load_from_dir(&home.join(".local/share/fonts"), &mut book_local, &mut fonts_local);
+                }
+            }
+        }
+
         let source = Source::new(*MAIN_ID, String::new());
 
         KatvanWorld {
@@ -66,8 +127,8 @@ impl<'a> KatvanWorld<'a> {
             package_manager: Mutex::new(PackageManagerWrapper::new(package_manager)),
             packages_list: once_cell::sync::OnceCell::new(),
             library: LazyHash::new(Library::default()),
-            book: LazyHash::new(FontBook::default()),
-            fonts: Vec::new(),
+            book: LazyHash::new(book_local),
+            fonts: fonts_local,
             source,
             now: None,
         }
