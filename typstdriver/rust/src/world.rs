@@ -115,7 +115,8 @@ impl<'a> KatvanWorld<'a> {
             {
                 load_from_dir(&PathBuf::from("/usr/share/fonts"), &mut book_local, &mut fonts_local);
                 if let Some(home) = dirs::home_dir() {
-                    load_from_dir(&home.join(".local/share/fonts"), &mut book_local, &mut fonts_local);
+                    let p = home.join(".local/share/fonts");
+                    load_from_dir(&p, &mut book_local, &mut fonts_local);
                 }
             }
         }
