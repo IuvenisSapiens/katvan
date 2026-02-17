@@ -230,13 +230,17 @@ impl typst::World for KatvanWorld<'_> {
         self.fonts.get(index).cloned()
     }
 
-    fn today(&self, offset: Option<i64>) -> Option<typst::foundations::Datetime> {
+    fn today(&self, offset: Option<typst::foundations::Duration>) -> Option<typst::foundations::Datetime> {
         let now = self.now?;
 
         let in_offset = match offset {
             None => now,
             Some(offset) => {
-                let hours: i8 = offset.try_into().ok()?;
+                // Convert typst's Duration into `time::Duration`, take whole hours
+                // and downcast to `i8` for `UtcOffset` construction.
+                let td: time::Duration = offset.try_into().ok()?;
+                let hours_i128 = td.whole_hours();
+                let hours: i8 = i8::try_from(hours_i128).ok()?;
                 let offset = time::UtcOffset::from_hms(hours, 0, 0).ok()?;
                 now.to_offset(offset)
             }
@@ -244,13 +248,17 @@ impl typst::World for KatvanWorld<'_> {
         Some(typst::foundations::Datetime::Date(in_offset.date()))
     }
 
-    fn now(&self, offset: Option<i64>) -> Option<typst::foundations::Datetime> {
+    fn now(&self, offset: Option<typst::foundations::Duration>) -> Option<typst::foundations::Datetime> {
         let now = self.now?;
 
         let in_offset = match offset {
             None => now,
             Some(offset) => {
-                let hours: i8 = offset.try_into().ok()?;
+                // Convert typst's Duration into `time::Duration`, take whole hours
+                // and downcast to `i8` for `UtcOffset` construction.
+                let td: time::Duration = offset.try_into().ok()?;
+                let hours_i128 = td.whole_hours();
+                let hours: i8 = i8::try_from(hours_i128).ok()?;
                 let offset = time::UtcOffset::from_hms(hours, 0, 0).ok()?;
                 now.to_offset(offset)
             }
