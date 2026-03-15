@@ -329,7 +329,16 @@ void CompletionManager::updateCompletionPrefix(bool force)
     QString prefix = cursor.selectedText();
     if (d_completer->completionPrefix() != prefix || force) {
         d_completer->setCompletionPrefix(prefix);
-        d_completer->popup()->setCurrentIndex(d_completer->completionModel()->index(0, 0));
+
+        int numCompletions = d_completer->completionModel()->rowCount();
+        QModelIndex firstCompletionIndex = d_completer->completionModel()->index(0, 0);
+
+        if (numCompletions == 1 && firstCompletionIndex.data().toString() == prefix) {
+            // There is only one applicable suggestion, and it was already applied
+            d_completer->popup()->hide();
+            return;
+        }
+        d_completer->popup()->setCurrentIndex(firstCompletionIndex);
     }
 
     // Needs to be in widget (d_editor) coordinates, adjustedCursorRect is in
