@@ -130,6 +130,9 @@ QVariant DiagnosticsModel::data(const QModelIndex& index, int role) const
             return QCursor(Qt::PointingHandCursor);
         }
     }
+    if (role == ROLE_DIAGNOSTIC_KIND) {
+        return QVariant::fromValue(diagnostic.kind());
+    }
 
     if (index.column() == COLUMN_SEVERITY) {
         auto kind = diagnostic.kind();

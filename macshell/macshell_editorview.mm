@@ -246,7 +246,7 @@
 
         __weak __typeof__(self) weakSelf = self;
         QObject::connect(self.goToLineDialog, &QInputDialog::accepted,
-                        self.goToLineDialog, [weakSelf]() {
+                         self.goToLineDialog, [weakSelf]() {
             int lineNumber = weakSelf.goToLineDialog->intValue();
             weakSelf.editor->goToBlock(lineNumber - 1, 0);
         });
@@ -311,7 +311,7 @@
     }
 }
 
-- (void) findBarViewDidChangeHeight
+- (void)findBarViewDidChangeHeight
 {
     d_findBarHeight = self.findBarView ? self.findBarView.frame.size.height : 0;
     self.findBarContainerHeightConstraint.constant = d_findBarHeight;

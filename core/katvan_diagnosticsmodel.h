@@ -44,6 +44,7 @@ public:
 
     enum {
         ROLE_MOUSE_CURSOR = Qt::UserRole + 1,
+        ROLE_DIAGNOSTIC_KIND,
     };
 
     DiagnosticsModel(QObject* parent = nullptr);
