@@ -16,6 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #import "macshell_editorview.h"
+#import "macshell_issuelist.h"
 #import "macshell_outlineview.h"
 #import "macshell_previewer.h"
 #import "macshell_sidebar.h"
@@ -35,6 +36,7 @@
 @property (nonatomic) KatvanPreviewer* previewer;
 @property (nonatomic) KatvanSidebar* sidebar;
 @property (nonatomic) KatvanOutlineView* outlineView;
+@property (nonatomic) KatvanIssueList* issueList;
 
 @property (nonatomic) katvan::Document* textDocument;
 @property (nonatomic) katvan::TypstDriverWrapper* driver;
@@ -86,6 +88,9 @@
     self.outlineView = [[KatvanOutlineView alloc] init];
     self.outlineView.target = self;
 
+    self.issueList = [[KatvanIssueList alloc] initWithModel:self.driver->diagnosticsModel()];
+    self.issueList.target = self;
+
     __weak __typeof__(self) weakSelf = self;
 
     QObject::connect(self.textDocument, &katvan::Document::contentEdited,
@@ -106,7 +111,7 @@
 
     QObject::connect(self.driver, &katvan::TypstDriverWrapper::compilationStatusChanged,
                      self.driver, [weakSelf]() {
-        weakSelf.editorView.editor->setSourceDiagnostics(weakSelf.driver->diagnosticsModel()->sourceDiagnostics());
+        [weakSelf compilationStatusChanged];
     });
     QObject::connect(self.driver, &katvan::TypstDriverWrapper::outlineUpdated,
                      self.driver, [weakSelf](katvan::typstdriver::OutlineNode* outline) {
@@ -173,6 +178,11 @@
                   icon:[NSImage imageWithSystemSymbolName:@"document.viewfinder.fill"
                                 accessibilityDescription:@"Document page in a targeting frame"]
                   toolTip:NSLocalizedString(@"Document Outline", nil)];
+
+    [self.sidebar addTabController:self.issueList
+                  icon:[NSImage imageWithSystemSymbolName:@"exclamationmark.triangle"
+                                accessibilityDescription:@"Exclamation mark in a triangle"]
+                  toolTip:NSLocalizedString(@"Issues", nil)];
 
     // TODO persist as part of restorable UI state
     [self.sidebar ensureControllerSelected:self.outlineView];
@@ -303,9 +313,9 @@
         dialog.defaultFileName = base; // No .pdf suffix
     }
 
-    [dialog beginSheetWithPDFInfo: info
-            modalForWindow: self.window
-            completionHandler: ^(NSInteger rc) {
+    [dialog beginSheetWithPDFInfo:info
+            modalForWindow:self.window
+            completionHandler:^(NSInteger rc) {
                 if (rc) {
                     QString path = QString::fromNSString(info.URL.path);
                     self.driver->exportToPdf(path);
@@ -332,6 +342,11 @@
 - (void)goToBlock:(int)line column:(int)column
 {
     self.editorView.editor->goToBlock(line, column);
+}
+
+- (void)compilationStatusChanged
+{
+    self.editorView.editor->setSourceDiagnostics(self.driver->diagnosticsModel()->sourceDiagnostics());
 }
 
 - (void)showSymbolPicker

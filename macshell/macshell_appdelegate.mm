@@ -36,6 +36,9 @@
 {
     self = [super init];
     if (self) {
+        // Workaround for QTBUG-144944
+        qputenv("QT_MAC_NO_CONTAINER_LAYER", "1");
+
         // Our application isn't actually a plugin, but AA_PluginApplication ensures
         // that Qt's application delegate and menu bar are not installed. We depend
         // on AppKit handling all lifecycle events as per default, otherwise some

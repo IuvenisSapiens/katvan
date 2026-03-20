@@ -108,7 +108,7 @@ public:
     d_items.clear();
 
     [self.outlineView reloadData];
-    [self.outlineView expandItem:Nil expandChildren:YES];
+    [self.outlineView expandItem:nil expandChildren:YES];
 
     NSUserInterfaceLayoutDirection dir = self.model->isRightToLeft()
         ? NSUserInterfaceLayoutDirectionRightToLeft
@@ -225,7 +225,7 @@ public:
     return item;
 }
 
-- (NSView*)outlineView:(NSOutlineView *)outlineView viewForTableColumn:(NSTableColumn*)tableColumn item:(id)item
+- (NSView*)outlineView:(NSOutlineView*)outlineView viewForTableColumn:(NSTableColumn*)tableColumn item:(id)item
 {
     NSTableCellView* view = [self.outlineView makeViewWithIdentifier:@"headingLabel" owner:self];
     if (view == nil) {

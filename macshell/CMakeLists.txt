@@ -2,6 +2,7 @@ set(SOURCES
     macshell_appdelegate.mm
     macshell_colorconverter.mm
     macshell_editorview.mm
+    macshell_issuelist.mm
     macshell_mainmenu.mm
     macshell_outlineview.mm
     macshell_previewer.mm
