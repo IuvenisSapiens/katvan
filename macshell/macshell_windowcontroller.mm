@@ -184,7 +184,6 @@
                                 accessibilityDescription:@"Exclamation mark in a triangle"]
                   toolTip:NSLocalizedString(@"Issues", nil)];
 
-    // TODO persist as part of restorable UI state
     [self.sidebar ensureControllerSelected:self.outlineView];
 }
 

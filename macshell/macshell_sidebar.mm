@@ -32,6 +32,7 @@
 {
     self = [super init];
     if (self) {
+        self.identifier = [self className];
         self.controllers = [NSMutableArray array];
 
         [self setupSidebarTabList];
@@ -43,7 +44,6 @@
 - (void)setupSidebarTabList
 {
     self.sidebarTabList = [[NSSegmentedControl alloc] init];
-    self.sidebarTabList.segmentStyle = NSSegmentStyleSeparated;
     self.sidebarTabList.trackingMode = NSSegmentSwitchTrackingSelectOne;
     self.sidebarTabList.target = self;
     self.sidebarTabList.action = @selector(sidebarTabClicked:);
@@ -73,6 +73,24 @@
         [self.sidebarTabView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
         [self.sidebarTabView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
     ]];
+}
+
+- (void)restoreStateWithCoder:(NSCoder*)coder
+{
+    if ([coder containsValueForKey:@"sidebarTab"]) {
+        NSInteger index = [coder decodeIntegerForKey:@"sidebarTab"];
+        self.sidebarTabList.selectedSegment = index;
+
+        NSTabViewItem* item = [self.sidebarTabView tabViewItemAtIndex:index];
+        [self.sidebarTabView selectTabViewItem:item];
+    }
+    [super restoreStateWithCoder:coder];
+}
+
+- (void)encodeRestorableStateWithCoder:(NSCoder*)coder
+{
+    [coder encodeInteger:self.sidebarTabList.selectedSegment forKey:@"sidebarTab"];
+    [super encodeRestorableStateWithCoder:coder];
 }
 
 - (void)addTabController:(NSViewController*)controller
@@ -114,6 +132,7 @@
 
     NSTabViewItem* item = [self.sidebarTabView tabViewItemAtIndex:index];
     [self.sidebarTabView selectTabViewItem:item];
+    [self invalidateRestorableState];
 }
 
 - (void)sidebarTabClicked:(id)sender
@@ -125,6 +144,7 @@
 
     NSTabViewItem* item = [self.sidebarTabView tabViewItemAtIndex:index];
     [self.sidebarTabView selectTabViewItem:item];
+    [self invalidateRestorableState];
 }
 
 @end
