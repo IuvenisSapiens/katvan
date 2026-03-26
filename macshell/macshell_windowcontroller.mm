@@ -50,7 +50,7 @@
 
 - (instancetype)initWithDocument:(katvan::Document*)textDocument initialURL:(NSURL*)url
 {
-    NSRect frame = NSMakeRect(0, 0, 800, 500);
+    NSRect frame = NSMakeRect(0, 0, 1900, 1000);
     NSWindowStyleMask styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable |
                                   NSWindowStyleMaskResizable | NSWindowStyleMaskFullSizeContentView;
     NSWindow* window = [[NSWindow alloc] initWithContentRect:frame
@@ -69,6 +69,7 @@
 
         [self setupViewsWithDocument:textDocument];
         [self setupUI];
+        [self resizeInitialUiWithFrameRect:frame andURL:url];
 
         [self documentDidExplicitlySaveInURL:url forced:YES];
     }
@@ -138,6 +139,25 @@
                      self.editorView.editor, [weakSelf]() {
         [weakSelf.editorView showColorPicker];
     });
+}
+
+- (void)resizeInitialUiWithFrameRect:(NSRect)frame andURL:(NSURL*)url
+{
+    // Need to resize the window, as splitViewController overrides its initial size
+    [self.window setContentSize:frame.size];
+    [self.window center];
+
+    // Set initial split view proportions and autosave name
+    [self.window layoutIfNeeded];
+
+    NSSplitView* splitView = self.splitViewController.splitView;
+    CGFloat totalWidth = NSWidth(splitView.frame);
+    [splitView setPosition:round(totalWidth * 0.2) ofDividerAtIndex:0];
+    [splitView setPosition:round(totalWidth * 0.6) ofDividerAtIndex:1];
+
+    if (url) {
+        splitView.autosaveName = [NSString stringWithFormat:@"MainSplitView-%@", url.path];
+    }
 }
 
 - (void)setupUI
