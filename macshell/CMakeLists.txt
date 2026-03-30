@@ -6,9 +6,12 @@ set(SOURCES
     macshell_mainmenu.mm
     macshell_outlineview.mm
     macshell_previewer.mm
+    macshell_settingsdialog.mm
+    macshell_settingsmanager.mm
     macshell_sidebar.mm
     macshell_textfinderclient.mm
     macshell_typstdocument.mm
+    macshell_widgets.mm
     macshell_windowcontroller.mm
     main.mm
 )

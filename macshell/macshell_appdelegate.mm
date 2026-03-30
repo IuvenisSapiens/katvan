@@ -18,6 +18,7 @@
 #import "macshell_appdelegate.h"
 #import "macshell_colorconverter.h"
 #import "macshell_mainmenu.h"
+#import "macshell_settingsdialog.h"
 
 #include "katvan_aboutdialog.h"
 #include "katvan_text_utils.h"
@@ -30,6 +31,7 @@
 @implementation KatvanAppDelegate
 {
     QApplication* d_app;
+    KatvanSettingsDialog* d_settingsDialog;
 }
 
 - (instancetype)initWithArgc:(int)argc Argv:(char**)argv
@@ -86,9 +88,26 @@
     dialog.exec();
 }
 
+- (void)showPreferences:(id)sender
+{
+    if (!d_settingsDialog) {
+        d_settingsDialog = [[KatvanSettingsDialog alloc] init];
+    }
+    [d_settingsDialog showDialog];
+}
+
 - (void)openTypstDocs:(id)sender
 {
     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://typst.app/docs/"]];
+}
+
+- (void)settingsUpdated:(id)sender
+{
+    for (NSDocument* document in NSDocumentController.sharedDocumentController.documents) {
+        for (NSWindowController* controller in document.windowControllers) {
+            [controller performSelector:@selector(readSettings)];
+        }
+    }
 }
 
 @end

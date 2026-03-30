@@ -19,6 +19,7 @@
 #import "macshell_issuelist.h"
 #import "macshell_outlineview.h"
 #import "macshell_previewer.h"
+#import "macshell_settingsmanager.h"
 #import "macshell_sidebar.h"
 #import "macshell_typstdocument.h"
 #import "macshell_windowcontroller.h"
@@ -69,6 +70,7 @@
 
         [self setupViewsWithDocument:textDocument];
         [self setupUI];
+        [self readSettings];
         [self resizeInitialUiWithFrameRect:frame andURL:url];
 
         [self documentDidExplicitlySaveInURL:url forced:YES];
@@ -281,6 +283,14 @@
         return item;
     }
     return nil;
+}
+
+- (void)readSettings
+{
+    KatvanSettingsManager& manager = KatvanSettingsManager::instance();
+
+    self.editorView.editor->applySettings(manager.editorSettings());
+    self.driver->setCompilerSettings(manager.compilerSettings());
 }
 
 - (void)documentDidExplicitlySaveInURL:(NSURL*)url forced:(BOOL)forced

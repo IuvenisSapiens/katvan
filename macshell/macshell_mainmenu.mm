@@ -75,7 +75,7 @@
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Preferences...", nil) action:nil keyEquivalent:@","];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Preferences...", nil) action:@selector(showPreferences:) keyEquivalent:@","];
 
     [menu addItem:[NSMenuItem separatorItem]];
 
