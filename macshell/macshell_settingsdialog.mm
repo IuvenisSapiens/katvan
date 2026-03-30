@@ -19,6 +19,8 @@
 #import "macshell_settingsmanager.h"
 #import "macshell_widgets.h"
 
+#include "typstdriver_packagemanager.h"
+
 static constexpr CGFloat kVerticalMargin = 20;
 static constexpr CGFloat kHorizontalMargin = 30;
 static constexpr CGFloat kColumnSpacing = 10;
@@ -164,6 +166,8 @@ static void addSeparatorRow(NSGridView* grid)
 
 - (void)loadSettings
 {
+    [self loadViewIfNeeded];
+
     const auto& editorSettings = KatvanSettingsManager::instance().editorSettings();
 
     // Editor font
@@ -309,10 +313,15 @@ static void addSeparatorRow(NSGridView* grid)
 
 @end
 
-@interface KatvanCompilerSettings : NSViewController
+@interface KatvanCompilerSettings : NSViewController <NSTableViewDelegate>
 
 @property (nonatomic) NSButton* allowPreviewPackagesCheckbox;
 @property (nonatomic) NSButton* enableA11yCheckbox;
+@property (nonatomic) NSTextField* cacheSizeLabel;
+
+@property (nonatomic) NSTableView* pathsTableView;
+@property (nonatomic) NSArrayController* allowedPathsController;
+@property (nonatomic) NSSegmentedControl* addRemoveControl;
 
 @end
 
@@ -328,6 +337,15 @@ static void addSeparatorRow(NSGridView* grid)
                                         target:self
                                         action:@selector(settingsChanged:)];
 
+    self.cacheSizeLabel = [NSTextField labelWithString:@""];
+
+    NSButton* browseCacheButton = [NSButton buttonWithTitle:NSLocalizedString(@"Browse...", nil)
+                                            target:self
+                                            action:@selector(browseCache)];
+
+    NSView* allowedPathsView = [self makeAllowedPathsView];
+    allowedPathsView.translatesAutoresizingMaskIntoConstraints = NO;
+
     //
     // Layout
     //
@@ -341,27 +359,183 @@ static void addSeparatorRow(NSGridView* grid)
 
     addControlRow(grid, self.allowPreviewPackagesCheckbox, NSLocalizedString(@"Compiler flags:", nil));
     addControlRow(grid, self.enableA11yCheckbox, nil);
+    addControlRow(grid, self.cacheSizeLabel, NSLocalizedString(@"Download cache:", nil));
+    addControlRow(grid, browseCacheButton, nil);
+    addSeparatorRow(grid);
 
     NSView* container = [[NSView alloc] initWithFrame:NSZeroRect];
     [container addSubview:grid];
+    [container addSubview:allowedPathsView];
 
     [NSLayoutConstraint activateConstraints:@[
         [grid.topAnchor constraintEqualToAnchor:container.topAnchor constant:kVerticalMargin],
         [grid.leadingAnchor constraintEqualToAnchor:container.leadingAnchor constant:kHorizontalMargin],
         [grid.trailingAnchor constraintEqualToAnchor:container.trailingAnchor constant:-kHorizontalMargin],
-        [grid.bottomAnchor constraintLessThanOrEqualToAnchor:container.bottomAnchor constant:-kVerticalMargin]
+
+        [allowedPathsView.topAnchor constraintEqualToAnchor:grid.bottomAnchor constant:kRowSpacing],
+        [allowedPathsView.leadingAnchor constraintEqualToAnchor:container.leadingAnchor constant:kHorizontalMargin],
+        [allowedPathsView.trailingAnchor constraintEqualToAnchor:container.trailingAnchor constant:-kHorizontalMargin],
+        [allowedPathsView.bottomAnchor constraintEqualToAnchor:container.bottomAnchor constant:-kVerticalMargin]
     ]];
 
     self.view = container;
 }
 
+- (NSView*)makeAllowedPathsView
+{
+    self.allowedPathsController = [[NSArrayController alloc] init];
+    self.allowedPathsController.objectClass = [NSString class];
+
+    NSTableColumn* column = [[NSTableColumn alloc] initWithIdentifier:@"path"];
+    column.editable = NO;
+
+    [column bind:NSValueBinding
+            toObject:self.allowedPathsController
+            withKeyPath:@"arrangedObjects.self" // Trick to avoid wrapper model
+            options:nil];
+
+    self.pathsTableView = [[NSTableView alloc] init];
+    self.pathsTableView.headerView = nil;
+    self.pathsTableView.usesAlternatingRowBackgroundColors = YES;
+    self.pathsTableView.allowsMultipleSelection = NO;
+    self.pathsTableView.focusRingType = NSFocusRingTypeNone;
+    self.pathsTableView.delegate = self;
+
+    [self.pathsTableView addTableColumn:column];
+    [self.pathsTableView bind:NSContentBinding
+                         toObject:self.allowedPathsController
+                         withKeyPath:@"arrangedObjects"
+                         options:nil];
+    [self.pathsTableView bind:NSSelectionIndexesBinding
+                         toObject:self.allowedPathsController
+                         withKeyPath:@"selectionIndexes"
+                         options:nil];
+
+    NSScrollView* scrollView = [[NSScrollView alloc] init];
+    scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+    scrollView.hasVerticalRuler = YES;
+    scrollView.hasHorizontalScroller = NO;
+    scrollView.autohidesScrollers = YES;
+    scrollView.borderType = NSBezelBorder;
+    scrollView.documentView = self.pathsTableView;
+
+    NSString* labelText = NSLocalizedString(
+        @"Allow including resources also from the following directories and their subdirectories:",
+        nil);
+
+    NSTextField* label = [NSTextField wrappingLabelWithString:labelText];
+    label.translatesAutoresizingMaskIntoConstraints = NO;
+
+    self.addRemoveControl = [NSSegmentedControl
+        segmentedControlWithImages:@[
+            [NSImage imageWithSystemSymbolName:@"plus" accessibilityDescription:nil],
+            [NSImage imageWithSystemSymbolName:@"minus" accessibilityDescription:nil]
+        ]
+        trackingMode:NSSegmentSwitchTrackingMomentary
+        target:self
+        action:@selector(addRemovePath:)];
+
+    self.addRemoveControl.translatesAutoresizingMaskIntoConstraints = NO;
+    self.addRemoveControl.segmentStyle = NSSegmentStyleSmallSquare;
+
+    [self.addRemoveControl setEnabled:NO forSegment:1];
+
+    NSView* container = [[NSView alloc] init];
+    [container addSubview:label];
+    [container addSubview:scrollView];
+    [container addSubview:self.addRemoveControl];
+
+    [NSLayoutConstraint activateConstraints:@[
+        [label.topAnchor constraintEqualToAnchor:container.topAnchor],
+        [label.leadingAnchor constraintEqualToAnchor:container.leadingAnchor],
+        [label.trailingAnchor constraintEqualToAnchor:container.trailingAnchor],
+
+        [scrollView.topAnchor constraintEqualToAnchor:label.bottomAnchor constant:kRowSpacing],
+        [scrollView.leadingAnchor constraintEqualToAnchor:container.leadingAnchor],
+        [scrollView.trailingAnchor constraintEqualToAnchor:container.trailingAnchor],
+
+        [self.addRemoveControl.topAnchor constraintEqualToAnchor:scrollView.bottomAnchor],
+        [self.addRemoveControl.leadingAnchor constraintEqualToAnchor:container.leadingAnchor],
+        [self.addRemoveControl.bottomAnchor constraintEqualToAnchor:container.bottomAnchor],
+    ]];
+
+    return container;
+}
+
+- (void)addRemovePath:(id)sender
+{
+    if (self.addRemoveControl.selectedSegment == 0) {
+        NSOpenPanel* panel = [NSOpenPanel openPanel];
+        panel.canChooseFiles = NO;
+        panel.canChooseDirectories = YES;
+        panel.allowsMultipleSelection = NO;
+
+        [panel beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse result) {
+            if (result == NSModalResponseOK) {
+                [self.allowedPathsController addObject:panel.URL.path];
+                [self saveSettings];
+            }
+        }];
+    }
+    else {
+        [self.allowedPathsController remove:sender];
+        [self saveSettings];
+    }
+}
+
+- (void)tableViewSelectionDidChange:(NSNotification*)notification
+{
+    [self.addRemoveControl setEnabled:self.allowedPathsController.canRemove forSegment:1];
+}
+
+- (void)browseCache
+{
+    QString path = katvan::typstdriver::PackageManager::downloadCacheDirectory();
+    NSURL* url = [NSURL fileURLWithPath:path.toNSString()];
+
+    [[NSWorkspace sharedWorkspace] openURL:url];
+}
+
+- (void)updateCacheSizeLabel
+{
+    auto stats = katvan::typstdriver::PackageManager::cacheStatistics();
+
+    NSString* size = [NSByteCountFormatter stringFromByteCount:stats.totalSize
+                                               countStyle:NSByteCountFormatterCountStyleFile];
+
+    NSNumberFormatter* numberFormatter = [[NSNumberFormatter alloc] init];
+    numberFormatter.numberStyle = NSNumberFormatterDecimalStyle;
+
+    NSString* numPackages = [numberFormatter stringFromNumber:@(stats.numPackages)];
+    NSString* numPackageVersions = [numberFormatter stringFromNumber:@(stats.numPackageVersions)];
+
+    NSString* label = [NSString
+        stringWithFormat:NSLocalizedString(@"%2$@ distinct versions of %1$@ packages (total %3$@)", nill),
+        numPackages,
+        numPackageVersions,
+        size];
+
+    self.cacheSizeLabel.stringValue = label;
+}
+
 - (void)loadSettings
 {
+    [self loadViewIfNeeded];
+
     const auto& compilerSettings = KatvanSettingsManager::instance().compilerSettings();
 
     // Compiler flags
     self.allowPreviewPackagesCheckbox.state = compilerSettings.allowPreviewPackages() ? NSControlStateValueOn : NSControlStateValueOff;
     self.enableA11yCheckbox.state = compilerSettings.enableA11yExtras() ? NSControlStateValueOn : NSControlStateValueOff;
+
+    // Download cache size
+    [self updateCacheSizeLabel];
+
+    // Allowed paths
+    const auto& allowedPaths = compilerSettings.allowedPaths();
+    for (const QString& path : allowedPaths) {
+        [self.allowedPathsController addObject:path.toNSString()];
+    }
 }
 
 - (void)saveSettings
@@ -370,6 +544,13 @@ static void addSeparatorRow(NSGridView* grid)
 
     compilerSettings.setAllowPreviewPackages(self.allowPreviewPackagesCheckbox.state == NSControlStateValueOn);
     compilerSettings.setEnableA11yExtras(self.enableA11yCheckbox.state == NSControlStateValueOn);
+
+    QStringList allowedPaths;
+    NSArray<NSString*>* paths = self.allowedPathsController.arrangedObjects;
+    for (NSString* path in paths) {
+        allowedPaths.append(QString::fromNSString(path));
+    }
+    compilerSettings.setAllowedPaths(allowedPaths);
 
     KatvanSettingsManager::instance().updateCompilerSettings(compilerSettings);
 }
