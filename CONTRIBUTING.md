@@ -28,13 +28,13 @@ Katvan aims to support the three main desktop operating systems - Linux (both Wa
 
 If you discover a bug or some other problem while using Katvan, we'd like to hear about it! Testing can't cover every use case on every platform, so bug reports are amongst the most valuable ways to contribute.
 
-Please make sure that the bug still happens on the most recent release of Katvan, and that a similar issue isn’t already open. If so, report the bug by opening a Github [Issue](https://github.com/IgKh/katvan/issues/new) in Katvan’s repository; please select the appropriate issue type.
+Please make sure that the bug still happens on the most recent release of Katvan, and that a similar issue isn’t already open. If so, report the bug by opening a Github [Issue](https://github.com/IgKh/katvan/issues/new?template=bug.yml) in Katvan’s repository; please select the appropriate issue type.
 
 ### Suggesting Features
 
 Ideas for new features that advance Katvan's mission are appreciated.
 
-To suggest a feature, open a Github [Issue](https://github.com/IgKh/katvan/issues/new) with the appropriate type. Make sure that the idea is within the project's scope as laid out by the design goals above; you'll be asked to justify the feature according to them.
+To suggest a feature, open a Github [Issue](https://github.com/IgKh/katvan/issues/new?template=feature.yml) with the appropriate type. Make sure that the idea is within the project's scope as laid out by the design goals above; you'll be asked to justify the feature according to them.
 
 ### Code Contributions
 
