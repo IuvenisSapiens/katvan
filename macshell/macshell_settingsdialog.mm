@@ -164,10 +164,16 @@ static void addSeparatorRow(NSGridView* grid)
     self.view = container;
 }
 
+- (void)viewDidLoad
+{
+    [self loadSettings];
+}
+
 - (void)loadSettings
 {
-    [self loadViewIfNeeded];
-
+    if (self.view == nil) {
+        return;
+    }
     const auto& editorSettings = KatvanSettingsManager::instance().editorSettings();
 
     // Editor font
@@ -462,6 +468,11 @@ static void addSeparatorRow(NSGridView* grid)
     return container;
 }
 
+- (void)viewDidLoad
+{
+    [self loadSettings];
+}
+
 - (void)addRemovePath:(id)sender
 {
     if (self.addRemoveControl.selectedSegment == 0) {
@@ -520,8 +531,9 @@ static void addSeparatorRow(NSGridView* grid)
 
 - (void)loadSettings
 {
-    [self loadViewIfNeeded];
-
+    if (self.view == nil) {
+        return;
+    }
     const auto& compilerSettings = KatvanSettingsManager::instance().compilerSettings();
 
     // Compiler flags
@@ -532,6 +544,8 @@ static void addSeparatorRow(NSGridView* grid)
     [self updateCacheSizeLabel];
 
     // Allowed paths
+    [self.allowedPathsController setContent:[NSMutableArray array]];
+
     const auto& allowedPaths = compilerSettings.allowedPaths();
     for (const QString& path : allowedPaths) {
         [self.allowedPathsController addObject:path.toNSString()];
