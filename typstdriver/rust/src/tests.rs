@@ -82,6 +82,10 @@ impl World for TestWorld {
     fn today(&self, _offset: Option<i64>) -> Option<typst::foundations::Datetime> {
         None
     }
+
+    fn now(&self, _offset: Option<i64>) -> Option<typst::foundations::Datetime> {
+        None
+    }
 }
 
 impl IdeWorld for TestWorld {

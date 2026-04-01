@@ -178,6 +178,20 @@ impl typst::World for KatvanWorld<'_> {
         };
         Some(typst::foundations::Datetime::Date(in_offset.date()))
     }
+
+    fn now(&self, offset: Option<i64>) -> Option<typst::foundations::Datetime> {
+        let now = self.now?;
+
+        let in_offset = match offset {
+            None => now,
+            Some(offset) => {
+                let hours: i8 = offset.try_into().ok()?;
+                let offset = time::UtcOffset::from_hms(hours, 0, 0).ok()?;
+                now.to_offset(offset)
+            }
+        };
+        Some(typst::foundations::Datetime::Datetime(time::PrimitiveDateTime::new(in_offset.date(), in_offset.time())))
+    }
 }
 
 impl typst_ide::IdeWorld for KatvanWorld<'_> {
