@@ -39,6 +39,7 @@
 @property (nonatomic) KatvanSidebar* sidebar;
 @property (nonatomic) KatvanOutlineView* outlineView;
 @property (nonatomic) KatvanIssueList* issueList;
+@property (nonatomic) NSToolbarItem* compilationStatusItem;
 
 @property (nonatomic) katvan::Document* textDocument;
 @property (nonatomic) katvan::TypstDriverWrapper* driver;
@@ -224,6 +225,7 @@
         NSToolbarToggleSidebarItemIdentifier,
         NSToolbarSidebarTrackingSeparatorItemIdentifier,
         @"katvan.toolbar.editor.insert",
+        @"katvan.toolbar.compilation.status",
         @"katvan.toolbar.separator",
         @"katvan.toolbar.previewer.zoomout",
         @"katvan.toolbar.previewer.zoomlevel",
@@ -242,6 +244,23 @@
                   itemForItemIdentifier:(NSString*)itemIdentifier
                   willBeInsertedIntoToolbar:(BOOL)flag
 {
+    if ([itemIdentifier isEqualToString:@"katvan.toolbar.compilation.status"]) {
+        NSToolbarItem* item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
+        item.label = NSLocalizedString(@"Compilation Status", "Details about the result of the last compilation");
+
+        NSButton* button = [NSButton buttonWithImage:[NSImage new]
+                                     target:self
+                                     action:@selector(compilationStatusClicked:)];
+        button.bezelStyle = NSBezelStyleToolbar;
+        button.bordered = NO;
+        button.contentTintColor = NSColor.systemGrayColor;
+        item.view = button;
+
+        if (flag) {
+            self.compilationStatusItem = item;
+        }
+        return item;
+    }
     if ([itemIdentifier isEqualToString:@"katvan.toolbar.editor.insert"]) {
         NSMenuToolbarItem* item = [[NSMenuToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
         item.label = NSLocalizedString(@"Insert", "Opens insert menu for the editor");
@@ -382,9 +401,56 @@
     self.editorView.editor->goToBlock(line, column);
 }
 
+- (void)compilationStatusClicked:(id)sender
+{
+    // Make sure sidebar is visible
+    NSSplitViewItem* sidebarItem = [self.splitViewController splitViewItemForViewController:self.sidebar];
+    sidebarItem.collapsed = NO;
+
+    [self.sidebar ensureControllerSelected:self.issueList];
+}
+
 - (void)compilationStatusChanged
 {
     self.editorView.editor->setSourceDiagnostics(self.driver->diagnosticsModel()->sourceDiagnostics());
+
+    if (self.compilationStatusItem) {
+        NSImage* statusSymbol;
+        NSColor* symbolColor;
+        NSString* toolTip;
+
+        switch (self.driver->status()) {
+            case katvan::TypstDriverWrapper::Status::SUCCESS:
+                symbolColor = NSColor.systemGreenColor;
+                toolTip = NSLocalizedString(@"Compiled successfully", "compilation status");
+                statusSymbol = [NSImage imageWithSystemSymbolName:@"checkmark.circle"
+                                        accessibilityDescription:@"Checkmark in a circle"];
+                break;
+            case katvan::TypstDriverWrapper::Status::SUCCESS_WITH_WARNINGS:
+                toolTip = NSLocalizedString(@"Compiled with warnings", "compilation status");
+                symbolColor = NSColor.systemYellowColor;
+                statusSymbol = [NSImage imageWithSystemSymbolName:@"exclamationmark.circle"
+                                        accessibilityDescription:@"Exclamation mark in a circle"];
+                break;
+            case katvan::TypstDriverWrapper::Status::FAILED:
+                toolTip = NSLocalizedString(@"Compiled with errors", "compilation status");
+                symbolColor = NSColor.systemRedColor;
+                statusSymbol = [NSImage imageWithSystemSymbolName:@"xmark.circle"
+                                        accessibilityDescription:@"X mark in a circle"];
+                break;
+            default:
+                toolTip = NSLocalizedString(@"Compiling...", "compilation status");
+                symbolColor = NSColor.systemGrayColor;
+                statusSymbol = [NSImage imageWithSystemSymbolName:@"clock"
+                                        accessibilityDescription:@"Clock"];
+                break;
+        }
+
+        NSButton* button = (NSButton*)self.compilationStatusItem.view;
+        button.image = statusSymbol;
+        button.contentTintColor = symbolColor;
+        button.toolTip = toolTip;
+    }
 }
 
 - (void)showSymbolPicker
