@@ -126,6 +126,12 @@
         }
     }
 
+    // Decode cursor move style
+    if ([coder containsValueForKey:@"cursorMoveStyle"]) {
+        auto cursorMoveStyle = (KatvanCursorMoveStyle)[coder decodeIntegerForKey:@"cursorMoveStyle"];
+        self.statusBar.cursorMoveStyle = cursorMoveStyle;
+    }
+
     [super restoreStateWithCoder:coder];
 }
 
@@ -134,6 +140,10 @@
     // Encode text cursor position
     NSInteger cursorPos = self.editor->textCursor().position();
     [coder encodeInteger:cursorPos forKey:@"cursorPos"];
+
+    // Encode cursor move style
+    NSInteger cursorMoveStyle = (NSInteger)self.statusBar.cursorMoveStyle;
+    [coder encodeInteger:cursorMoveStyle forKey:@"cursorMoveStyle"];
 
     [super encodeRestorableStateWithCoder:coder];
 }
@@ -298,6 +308,7 @@
     else {
         self.editor->document()->setDefaultCursorMoveStyle(Qt::VisualMoveStyle);
     }
+    [self invalidateRestorableState];
 }
 
 //

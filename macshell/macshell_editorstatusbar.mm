@@ -132,15 +132,19 @@ static constexpr CGFloat kSectionPadding = 8.0;
 {
     KatvanCursorMoveStyle style = (KatvanCursorMoveStyle)self.cursorMoveStylePopup.indexOfSelectedItem;
 
-    _cursorMoveStyle = style;
-    [self.delegate cursorMovementStyleChanged:style];
+    if (_cursorMoveStyle != style) {
+        _cursorMoveStyle = style;
+        [self.delegate cursorMovementStyleChanged:style];
+    }
 }
 
 - (void)setCursorMoveStyle:(KatvanCursorMoveStyle)cursorMoveStyle
 {
-    _cursorMoveStyle = cursorMoveStyle;
-    [self.cursorMoveStylePopup selectItemAtIndex:(NSInteger)cursorMoveStyle];
-    [self.delegate cursorMovementStyleChanged:cursorMoveStyle];
+    if (_cursorMoveStyle != cursorMoveStyle) {
+        _cursorMoveStyle = cursorMoveStyle;
+        [self.cursorMoveStylePopup selectItemAtIndex:(NSInteger)cursorMoveStyle];
+        [self.delegate cursorMovementStyleChanged:cursorMoveStyle];
+    }
 }
 
 - (NSAttributedString*)makeCursorPositionLabelTemplate
