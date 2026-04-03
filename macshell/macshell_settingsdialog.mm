@@ -162,6 +162,7 @@ static void addSeparatorRow(NSGridView* grid)
     ]];
 
     self.view = container;
+    self.preferredContentSize = [container fittingSize];
 }
 
 - (void)viewDidLoad
@@ -385,6 +386,7 @@ static void addSeparatorRow(NSGridView* grid)
     ]];
 
     self.view = container;
+    self.preferredContentSize = [container fittingSize];
 }
 
 - (NSView*)makeAllowedPathsView
@@ -459,6 +461,7 @@ static void addSeparatorRow(NSGridView* grid)
         [scrollView.topAnchor constraintEqualToAnchor:label.bottomAnchor constant:kRowSpacing],
         [scrollView.leadingAnchor constraintEqualToAnchor:container.leadingAnchor],
         [scrollView.trailingAnchor constraintEqualToAnchor:container.trailingAnchor],
+        [scrollView.heightAnchor constraintGreaterThanOrEqualToConstant:250],
 
         [self.addRemoveControl.topAnchor constraintEqualToAnchor:scrollView.bottomAnchor],
         [self.addRemoveControl.leadingAnchor constraintEqualToAnchor:container.leadingAnchor],
@@ -544,12 +547,13 @@ static void addSeparatorRow(NSGridView* grid)
     [self updateCacheSizeLabel];
 
     // Allowed paths
-    [self.allowedPathsController setContent:[NSMutableArray array]];
-
     const auto& allowedPaths = compilerSettings.allowedPaths();
+
+    NSMutableArray* paths = [NSMutableArray arrayWithCapacity:allowedPaths.size()];
     for (const QString& path : allowedPaths) {
-        [self.allowedPathsController addObject:path.toNSString()];
+        [paths addObject:path.toNSString()];
     }
+    [self.allowedPathsController setContent:paths];
 }
 
 - (void)saveSettings
@@ -572,6 +576,55 @@ static void addSeparatorRow(NSGridView* grid)
 - (void)settingsChanged:(id)sender
 {
     [self saveSettings];
+}
+
+@end
+
+@interface KatvanSettingsTabController : NSTabViewController
+@end
+
+@implementation KatvanSettingsTabController
+
+- (void)viewWillAppear
+{
+    [super viewWillAppear];
+    [self resizeWindowForTab:self.tabView.selectedTabViewItem animate:NO];
+}
+
+- (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem
+{
+    [super tabView:tabView didSelectTabViewItem:tabViewItem];
+    [self resizeWindowForTab:tabViewItem animate:self.view.window.isVisible];
+}
+
+- (void)resizeWindowForTab:(NSTabViewItem*)tabViewItem animate:(BOOL)animate
+{
+    NSWindow* window = self.view.window;
+    if (!window) {
+        return;
+    }
+
+    NSSize contentSize = tabViewItem.viewController.preferredContentSize;
+    if (NSEqualSizes(contentSize, NSZeroSize)) {
+        return;
+    }
+
+    NSRect windowFrame = window.frame;
+    CGFloat chromeHeight = windowFrame.size.height - window.contentLayoutRect.size.height;
+
+    CGFloat newHeight = contentSize.height + chromeHeight;
+    CGFloat newWidth = contentSize.width;
+    CGFloat deltaHeight = newHeight - windowFrame.size.height;
+    CGFloat deltaWidth = newWidth - windowFrame.size.width;
+
+    NSRect newFrame = NSMakeRect(
+        windowFrame.origin.x - deltaWidth / 2.0,
+        windowFrame.origin.y - deltaHeight,
+        newWidth,
+        newHeight
+    );
+
+    [window setFrame:newFrame display:YES animate:animate];
 }
 
 @end
@@ -599,7 +652,7 @@ static void addSeparatorRow(NSGridView* grid)
     NSTabViewItem* compilerTab = [NSTabViewItem tabViewItemWithViewController:compilerSettingsController];
     compilerTab.image = [NSImage imageWithSystemSymbolName:@"gear" accessibilityDescription: nil];
 
-    NSTabViewController* tabController = [[NSTabViewController alloc] init];
+    KatvanSettingsTabController* tabController = [[KatvanSettingsTabController alloc] init];
     tabController.tabStyle = NSTabViewControllerTabStyleToolbar;
     tabController.tabViewItems = @[editorTab, compilerTab];
 
