@@ -29,6 +29,7 @@
 #include "katvan_editor.h"
 #include "katvan_symbolpicker.h"
 #include "katvan_typstdriverwrapper.h"
+#include "katvan_wordcounter.h"
 
 @interface KatvanWindowController ()
 
@@ -41,6 +42,7 @@
 
 @property (nonatomic) katvan::Document* textDocument;
 @property (nonatomic) katvan::TypstDriverWrapper* driver;
+@property (nonatomic) katvan::WordCounter* wordCounter;
 @property (nonatomic) katvan::SymbolPicker* symbolPicker;
 
 @property (nonatomic) QString documentFilePath;
@@ -66,6 +68,7 @@
 
         self.textDocument = textDocument;
         self.driver = new katvan::TypstDriverWrapper();
+        self.wordCounter = new katvan::WordCounter(self.driver);
         self.symbolPicker = nullptr;
 
         [self setupViewsWithDocument:textDocument];
@@ -80,6 +83,7 @@
 
 - (void)dealloc
 {
+    delete self.wordCounter;
     delete self.driver;
 }
 
@@ -140,6 +144,11 @@
     QObject::connect(self.editorView.editor, &katvan::Editor::showColorPicker,
                      self.editorView.editor, [weakSelf]() {
         [weakSelf.editorView showColorPicker];
+    });
+
+    QObject::connect(self.wordCounter, &katvan::WordCounter::wordCountChanged,
+                     self.wordCounter, [weakSelf](size_t count) {
+        [weakSelf.editorView updateWordCount:count];
     });
 }
 
