@@ -16,21 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#import "macshell_editorstatusbar.h"
-
-#include "katvan_document.h"
-#include "katvan_editor.h"
+#include <QTextCursor>
 
 #import <AppKit/AppKit.h>
 
-@interface KatvanEditorView : NSViewController <KatvanEditorStatusBarDelegate, NSTextFinderBarContainer>
+typedef NS_ENUM(NSInteger, KatvanCursorMoveStyle) {
+    KatvanCursorMoveStyleLogical,
+    KatvanCursorMoveStyleVisual,
+};
 
-@property (readonly, nonatomic) katvan::Editor* editor;
+@protocol KatvanEditorStatusBarDelegate <NSObject>
 
-- (instancetype)initWithDocument:(katvan::Document*)textDocument;
+- (void)cursorMovementStyleChanged:(KatvanCursorMoveStyle)style;
 
-- (NSMenu*)createInsertMenu;
-- (void)showColorPicker;
+@end
+
+@interface KatvanEditorStatusBar : NSView
+
+@property (nonatomic) KatvanCursorMoveStyle cursorMoveStyle;
+@property (nonatomic, weak) id<KatvanEditorStatusBarDelegate> delegate;
+
+- (void)updateCursorPosition:(QTextCursor)cursor;
 - (void)updateWordCount:(NSUInteger)count;
 
 @end

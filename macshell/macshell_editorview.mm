@@ -25,14 +25,17 @@
 
 @property (nonatomic) katvan::Editor* editor;
 @property (nonatomic) QInputDialog* goToLineDialog;
+@property (nonatomic) KatvanEditorStatusBar* statusBar;
 
 @property (nonatomic) NSTextFinder* textFinder;
 @property (nonatomic) KatvanTextFinderClient* textFinderClient;
 @property (nonatomic) NSView* findBarContainerView;
 @property (nonatomic) NSLayoutConstraint* findBarContainerHeightConstraint;
+
 @end
 
-@implementation KatvanEditorView {
+@implementation KatvanEditorView
+{
     CGFloat d_findBarHeight;
 }
 
@@ -54,6 +57,7 @@
         QObject::connect(self.editor, &QTextEdit::cursorPositionChanged,
                          self.editor, [weakSelf]() {
             [weakSelf invalidateRestorableState];
+            [weakSelf.statusBar updateCursorPosition:weakSelf.editor->textCursor()];
         });
     }
     return self;
@@ -72,14 +76,21 @@
 
     [self.view addObserver:self forKeyPath:@"effectiveAppearance" options:0 context:nil];
 
+    //self.editor->setWindowFlags(self.editor->windowFlags() | Qt::SubWindow);
+
     NSView* editorView = (__bridge NSView *)reinterpret_cast<void*>(self.editor->winId());
     editorView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:editorView];
 
-    self.findBarContainerView = [[NSView alloc] init];
+    self.findBarContainerView = [NSView new];
     self.findBarContainerView.hidden = YES;
     self.findBarContainerView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:self.findBarContainerView];
+
+    self.statusBar = [[KatvanEditorStatusBar alloc] init];
+    self.statusBar.delegate = self;
+    self.statusBar.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:self.statusBar];
 
     self.findBarContainerHeightConstraint = [self.findBarContainerView.heightAnchor constraintEqualToConstant:0];
 
@@ -90,7 +101,10 @@
         [editorView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
         [editorView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
         [editorView.topAnchor constraintEqualToAnchor:self.findBarContainerView.bottomAnchor],
-        [editorView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
+        [editorView.bottomAnchor constraintEqualToAnchor:self.statusBar.topAnchor],
+        [self.statusBar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
+        [self.statusBar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+        [self.statusBar.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
         [self.view.widthAnchor constraintGreaterThanOrEqualToConstant:self.editor->minimumWidth()],
         [self.view.heightAnchor constraintGreaterThanOrEqualToConstant:self.editor->minimumHeight()],
         self.findBarContainerHeightConstraint,
@@ -112,6 +126,12 @@
         }
     }
 
+    // Decode cursor move style
+    if ([coder containsValueForKey:@"cursorMoveStyle"]) {
+        auto cursorMoveStyle = (KatvanCursorMoveStyle)[coder decodeIntegerForKey:@"cursorMoveStyle"];
+        self.statusBar.cursorMoveStyle = cursorMoveStyle;
+    }
+
     [super restoreStateWithCoder:coder];
 }
 
@@ -120,6 +140,10 @@
     // Encode text cursor position
     NSInteger cursorPos = self.editor->textCursor().position();
     [coder encodeInteger:cursorPos forKey:@"cursorPos"];
+
+    // Encode cursor move style
+    NSInteger cursorMoveStyle = (NSInteger)self.statusBar.cursorMoveStyle;
+    [coder encodeInteger:cursorMoveStyle forKey:@"cursorMoveStyle"];
 
     [super encodeRestorableStateWithCoder:coder];
 }
@@ -265,6 +289,26 @@
     NSColorPanel* panel = [NSColorPanel sharedColorPanel];
     [panel setContinuous:NO];
     [panel makeKeyAndOrderFront:self];
+}
+
+- (void)updateWordCount:(NSUInteger)count
+{
+    [self.statusBar updateWordCount:count];
+}
+
+//
+// KatvanEditorStatusBarDelegate protocol methods
+//
+
+- (void)cursorMovementStyleChanged:(KatvanCursorMoveStyle)style
+{
+    if (style == KatvanCursorMoveStyleLogical) {
+        self.editor->document()->setDefaultCursorMoveStyle(Qt::LogicalMoveStyle);
+    }
+    else {
+        self.editor->document()->setDefaultCursorMoveStyle(Qt::VisualMoveStyle);
+    }
+    [self invalidateRestorableState];
 }
 
 //
