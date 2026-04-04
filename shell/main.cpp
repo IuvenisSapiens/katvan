@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include "katvan_mainwindow.h"
-#include "katvan_spellchecker.h"
 #include "katvan_utils.h"
 
+#include "katvan_spellchecker_hunspell.h"
 #include "katvan_text_utils.h"
 #include "katvan_version.h"
 
@@ -47,8 +47,11 @@ void setupPortableMode()
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settingsPath);
 
-    katvan::SpellChecker::instance()->setPersonalDictionaryLocation(settingsPath + "/Katvan");
     katvan::typstdriver::PackageManager::setDownloadCacheLocation(settingsPath + "/Katvan/cache");
+
+#if !defined(Q_OS_MACOS) && !defined(Q_OS_WINDOWS)
+    katvan::HunspellSpellChecker::setPersonalDictionaryLocation(settingsPath + "/Katvan");
+#endif
 }
 
 void loadTranslations(const QLocale& locale)

@@ -25,11 +25,14 @@ namespace katvan {
 
 MacOsSpellChecker::MacOsSpellChecker(QObject* parent)
     : SpellChecker(parent)
+    , d_documentTag(0)
 {
+    d_documentTag = [NSSpellChecker uniqueSpellDocumentTag];
 }
 
 MacOsSpellChecker::~MacOsSpellChecker()
 {
+    [[NSSpellChecker sharedSpellChecker] closeSpellDocumentWithTag:d_documentTag];
 }
 
 QMap<QString, QString> MacOsSpellChecker::findDictionaries()
@@ -64,9 +67,6 @@ void MacOsSpellChecker::setCurrentDictionary(const QString& dictName, const QStr
 SpellChecker::MisspelledWordRanges MacOsSpellChecker::checkSpelling(const QString& text)
 {
     SpellChecker::MisspelledWordRanges result;
-    if (currentDictionaryName().isEmpty()) {
-        return result;
-    }
 
     NSSpellChecker* checker = [NSSpellChecker sharedSpellChecker];
     NSString* str = text.toNSString();
@@ -74,11 +74,11 @@ SpellChecker::MisspelledWordRanges MacOsSpellChecker::checkSpelling(const QStrin
     NSUInteger start = 0;
     while (start < [str length]) {
         NSRange range = [checker checkSpellingOfString: str
-                                 startingAt: start
-                                 language: [checker language]
-                                 wrap: NO
-                                 inSpellDocumentWithTag: 0
-                                 wordCount: NULL];
+                                 startingAt:start
+                                 language:[checker language]
+                                 wrap:NO
+                                 inSpellDocumentWithTag:d_documentTag
+                                 wordCount:NULL];
 
         if (range.length == 0) {
             break;
@@ -93,9 +93,13 @@ SpellChecker::MisspelledWordRanges MacOsSpellChecker::checkSpelling(const QStrin
 void MacOsSpellChecker::addToPersonalDictionary(const QString& word)
 {
     NSSpellChecker* checker = [NSSpellChecker sharedSpellChecker];
-    NSString* str = word.toNSString();
+    [checker learnWord:word.toNSString()];
+}
 
-    [checker learnWord: str];
+void MacOsSpellChecker::ignoreWord(const QString& word)
+{
+    NSSpellChecker* checker = [NSSpellChecker sharedSpellChecker];
+    [checker ignoreWord:word.toNSString() inSpellDocumentWithTag:d_documentTag];
 }
 
 void MacOsSpellChecker::requestSuggestionsImpl(const QString& word, int position)
@@ -103,10 +107,10 @@ void MacOsSpellChecker::requestSuggestionsImpl(const QString& word, int position
     NSSpellChecker* checker = [NSSpellChecker sharedSpellChecker];
     NSString* str = word.toNSString();
 
-    NSArray<NSString*>* guesses = [checker guessesForWordRange: NSMakeRange(0, [str length])
-                                           inString: str
-                                           language: [checker language]
-                                           inSpellDocumentWithTag: 0];
+    NSArray<NSString*>* guesses = [checker guessesForWordRange:NSMakeRange(0, [str length])
+                                           inString:str
+                                           language:[checker language]
+                                           inSpellDocumentWithTag:d_documentTag];
 
     QList<QString> suggestions;
     for (NSString* guess in guesses) {

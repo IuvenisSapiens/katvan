@@ -81,6 +81,7 @@ MainWindow::MainWindow()
 
     d_document = new Document(this);
     d_driver = new TypstDriverWrapper(this);
+    d_spellChecker = SpellChecker::createPlatformSpellChecker(this);
     d_wordCounter = new WordCounter(d_driver, this);
 
     setIconTheme();
@@ -122,7 +123,7 @@ void MainWindow::setupUI()
     setWindowTitle(QString("%1[*]").arg(QCoreApplication::applicationName()));
     setWindowIcon(QIcon(":/assets/katvan.svg"));
 
-    d_editor = new Editor(d_document);
+    d_editor = new Editor(d_document, d_spellChecker);
     connect(d_editor, &Editor::toolTipRequested, d_driver, &TypstDriverWrapper::requestToolTip);
     connect(d_editor, &Editor::goToDefinitionRequested, d_driver, &TypstDriverWrapper::searchDefinition);
     connect(d_editor->completionManager(), &CompletionManager::completionsRequested, d_driver, &TypstDriverWrapper::requestCompletions);
@@ -949,9 +950,8 @@ void MainWindow::restoreSpellingDictionary(const QSettings& settings)
     QString dictName = settings.value(SETTING_SPELLING_DICT, QString()).toString();
     QString dictPath;
 
-    SpellChecker* checker = SpellChecker::instance();
     if (!dictName.isEmpty()) {
-        QMap<QString, QString> allDicts = checker->findDictionaries();
+        QMap<QString, QString> allDicts = d_spellChecker->findDictionaries();
         if (!allDicts.contains(dictName)) {
             dictName.clear();
         }
@@ -960,14 +960,13 @@ void MainWindow::restoreSpellingDictionary(const QSettings& settings)
         }
     }
 
-    checker->setCurrentDictionary(dictName, dictPath);
+    d_spellChecker->setCurrentDictionary(dictName, dictPath);
     d_spellingButton->setText(dictName.isEmpty() ? tr("None") : dictName);
 }
 
 void MainWindow::changeSpellCheckingDictionary()
 {
-    SpellChecker* checker = SpellChecker::instance();
-    QMap<QString, QString> dicts = checker->findDictionaries();
+    QMap<QString, QString> dicts = d_spellChecker->findDictionaries();
 
     QStringList dictNames = { "" };
     QStringList dictLabels = { tr("None") };
@@ -976,10 +975,10 @@ void MainWindow::changeSpellCheckingDictionary()
         dictNames.append(*kit);
         dictLabels.append(QString("%1 - %2").arg(
             *kit,
-            checker->dictionaryDisplayName(*kit)));
+            d_spellChecker->dictionaryDisplayName(*kit)));
     }
 
-    QString currentDict = checker->currentDictionaryName();
+    QString currentDict = d_spellChecker->currentDictionaryName();
     int index = dictNames.indexOf(currentDict);
     if (index < 0) {
         index = 0;
@@ -999,7 +998,7 @@ void MainWindow::changeSpellCheckingDictionary()
     }
 
     QString selectedDictName = dictNames[dictLabels.indexOf(result)];
-    checker->setCurrentDictionary(selectedDictName, dicts.value(selectedDictName));
+    d_spellChecker->setCurrentDictionary(selectedDictName, dicts.value(selectedDictName));
     d_spellingButton->setText(selectedDictName.isEmpty() ? result : selectedDictName);
 
     QSettings settings;

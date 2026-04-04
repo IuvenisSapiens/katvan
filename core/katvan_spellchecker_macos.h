@@ -36,9 +36,12 @@ public:
     MisspelledWordRanges checkSpelling(const QString& text) override;
 
     void addToPersonalDictionary(const QString& word) override;
+    void ignoreWord(const QString& word);
 
 private:
     void requestSuggestionsImpl(const QString& word, int position) override;
+
+    unsigned long d_documentTag;
 };
 
 }

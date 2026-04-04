@@ -35,11 +35,10 @@ public:
     SpellChecker(QObject* parent = nullptr);
     ~SpellChecker();
 
-    static SpellChecker* instance();
+    static SpellChecker* createPlatformSpellChecker(QObject* parent = nullptr);
 
     virtual QMap<QString, QString> findDictionaries() = 0;
     virtual QString dictionaryDisplayName(const QString& dictName);
-    virtual void setPersonalDictionaryLocation(const QString& dirPath);
 
     virtual QString currentDictionaryName() const { return d_currentDictName; }
     virtual void setCurrentDictionary(const QString& dictName, const QString& dictPath);

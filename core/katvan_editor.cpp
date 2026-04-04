@@ -91,8 +91,9 @@ private:
     Editor *d_editor;
 };
 
-Editor::Editor(Document* doc, QWidget* parent)
+Editor::Editor(Document* doc, SpellChecker* spellChecker, QWidget* parent)
     : QTextEdit(parent)
+    , d_spellChecker(spellChecker)
     , d_codeModel(doc->codeModel())
     , d_fontZoomFactor(1.0)
     , d_pendingSuggestionsPosition(-1)
@@ -106,10 +107,12 @@ Editor::Editor(Document* doc, QWidget* parent)
     setDocument(doc);
     doc->setDocumentLayout(layout);
 
-    connect(SpellChecker::instance(), &SpellChecker::suggestionsReady, this, &Editor::spellingSuggestionsReady);
-    connect(SpellChecker::instance(), &SpellChecker::dictionaryChanged, this, &Editor::forceRehighlighting);
+    if (d_spellChecker) {
+        connect(d_spellChecker, &SpellChecker::suggestionsReady, this, &Editor::spellingSuggestionsReady);
+        connect(d_spellChecker, &SpellChecker::dictionaryChanged, this, &Editor::forceRehighlighting);
+    }
 
-    d_highlighter = new Highlighter(doc, SpellChecker::instance(), d_theme);
+    d_highlighter = new Highlighter(doc, d_spellChecker, d_theme);
     d_completionManager = new CompletionManager(this);
     d_wheelTracker = new utils::WheelTracker(this);
 
@@ -596,7 +599,7 @@ void Editor::contextMenuEvent(QContextMenuEvent* event)
 
         QAction* addToPersonalAction = new QAction(tr("Add to Personal Dictionary"));
         connect(addToPersonalAction, &QAction::triggered, this, [this, misspelledWord, cursor]() {
-            SpellChecker::instance()->addToPersonalDictionary(misspelledWord);
+            d_spellChecker->addToPersonalDictionary(misspelledWord);
             forceRehighlighting();
         });
 
@@ -614,7 +617,7 @@ void Editor::contextMenuEvent(QContextMenuEvent* event)
         // signal will be instantly invoked as a direct connection.
         d_pendingSuggestionsWord = misspelledWord;
         d_pendingSuggestionsPosition = cursor.position();
-        SpellChecker::instance()->requestSuggestions(misspelledWord, cursor.position());
+        d_spellChecker->requestSuggestions(misspelledWord, cursor.position());
     }
     d_contextMenu->popup(event->globalPos());
 }

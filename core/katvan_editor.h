@@ -39,6 +39,7 @@ class CodeModel;
 class CompletionManager;
 class Document;
 class Highlighter;
+class SpellChecker;
 
 namespace utils { class WheelTracker; }
 
@@ -49,7 +50,7 @@ class Editor : public QTextEdit
     friend class LineNumberGutter;
 
 public:
-    Editor(Document* doc, QWidget* parent = nullptr);
+    Editor(Document* doc, SpellChecker* spellChecker, QWidget* parent = nullptr);
 
     CompletionManager* completionManager() const { return d_completionManager; }
 
@@ -152,6 +153,7 @@ private:
     QWidget* d_leftLineNumberGutter;
     QWidget* d_rightLineNumberGutter;
 
+    SpellChecker* d_spellChecker;
     Highlighter* d_highlighter;
     CodeModel* d_codeModel;
     CompletionManager* d_completionManager;

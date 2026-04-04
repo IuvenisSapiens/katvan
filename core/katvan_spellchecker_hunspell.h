@@ -43,9 +43,9 @@ public:
     HunspellSpellChecker(QObject* parent = nullptr);
     ~HunspellSpellChecker();
 
-    QMap<QString, QString> findDictionaries() override;
-    void setPersonalDictionaryLocation(const QString& dirPath) override;
+    static void setPersonalDictionaryLocation(const QString& dirPath);
 
+    QMap<QString, QString> findDictionaries() override;
     void setCurrentDictionary(const QString& dictName, const QString& dictAffFile) override;
 
     MisspelledWordRanges checkSpelling(const QString& text) override;

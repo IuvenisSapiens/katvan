@@ -42,7 +42,7 @@ struct EditorHolder
 {
     EditorHolder(const QString& text, const EditorSettings& settings = EditorSettings())
         : document(new Document())
-        , editor(new Editor(document.get()))
+        , editor(new Editor(document.get(), nullptr))
     {
         editor->applySettings(settings);
         document->setDocumentText(text);
