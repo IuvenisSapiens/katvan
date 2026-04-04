@@ -18,6 +18,8 @@
 #import "macshell_editorview.h"
 #import "macshell_textfinderclient.h"
 
+#include "katvan_completionmanager.h"
+
 #include <QInputDialog>
 #include <QMenu>
 
@@ -235,6 +237,11 @@
 - (void)selectAll:(id)sender
 {
     self.editor->selectAll();
+}
+
+- (void)triggerAutocomplete:(id)sender
+{
+    self.editor->completionManager()->startExplicitCompletion();
 }
 
 - (void)zoomToActualSize:(id)sender

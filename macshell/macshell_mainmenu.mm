@@ -147,6 +147,11 @@
 
     [menu addItemWithTitle:NSLocalizedString(@"Delete", nil) action:@selector(delete:) keyEquivalent:@""];
 
+    const char kEsc[] = {0x1b, 0};
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Complete", nil) action:@selector(triggerAutocomplete:) keyEquivalent:@""];
+    [menuItem setKeyEquivalent:[NSString stringWithUTF8String:kEsc]];
+    [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagOption];
+
     [menu addItemWithTitle:NSLocalizedString(@"Select All", nil) action:@selector(selectAll:) keyEquivalent:@"a"];
 
     [menu addItem:[NSMenuItem separatorItem]];
