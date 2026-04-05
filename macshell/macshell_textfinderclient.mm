@@ -91,7 +91,7 @@
 - (NSArray<NSValue*>*)selectedRanges
 {
     return @[
-        [NSValue valueWithRange: [self firstSelectedRange]]
+        [NSValue valueWithRange:[self firstSelectedRange]]
     ];
 }
 

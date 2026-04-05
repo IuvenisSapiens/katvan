@@ -235,11 +235,11 @@ public:
 // Because of our tokenizer design (which doesn't backtrack by itself) number
 // base prefixes can cause an otherwise continuous word to be broken into
 // multiple word tokens (e.g "break" -> "b" + "reak"). This covers up for it.
-auto FullWord() {
+inline auto FullWord() {
     return OneOrMore(TokenType(parsing::TokenType::WORD));
 }
 
-auto CodeIdentifier() {
+inline auto CodeIdentifier() {
     return All(
         FullWord(),
         ZeroOrMore(Symbol(QLatin1Char('_')))
@@ -247,7 +247,7 @@ auto CodeIdentifier() {
 }
 
 // A number literal in code, with possible trailing units
-auto FullCodeNumber() {
+inline auto FullCodeNumber() {
     return All(
         TokenType(parsing::TokenType::CODE_NUMBER),
         Optionally(Any(TokenType(parsing::TokenType::WORD), Symbol(QLatin1Char('%'))))
@@ -255,7 +255,7 @@ auto FullCodeNumber() {
 }
 
 // Start of content line
-auto LineStartAnchor(bool atContentStart) {
+inline auto LineStartAnchor(bool atContentStart) {
     return Any(
         TokenType(parsing::TokenType::BEGIN),
         TokenType(parsing::TokenType::LINE_END),
@@ -263,19 +263,22 @@ auto LineStartAnchor(bool atContentStart) {
     );
 }
 
-auto LabelName() {
+inline auto LabelName() {
+    // Special characters according to:
+    // https://github.com/typst/typst/blob/d6848a802e86a6269300f9768c054a641c2da77f/crates/typst-syntax/src/lexer.rs#L1161
     return OneOrMore(
         Any(
             TokenType(parsing::TokenType::WORD),
             TokenType(parsing::TokenType::CODE_NUMBER),
             Symbol(QLatin1Char('_')),
             Symbol(QLatin1Char('-')),
-            Symbol(QLatin1Char('.'))
+            Symbol(QLatin1Char('.')),
+            Symbol(QLatin1Char(':'))
         )
     );
 }
 
-auto ExpressionChainContinuation() {
+inline auto ExpressionChainContinuation() {
     return All(
         Symbol(QLatin1Char('.')),
         Peek(TokenType(parsing::TokenType::WORD))

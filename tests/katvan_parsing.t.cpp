@@ -800,6 +800,18 @@ TEST(ContentParserTests, Sanity)
     ));
 }
 
+TEST(ContentParserTests, IgnoreLabels)
+{
+    auto segments = extractContent(QStringLiteral(
+        "#[ My content block with @ref data ] <theorem:euclid>"));
+
+    EXPECT_THAT(segments, ::testing::ElementsAre(
+        ContentSegment{  2,  23 }, // " My content block with "
+        ContentSegment{  29, 6  }, // " data "
+        ContentSegment{  36, 1  }  // " "
+    ));
+}
+
 static IsolateRangeList extractIsolates(QStringView text)
 {
     IsolatesListener listener;

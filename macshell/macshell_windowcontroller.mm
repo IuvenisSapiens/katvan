@@ -16,7 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #import "macshell_editorview.h"
+#import "macshell_exporter.h"
 #import "macshell_issuelist.h"
+#import "macshell_labelsview.h"
 #import "macshell_outlineview.h"
 #import "macshell_previewer.h"
 #import "macshell_settingsmanager.h"
@@ -38,7 +40,9 @@
 @property (nonatomic) KatvanPreviewer* previewer;
 @property (nonatomic) KatvanSidebar* sidebar;
 @property (nonatomic) KatvanOutlineView* outlineView;
+@property (nonatomic) KatvanLabelsView* labelsView;
 @property (nonatomic) KatvanIssueList* issueList;
+@property (nonatomic) KatvanExporter* exporter;
 @property (nonatomic) NSToolbarItem* compilationStatusItem;
 
 @property (nonatomic) katvan::Document* textDocument;
@@ -71,6 +75,7 @@
         self.driver = new katvan::TypstDriverWrapper();
         self.wordCounter = new katvan::WordCounter(self.driver);
         self.symbolPicker = nullptr;
+        self.exporter = [[KatvanExporter alloc] initWithDriver:self.driver andWindow:window];
 
         [self setupViewsWithDocument:textDocument];
         [self setupUI];
@@ -95,6 +100,9 @@
 
     self.outlineView = [[KatvanOutlineView alloc] init];
     self.outlineView.target = self;
+
+    self.labelsView = [[KatvanLabelsView alloc] init];
+    self.labelsView.target = self;
 
     self.issueList = [[KatvanIssueList alloc] initWithModel:self.driver->diagnosticsModel()];
     self.issueList.target = self;
@@ -124,6 +132,10 @@
     QObject::connect(self.driver, &katvan::TypstDriverWrapper::outlineUpdated,
                      self.driver, [weakSelf](katvan::typstdriver::OutlineNode* outline) {
         [weakSelf.outlineView setOutline:outline];
+    });
+    QObject::connect(self.driver, &katvan::TypstDriverWrapper::labelsUpdated,
+                     self.driver, [weakSelf](QList<katvan::typstdriver::DocumentLabel> labels) {
+        [weakSelf.labelsView setLabels:labels];
     });
 
     QObject::connect(self.editorView.editor, &katvan::Editor::toolTipRequested,
@@ -210,6 +222,11 @@
                   icon:[NSImage imageWithSystemSymbolName:@"document.viewfinder.fill"
                                 accessibilityDescription:@"Document page in a targeting frame"]
                   toolTip:NSLocalizedString(@"Document Outline", nil)];
+
+    [self.sidebar addTabController:self.labelsView
+                  icon:[NSImage imageWithSystemSymbolName:@"tag.fill"
+                                accessibilityDescription:@"Tag"]
+                  toolTip:NSLocalizedString(@"Labels", nil)];
 
     [self.sidebar addTabController:self.issueList
                   icon:[NSImage imageWithSystemSymbolName:@"exclamationmark.triangle"
@@ -352,33 +369,14 @@
         return NO;
     }
     else if (action == @selector(exportAsPdf:)) {
-        katvan::TypstDriverWrapper::Status status = self.driver->status();
-        return status == katvan::TypstDriverWrapper::Status::SUCCESS
-            || status == katvan::TypstDriverWrapper::Status::SUCCESS_WITH_WARNINGS;
+        return [self.exporter canExport];
     }
     return YES;
 }
 
 - (void)exportAsPdf:(id)sender
 {
-    NSPDFPanel* dialog = [NSPDFPanel panel];
-    NSPDFInfo* info = [[NSPDFInfo alloc] init];
-
-    NSString* filename = self.window.representedFilename;
-    if ([filename length] > 0) {
-        NSString* base = filename.lastPathComponent.stringByDeletingPathExtension;
-        dialog.defaultFileName = base; // No .pdf suffix
-    }
-
-    [dialog beginSheetWithPDFInfo:info
-            modalForWindow:self.window
-            completionHandler:^(NSInteger rc) {
-                if (rc) {
-                    QString path = QString::fromNSString(info.URL.path);
-                    self.driver->exportToPdf(path);
-                }
-            }
-    ];
+    [self.exporter exportAsPdf];
 }
 
 - (void)goToPreview:(id)sender

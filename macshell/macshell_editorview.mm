@@ -369,7 +369,7 @@ static QTextCursor findMisspellingFromCursor(QTextCursor from)
     QTextCursor cursor = self.editor->textCursor();
 
     QTextCursor misspelledCursor = findMisspellingFromCursor(cursor);
-    if (misspelledCursor.isNull() && cursor.blockNumber() > 0) {
+    if (misspelledCursor.isNull() && cursor.position() > 0) {
         // Look before the current cursor
         QTextCursor documentCursor { self.editor->document() };
         misspelledCursor = findMisspellingFromCursor(documentCursor);
@@ -405,6 +405,11 @@ static QTextCursor findMisspellingFromCursor(QTextCursor from)
 //
 // NSTextFinderBarContainer protocol methods
 //
+
+- (NSView*)contentView
+{
+    return (__bridge NSView *)reinterpret_cast<void*>(self.editor->winId());
+}
 
 - (NSView*)findBarView
 {
