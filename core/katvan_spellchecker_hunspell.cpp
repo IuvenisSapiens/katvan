@@ -72,6 +72,11 @@ void HunspellSpellChecker::ensureWorkerThread()
     }
 }
 
+void HunspellSpellChecker::setPersonalDictionaryLocation(const QString& dirPath)
+{
+    s_personalDictionaryLocation = dirPath;
+}
+
 /**
  * Scan system and executable-local locations for Hunspell dictionaries,
  * which are a pair of *.aff and *.dic files with the same base name.
@@ -106,12 +111,6 @@ QMap<QString, QString> HunspellSpellChecker::findDictionaries()
         }
     }
     return affFiles;
-}
-
-void HunspellSpellChecker::setPersonalDictionaryLocation(const QString& dirPath)
-{
-    s_personalDictionaryLocation = dirPath;
-    setPersonalDictionaryPath();
 }
 
 void HunspellSpellChecker::setCurrentDictionary(const QString& dictName, const QString& dictAffFile)
@@ -338,7 +337,13 @@ void HunspellSpellChecker::personalDictionaryFileChanged()
 
 void HunspellSpellChecker::requestSuggestionsImpl(const QString& word, int position)
 {
-    LoadedSpeller* speller = d_spellers[currentDictionaryName()].get();
+    QString dictionary = currentDictionaryName();
+    if (dictionary.isEmpty()) {
+        qWarning() << "Asked for suggestions, but no dictionary is active!";
+        return;
+    }
+
+    LoadedSpeller* speller = d_spellers[dictionary].get();
     SpellingSuggestionsWorker* worker = new SpellingSuggestionsWorker(speller, word, position);
 
     ensureWorkerThread();

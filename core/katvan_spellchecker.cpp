@@ -42,20 +42,15 @@ SpellChecker::~SpellChecker()
 {
 }
 
-SpellChecker* SpellChecker::instance()
+SpellChecker* SpellChecker::createPlatformSpellChecker(QObject* parent)
 {
-    static SpellChecker* checker = nullptr;
-    if (!checker) {
 #if defined(Q_OS_MACOS)
-        checker = new MacOsSpellChecker();
+    return new MacOsSpellChecker(parent);
 #elif defined(Q_OS_WINDOWS)
-        checker = new WindowsSpellChecker();
+    return new WindowsSpellChecker(parent);
 #else
-        checker = new HunspellSpellChecker();
+    return new HunspellSpellChecker(parent);
 #endif
-        connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, checker, &QObject::deleteLater);
-    }
-    return checker;
 }
 
 QString SpellChecker::dictionaryDisplayName(const QString& dictName)
@@ -71,11 +66,6 @@ QString SpellChecker::dictionaryDisplayName(const QString& dictName)
     );
 }
 
-void SpellChecker::setPersonalDictionaryLocation(const QString& dirPath)
-{
-    Q_UNUSED(dirPath)
-}
-
 void SpellChecker::setCurrentDictionary(const QString& dictName, const QString& dictPath)
 {
     Q_UNUSED(dictPath)
@@ -87,11 +77,6 @@ void SpellChecker::setCurrentDictionary(const QString& dictName, const QString& 
 
 void SpellChecker::requestSuggestions(const QString& word, int position)
 {
-    if (d_currentDictName.isEmpty()) {
-        qWarning() << "Asked for suggestions, but no dictionary is active!";
-        return;
-    }
-
     if (d_suggestionsCache.contains(word)) {
         Q_EMIT suggestionsReady(word, position, *d_suggestionsCache.object(word));
         return;

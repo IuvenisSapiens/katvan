@@ -83,10 +83,10 @@ TEST(SpellCheckerTests, BasicHebrew) {
 
 TEST(SpellCheckerTests, PersonalDict) {
     QTemporaryDir dir;
+    HunspellSpellChecker::setPersonalDictionaryLocation(dir.path());
 
     HunspellSpellChecker checker1;
     QSignalSpy spy1(&checker1, &SpellChecker::dictionaryChanged);
-    checker1.setPersonalDictionaryLocation(dir.path());
 
     checker1.setCurrentDictionary("en_IL", getDictionaryPath("en_IL"));
     EXPECT_TRUE(spy1.wait(SIGNAL_WAIT_TIMEOUT_MSEC));

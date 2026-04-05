@@ -147,6 +147,10 @@
 
     [menu addItemWithTitle:NSLocalizedString(@"Delete", nil) action:@selector(delete:) keyEquivalent:@""];
 
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Complete", nil) action:@selector(triggerAutocomplete:) keyEquivalent:@""];
+    [menuItem setKeyEquivalent:@"\u001B"]; // Esc
+    [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagOption];
+
     [menu addItemWithTitle:NSLocalizedString(@"Select All", nil) action:@selector(selectAll:) keyEquivalent:@"a"];
 
     [menu addItem:[NSMenuItem separatorItem]];
@@ -169,7 +173,8 @@
     menuItem = [findMenu addItemWithTitle:NSLocalizedString(@"Find Previous", nil) action:@selector(performTextFinderAction:) keyEquivalent:@"G"];
     [menuItem setTag:NSTextFinderActionPreviousMatch];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Spell Checking...", nil) action:nil keyEquivalent:@""];
+    // AppKit magically modifies the title of this menu item
+    [menu addItemWithTitle:NSLocalizedString(@"Spelling and Grammar", nil) action:@selector(showGuessPanel:) keyEquivalent:@":"];
 }
 
 + (void)setupViewMenu:(NSMenu*)menu

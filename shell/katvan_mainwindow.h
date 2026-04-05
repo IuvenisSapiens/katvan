@@ -39,10 +39,11 @@ class OutlineView;
 class Previewer;
 class RecentFiles;
 class SearchBar;
+class SettingsDialog;
 
 class Document;
 class Editor;
-class SettingsDialog;
+class SpellChecker;
 class SymbolPicker;
 class TypstDriverWrapper;
 class WordCounter;
@@ -123,6 +124,7 @@ private:
     RecentFiles* d_recentFiles;
     TypstDriverWrapper* d_driver;
     BackupHandler* d_backupHandler;
+    SpellChecker* d_spellChecker;
     WordCounter* d_wordCounter;
 
     Editor* d_editor;

@@ -18,12 +18,17 @@
 #import "macshell_editorview.h"
 #import "macshell_textfinderclient.h"
 
+#include "katvan_completionmanager.h"
+#include "katvan_highlighter.h"
+#include "katvan_spellchecker_macos.h"
+
 #include <QInputDialog>
 #include <QMenu>
 
 @interface KatvanEditorView ()
 
 @property (nonatomic) katvan::Editor* editor;
+@property (nonatomic) katvan::MacOsSpellChecker* spellChecker;
 @property (nonatomic) QInputDialog* goToLineDialog;
 @property (nonatomic) KatvanEditorStatusBar* statusBar;
 
@@ -44,7 +49,8 @@
     self = [super init];
     if (self) {
         self.identifier = [self className];
-        self.editor = new katvan::Editor(textDocument);
+        self.spellChecker = new katvan::MacOsSpellChecker;
+        self.editor = new katvan::Editor(textDocument, self.spellChecker);
         self.goToLineDialog = nullptr;
 
         self.textFinderClient = [[KatvanTextFinderClient alloc] initWithEditor:self.editor];
@@ -68,6 +74,7 @@
     [self.view removeObserver:self forKeyPath:@"effectiveAppearance"];
 
     delete self.editor;
+    delete self.spellChecker;
 }
 
 - (void)viewDidLoad
@@ -237,6 +244,17 @@
     self.editor->selectAll();
 }
 
+- (void)triggerAutocomplete:(id)sender
+{
+    self.editor->completionManager()->startExplicitCompletion();
+}
+
+- (void)showGuessPanel:(id)sender
+{
+    NSPanel* panel = [[NSSpellChecker sharedSpellChecker] spellingPanel];
+    [panel orderFront:self];
+}
+
 - (void)zoomToActualSize:(id)sender
 {
     self.editor->resetFontSize();
@@ -288,7 +306,7 @@
 {
     NSColorPanel* panel = [NSColorPanel sharedColorPanel];
     [panel setContinuous:NO];
-    [panel makeKeyAndOrderFront:self];
+    [panel orderFront:self];
 }
 
 - (void)updateWordCount:(NSUInteger)count
@@ -309,6 +327,79 @@
         self.editor->document()->setDefaultCursorMoveStyle(Qt::VisualMoveStyle);
     }
     [self invalidateRestorableState];
+}
+
+//
+// Spelling related methods
+//
+
+static QTextCursor findMisspellingFromCursor(QTextCursor from)
+{
+    for (QTextBlock block = from.block(); block.isValid(); block = block.next()) {
+        auto* data = katvan::BlockData::get<katvan::SpellingBlockData>(block);
+        auto words = data->misspelledWords();
+        if (words.empty()) {
+            continue;
+        }
+
+        for (auto& word : words) {
+            int startPos = word.startPos;
+            if (block == from.block() && startPos < from.positionInBlock()) {
+                continue;
+            }
+
+            QTextCursor result{ block };
+            result.setPosition(block.position() + startPos);
+            result.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, word.length);
+
+            return result;
+        }
+    }
+    return QTextCursor{};
+}
+
+- (void)checkSpelling:(id)sender
+{
+    // Not actually documented anywhere, but the spelling panel sends the
+    // checkSpelling: message to the first responder when the "Find Next"
+    // button is clicked. The responder is supposed to run the spell check
+    // to find the first misspelled word and update the panel. We check
+    // spelling continuously, so look in the block data of the document
+    // for the first one after the cursor, select it and notify the panel.
+    QTextCursor cursor = self.editor->textCursor();
+
+    QTextCursor misspelledCursor = findMisspellingFromCursor(cursor);
+    if (misspelledCursor.isNull() && cursor.blockNumber() > 0) {
+        // Look before the current cursor
+        QTextCursor documentCursor { self.editor->document() };
+        misspelledCursor = findMisspellingFromCursor(documentCursor);
+    }
+
+    NSSpellChecker* checker = [NSSpellChecker sharedSpellChecker];
+
+    if (misspelledCursor.isNull()) {
+        [checker updateSpellingPanelWithMisspelledWord:@""];
+    }
+    else {
+        self.editor->setTextCursor(misspelledCursor);
+        [checker updateSpellingPanelWithMisspelledWord:misspelledCursor.selectedText().toNSString()];
+    }
+}
+
+- (void)changeSpelling:(id)sender
+{
+    NSString* replacement = [[sender selectedCell] stringValue];
+
+    QTextCursor cursor = self.editor->textCursor();
+    cursor.insertText(QString::fromNSString(replacement));
+}
+
+- (void)ignoreSpelling:(id)sender
+{
+    NSString* ignored = [[sender selectedCell] stringValue];
+
+    self.spellChecker->ignoreWord(QString::fromNSString(ignored));
+    self.editor->forceRehighlighting();
 }
 
 //
