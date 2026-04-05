@@ -16,6 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #import "macshell_editorview.h"
+#import "macshell_exporter.h"
 #import "macshell_issuelist.h"
 #import "macshell_labelsview.h"
 #import "macshell_outlineview.h"
@@ -41,6 +42,7 @@
 @property (nonatomic) KatvanOutlineView* outlineView;
 @property (nonatomic) KatvanLabelsView* labelsView;
 @property (nonatomic) KatvanIssueList* issueList;
+@property (nonatomic) KatvanExporter* exporter;
 @property (nonatomic) NSToolbarItem* compilationStatusItem;
 
 @property (nonatomic) katvan::Document* textDocument;
@@ -73,6 +75,7 @@
         self.driver = new katvan::TypstDriverWrapper();
         self.wordCounter = new katvan::WordCounter(self.driver);
         self.symbolPicker = nullptr;
+        self.exporter = [[KatvanExporter alloc] initWithDriver:self.driver andWindow:window];
 
         [self setupViewsWithDocument:textDocument];
         [self setupUI];
@@ -366,33 +369,14 @@
         return NO;
     }
     else if (action == @selector(exportAsPdf:)) {
-        katvan::TypstDriverWrapper::Status status = self.driver->status();
-        return status == katvan::TypstDriverWrapper::Status::SUCCESS
-            || status == katvan::TypstDriverWrapper::Status::SUCCESS_WITH_WARNINGS;
+        return [self.exporter canExport];
     }
     return YES;
 }
 
 - (void)exportAsPdf:(id)sender
 {
-    NSPDFPanel* dialog = [NSPDFPanel panel];
-    NSPDFInfo* info = [[NSPDFInfo alloc] init];
-
-    NSString* filename = self.window.representedFilename;
-    if ([filename length] > 0) {
-        NSString* base = filename.lastPathComponent.stringByDeletingPathExtension;
-        dialog.defaultFileName = base; // No .pdf suffix
-    }
-
-    [dialog beginSheetWithPDFInfo:info
-            modalForWindow:self.window
-            completionHandler:^(NSInteger rc) {
-                if (rc) {
-                    QString path = QString::fromNSString(info.URL.path);
-                    self.driver->exportToPdf(path);
-                }
-            }
-    ];
+    [self.exporter exportAsPdf];
 }
 
 - (void)goToPreview:(id)sender
