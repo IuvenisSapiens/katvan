@@ -17,6 +17,7 @@
  */
 #import "macshell_editorview.h"
 #import "macshell_issuelist.h"
+#import "macshell_labelsview.h"
 #import "macshell_outlineview.h"
 #import "macshell_previewer.h"
 #import "macshell_settingsmanager.h"
@@ -38,6 +39,7 @@
 @property (nonatomic) KatvanPreviewer* previewer;
 @property (nonatomic) KatvanSidebar* sidebar;
 @property (nonatomic) KatvanOutlineView* outlineView;
+@property (nonatomic) KatvanLabelsView* labelsView;
 @property (nonatomic) KatvanIssueList* issueList;
 @property (nonatomic) NSToolbarItem* compilationStatusItem;
 
@@ -96,6 +98,9 @@
     self.outlineView = [[KatvanOutlineView alloc] init];
     self.outlineView.target = self;
 
+    self.labelsView = [[KatvanLabelsView alloc] init];
+    self.labelsView.target = self;
+
     self.issueList = [[KatvanIssueList alloc] initWithModel:self.driver->diagnosticsModel()];
     self.issueList.target = self;
 
@@ -124,6 +129,10 @@
     QObject::connect(self.driver, &katvan::TypstDriverWrapper::outlineUpdated,
                      self.driver, [weakSelf](katvan::typstdriver::OutlineNode* outline) {
         [weakSelf.outlineView setOutline:outline];
+    });
+    QObject::connect(self.driver, &katvan::TypstDriverWrapper::labelsUpdated,
+                     self.driver, [weakSelf](QList<katvan::typstdriver::DocumentLabel> labels) {
+        [weakSelf.labelsView setLabels:labels];
     });
 
     QObject::connect(self.editorView.editor, &katvan::Editor::toolTipRequested,
@@ -210,6 +219,11 @@
                   icon:[NSImage imageWithSystemSymbolName:@"document.viewfinder.fill"
                                 accessibilityDescription:@"Document page in a targeting frame"]
                   toolTip:NSLocalizedString(@"Document Outline", nil)];
+
+    [self.sidebar addTabController:self.labelsView
+                  icon:[NSImage imageWithSystemSymbolName:@"tag.fill"
+                                accessibilityDescription:@"Tag"]
+                  toolTip:NSLocalizedString(@"Labels", nil)];
 
     [self.sidebar addTabController:self.issueList
                   icon:[NSImage imageWithSystemSymbolName:@"exclamationmark.triangle"

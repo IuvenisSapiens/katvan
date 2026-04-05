@@ -4,6 +4,7 @@ set(SOURCES
     macshell_editorstatusbar.mm
     macshell_editorview.mm
     macshell_issuelist.mm
+    macshell_labelsview.mm
     macshell_mainmenu.mm
     macshell_outlineview.mm
     macshell_previewer.mm
