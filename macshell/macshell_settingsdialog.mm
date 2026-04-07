@@ -128,7 +128,7 @@ static void addSeparatorRow(NSGridView* grid)
     //
     // Layout
     //
-    NSGridView *grid = [NSGridView gridViewWithNumberOfColumns:2 rows:0];
+    NSGridView* grid = [NSGridView gridViewWithNumberOfColumns:2 rows:0];
     grid.translatesAutoresizingMaskIntoConstraints = NO;
     grid.rowSpacing = kRowSpacing;
     grid.columnSpacing = kColumnSpacing;
@@ -356,7 +356,7 @@ static void addSeparatorRow(NSGridView* grid)
     //
     // Layout
     //
-    NSGridView *grid = [NSGridView gridViewWithNumberOfColumns:2 rows:0];
+    NSGridView* grid = [NSGridView gridViewWithNumberOfColumns:2 rows:0];
     grid.translatesAutoresizingMaskIntoConstraints = NO;
     grid.rowSpacing = kRowSpacing;
     grid.columnSpacing = kColumnSpacing;

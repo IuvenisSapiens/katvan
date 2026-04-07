@@ -19,6 +19,66 @@
 
 #include <QtMinMax>
 
+@interface KatvanAuxToolBar ()
+
+@property (nonatomic) NSStackView* stackView;
+
+@end
+
+@implementation KatvanAuxToolBar
+
+- (instancetype)initWithFrame:(NSRect)frameRect
+{
+    self = [super initWithFrame:frameRect];
+    if (self) {
+        self.stackView = [NSStackView stackViewWithViews:@[]];
+        self.stackView.edgeInsets = NSEdgeInsetsMake(4, 8, 4, 8);
+        self.stackView.spacing = 4;
+        [self addSubview:self.stackView];
+
+        NSBox* separator = [[NSBox alloc] init];
+        separator.boxType = NSBoxSeparator;
+        separator.translatesAutoresizingMaskIntoConstraints = NO;
+        [self addSubview:separator];
+
+        [NSLayoutConstraint activateConstraints:@[
+            [self.stackView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
+            [self.stackView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
+            [self.stackView.topAnchor constraintEqualToAnchor:self.topAnchor],
+            [self.stackView.heightAnchor constraintEqualToConstant:25.0],
+            [separator.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
+            [separator.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
+            [separator.topAnchor constraintEqualToAnchor:self.stackView.bottomAnchor],
+            [separator.bottomAnchor constraintEqualToAnchor:self.bottomAnchor]
+        ]];
+    }
+    return self;
+}
+
+- (void)addView:(NSView*)view inGravity:(NSStackViewGravity)gravity
+{
+    [self.stackView addView:view inGravity:gravity];
+}
+
+- (NSButton*)addButtonWithIcon:(NSImage*)icon
+        toolTip:(NSString*)toolTip
+        inGravity:(NSStackViewGravity)gravity
+        target:(id)target
+        action:(SEL)selector
+{
+    NSButton* button = [NSButton buttonWithImage:icon target:target action:selector];
+    button.toolTip = toolTip;
+    button.bezelStyle = NSBezelStyleToolbar;
+    button.bordered = NO;
+    button.showsBorderOnlyWhileMouseInside = YES;
+    button.symbolConfiguration = [NSImageSymbolConfiguration configurationWithScale:NSImageSymbolScaleLarge];
+
+    [self.stackView addView:button inGravity:gravity];
+    return button;
+}
+
+@end
+
 @interface KatvanSpinBox ()
 
 @property (nonatomic) NSTextField* textField;

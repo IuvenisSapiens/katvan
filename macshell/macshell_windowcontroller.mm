@@ -44,6 +44,11 @@
 @property (nonatomic) KatvanIssueList* issueList;
 @property (nonatomic) KatvanExporter* exporter;
 @property (nonatomic) NSToolbarItem* compilationStatusItem;
+@property (nonatomic) NSToolbarItemGroup* previewLayoutItem;
+
+@property (nonatomic) NSSplitViewItem* sidebarSplitItem;
+@property (nonatomic) NSSplitViewItem* editorSplitItem;
+@property (nonatomic) NSSplitViewItem* previewerSplitItem;
 
 @property (nonatomic) katvan::Document* textDocument;
 @property (nonatomic) katvan::TypstDriverWrapper* driver;
@@ -68,8 +73,7 @@
 
     self = [super initWithWindow:window];
     if (self) {
-        [window setTabbingMode:NSWindowTabbingModeDisallowed];
-        [window center];
+        window.tabbingMode = NSWindowTabbingModeDisallowed;
 
         self.textDocument = textDocument;
         self.driver = new katvan::TypstDriverWrapper();
@@ -80,7 +84,7 @@
         [self setupViewsWithDocument:textDocument];
         [self setupUI];
         [self readSettings];
-        [self resizeInitialUiWithFrameRect:frame andURL:url];
+        [self resizeInitialUiWithFrameRect:frame];
 
         [self documentDidExplicitlySaveInURL:url forced:YES];
     }
@@ -147,8 +151,7 @@
 
     QObject::connect(self.editorView.editor, &QTextEdit::cursorPositionChanged,
                      self.editorView.editor, [weakSelf]() {
-        int line = weakSelf.editorView.editor->textCursor().blockNumber();
-        [weakSelf.outlineView selectEntryForLine:line];
+        [weakSelf textCursorPositionChanged];
     });
     QObject::connect(self.editorView.editor, &katvan::Editor::showSymbolPicker,
                      self.editorView.editor, [weakSelf]() {
@@ -165,7 +168,7 @@
     });
 }
 
-- (void)resizeInitialUiWithFrameRect:(NSRect)frame andURL:(NSURL*)url
+- (void)resizeInitialUiWithFrameRect:(NSRect)frame
 {
     // Need to resize the window, as splitViewController overrides its initial size
     [self.window setContentSize:frame.size];
@@ -178,10 +181,6 @@
     CGFloat totalWidth = NSWidth(splitView.frame);
     [splitView setPosition:round(totalWidth * 0.2) ofDividerAtIndex:0];
     [splitView setPosition:round(totalWidth * 0.6) ofDividerAtIndex:1];
-
-    if (url) {
-        splitView.autosaveName = [NSString stringWithFormat:@"MainSplitView-%@", url.path];
-    }
 }
 
 - (void)setupUI
@@ -191,19 +190,19 @@
     self.splitViewController = [[NSSplitViewController alloc] init];
     self.splitViewController.splitView.dividerStyle = NSSplitViewDividerStyleThin;
 
-    NSSplitViewItem* sidebarItem = [NSSplitViewItem sidebarWithViewController:self.sidebar];
-    [sidebarItem setPreferredThicknessFraction:0.2];
-    [sidebarItem setTitlebarSeparatorStyle:NSTitlebarSeparatorStyleLine];
-    [self.splitViewController addSplitViewItem:sidebarItem];
+    self.sidebarSplitItem = [NSSplitViewItem sidebarWithViewController:self.sidebar];
+    [self.sidebarSplitItem setPreferredThicknessFraction:0.2];
+    [self.sidebarSplitItem setTitlebarSeparatorStyle:NSTitlebarSeparatorStyleLine];
+    [self.splitViewController addSplitViewItem:self.sidebarSplitItem];
 
-    NSSplitViewItem* editorItem = [NSSplitViewItem splitViewItemWithViewController:self.editorView];
-    [editorItem setPreferredThicknessFraction:0.4];
-    [self.splitViewController addSplitViewItem:editorItem];
+    self.editorSplitItem = [NSSplitViewItem splitViewItemWithViewController:self.editorView];
+    [self.editorSplitItem setPreferredThicknessFraction:0.4];
+    [self.splitViewController addSplitViewItem:self.editorSplitItem];
 
-    NSSplitViewItem* previewerItem = [NSSplitViewItem splitViewItemWithViewController:self.previewer];
-    [previewerItem setPreferredThicknessFraction:0.4];
-    [previewerItem setCanCollapse:YES];
-    [self.splitViewController addSplitViewItem:previewerItem];
+    self.previewerSplitItem = [NSSplitViewItem splitViewItemWithViewController:self.previewer];
+    [self.previewerSplitItem setPreferredThicknessFraction:0.4];
+    [self.previewerSplitItem setCanCollapse:YES];
+    [self.splitViewController addSplitViewItem:self.previewerSplitItem];
 
     [self.window setContentViewController:self.splitViewController];
 
@@ -224,7 +223,7 @@
                   toolTip:NSLocalizedString(@"Document Outline", nil)];
 
     [self.sidebar addTabController:self.labelsView
-                  icon:[NSImage imageWithSystemSymbolName:@"tag.fill"
+                  icon:[NSImage imageWithSystemSymbolName:@"tag"
                                 accessibilityDescription:@"Tag"]
                   toolTip:NSLocalizedString(@"Labels", nil)];
 
@@ -241,14 +240,8 @@
     return @[
         NSToolbarToggleSidebarItemIdentifier,
         NSToolbarSidebarTrackingSeparatorItemIdentifier,
-        @"katvan.toolbar.editor.insert",
-        @"katvan.toolbar.compilation.status",
-        @"katvan.toolbar.separator",
-        @"katvan.toolbar.previewer.zoomout",
-        @"katvan.toolbar.previewer.zoomlevel",
-        @"katvan.toolbar.previewer.zoomin",
-        NSToolbarFlexibleSpaceItemIdentifier,
-        @"katvan.toolbar.previewer.invertcolors",
+        @"katvan.toolbar.status",
+        @"katvan.toolbar.layout",
     ];
 }
 
@@ -261,7 +254,7 @@
                   itemForItemIdentifier:(NSString*)itemIdentifier
                   willBeInsertedIntoToolbar:(BOOL)flag
 {
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.compilation.status"]) {
+    if ([itemIdentifier isEqualToString:@"katvan.toolbar.status"]) {
         NSToolbarItem* item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
         item.label = NSLocalizedString(@"Compilation Status", "Details about the result of the last compilation");
 
@@ -278,53 +271,25 @@
         }
         return item;
     }
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.editor.insert"]) {
-        NSMenuToolbarItem* item = [[NSMenuToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-        item.label = NSLocalizedString(@"Insert", "Opens insert menu for the editor");
-        item.toolTip = NSLocalizedString(@"Insert", nil);
-        item.image = [NSImage imageWithSystemSymbolName:@"plus" accessibilityDescription:@"Plus sign"];
-        item.menu = [self.editorView createInsertMenu];
-        return item;
-    }
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.separator"]) {
-        NSTrackingSeparatorToolbarItem* item = [NSTrackingSeparatorToolbarItem
-            trackingSeparatorToolbarItemWithIdentifier:itemIdentifier
-            splitView:self.splitViewController.splitView
-            dividerIndex:(self.splitViewController.splitViewItems.count - 2)];
-        return item;
-    }
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.previewer.zoomout"]) {
-        NSToolbarItem* item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-        item.label = NSLocalizedString(@"Zoom Out", nil);
-        item.toolTip = NSLocalizedString(@"Zoom out the preview", nil);
-        item.image = [NSImage imageWithSystemSymbolName:@"minus.magnifyingglass" accessibilityDescription:@"Magnifying glass with minus"];
-        item.target = self.previewer;
-        item.action = @selector(zoomOut:);
-        return item;
-    }
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.previewer.zoomlevel"]) {
-        NSToolbarItem* item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-        item.label = NSLocalizedString(@"Zoom Level", nil);
-        item.toolTip = NSLocalizedString(@"Set the zoom level of the preview", nil);
-        item.view = [self.previewer makeZoomLevelPopup];
-        return item;
-    }
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.previewer.zoomin"]) {
-        NSToolbarItem* item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-        item.label = NSLocalizedString(@"Zoom In", nil);
-        item.toolTip = NSLocalizedString(@"Zoom in the preview", nil);
-        item.image = [NSImage imageWithSystemSymbolName:@"plus.magnifyingglass" accessibilityDescription:@"Magnifying glass with plus"];
-        item.target = self.previewer;
-        item.action = @selector(zoomIn:);
-        return item;
-    }
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.previewer.invertcolors"]) {
-        NSToolbarItem* item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-        item.label = NSLocalizedString(@"Invert Colors", nil);
-        item.toolTip = NSLocalizedString(@"Invert the colors of the document preview", nil);
-        item.image = [NSImage imageWithSystemSymbolName:@"circle.lefthalf.filled" accessibilityDescription:@"Circle half filled"];
-        item.target = self.previewer;
-        item.action = @selector(invertPreviewColors:);
+    if ([itemIdentifier isEqualToString:@"katvan.toolbar.layout"]) {
+        NSToolbarItemGroup* item =
+            [NSToolbarItemGroup groupWithItemIdentifier:itemIdentifier
+                                images:@[
+                                    [NSImage imageWithSystemSymbolName:@"rectangle.lefthalf.filled" accessibilityDescription:@"On the left"],
+                                    [NSImage imageWithSystemSymbolName:@"rectangle" accessibilityDescription:@"No preview"],
+                                    [NSImage imageWithSystemSymbolName:@"rectangle.righthalf.filled" accessibilityDescription:@"On the right"],
+                                ]
+                                selectionMode:NSToolbarItemGroupSelectionModeSelectOne
+                                labels:@[]
+                                target:self
+                                action:@selector(applyPreviewLocation:)];
+
+        item.label = NSLocalizedString(@"Preview Location", "Segment control for choosing where the preview will be");
+        item.selectedIndex = 2;
+
+        if (flag) {
+            self.previewLayoutItem = item;
+        }
         return item;
     }
     return nil;
@@ -354,6 +319,46 @@
     self.editorView.editor->checkForModelines();
 }
 
+- (void)restoreStateWithCoder:(NSCoder*)coder
+{
+    // Decode preview location
+    if ([coder containsValueForKey:@"previewLocation"]) {
+        NSInteger previewLocation = [coder decodeIntegerForKey:@"previewLocation"];
+
+        [self.previewLayoutItem setSelectedIndex:previewLocation];
+        [self applyPreviewLocation:nil];
+    }
+
+    // Decode splitter positions
+    NSArray<NSNumber*>* positions = [coder decodeArrayOfObjectsOfClass:[NSNumber class] forKey:@"splitterPositions"];
+    if (positions) {
+        NSSplitView* splitView = self.splitViewController.splitView;
+        for (NSUInteger i = 0; i < positions.count && i + 1 < splitView.subviews.count; i++) {
+            [splitView setPosition:positions[i].doubleValue ofDividerAtIndex:i];
+        }
+    }
+
+    [super restoreStateWithCoder:coder];
+}
+
+- (void)encodeRestorableStateWithCoder:(NSCoder*)coder
+{
+    // Encode preview layout
+    NSInteger previewLocation = self.previewLayoutItem.selectedIndex;
+    [coder encodeInteger:previewLocation forKey:@"previewLocation"];
+
+    // Encode splitter positions
+    NSSplitView* splitView = self.splitViewController.splitView;
+    NSMutableArray<NSNumber*>* positions = [NSMutableArray array];
+    NSArray<NSView*>* subviews = splitView.subviews;
+    for (NSUInteger i = 0; i + 1 < subviews.count; i++) {
+        [positions addObject:@(NSMaxX(subviews[i].frame))];
+    }
+    [coder encodeObject:positions forKey:@"splitterPositions"];
+
+    [super encodeRestorableStateWithCoder:coder];
+}
+
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)item
 {
     SEL action = [item action];
@@ -372,6 +377,23 @@
         return [self.exporter canExport];
     }
     return YES;
+}
+
+- (void)applyPreviewLocation:(id)sender
+{
+    NSInteger index = self.previewLayoutItem.selectedIndex;
+    if (index == 0) { // Preview on the left
+        self.splitViewController.splitViewItems = @[self.sidebarSplitItem, self.previewerSplitItem, self.editorSplitItem];
+    }
+    else if (index == 1) { // No preview
+        self.splitViewController.splitViewItems = @[self.sidebarSplitItem, self.editorSplitItem];
+    }
+    else if (index == 2) { // Preview on the right
+        self.splitViewController.splitViewItems = @[self.sidebarSplitItem, self.editorSplitItem, self.previewerSplitItem];
+    }
+
+    [self.splitViewController.splitView adjustSubviews];
+    [self invalidateRestorableState];
 }
 
 - (void)exportAsPdf:(id)sender
@@ -397,6 +419,12 @@
 - (void)goToBlock:(int)line column:(int)column
 {
     self.editorView.editor->goToBlock(line, column);
+}
+
+- (void)invertPreviewColors:(id)sender
+{
+    // Answer the action here in case the previewer isn't first responder
+    [self.previewer performSelector:@selector(invertPreviewColors:) withObject:sender];
 }
 
 - (void)compilationStatusClicked:(id)sender
@@ -449,6 +477,18 @@
         button.contentTintColor = symbolColor;
         button.toolTip = toolTip;
     }
+}
+
+- (void)textCursorPositionChanged
+{
+    QTextCursor cursor = self.editorView.editor->textCursor();
+    int line = cursor.blockNumber();
+    int column = cursor.positionInBlock();
+
+    if (self.previewer.followEditorCursor) {
+        self.driver->forwardSearch(line, column, self.previewer.currentPage);
+    }
+    [self.outlineView selectEntryForLine:line];
 }
 
 - (void)showSymbolPicker

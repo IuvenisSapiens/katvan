@@ -23,9 +23,10 @@
 
 @interface KatvanPreviewer : NSViewController
 
-@property (readonly) katvan::PreviewerView* previewerView;
+@property (nonatomic, readonly) katvan::PreviewerView* previewerView;
+@property (nonatomic, readonly) int currentPage;
+@property (nonatomic, readonly) BOOL followEditorCursor;
 
 - (instancetype)initWithDriver:(katvan::TypstDriverWrapper*)driver;
-- (NSPopUpButton*)makeZoomLevelPopup;
 
 @end

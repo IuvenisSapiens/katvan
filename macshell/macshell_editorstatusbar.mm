@@ -122,7 +122,7 @@ static constexpr CGFloat kSectionPadding = 8.0;
     NSPopUpButton* popUp = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
     popUp.bordered = NO;
     popUp.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
-    popUp.cell.controlSize = NSControlSizeSmall;
+    popUp.controlSize = NSControlSizeSmall;
     popUp.translatesAutoresizingMaskIntoConstraints = NO;
 
     return popUp;

@@ -16,6 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #import "macshell_previewer.h"
+#import "macshell_widgets.h"
 
 #include <QScrollBar>
 
@@ -24,9 +25,18 @@ static const NSInteger kZoomLevelFitWidth = -2;
 static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
 
 @interface PageNumberLabelCell : NSTextFieldCell
+@property (nonatomic) BOOL active;
 @end
 
 @implementation PageNumberLabelCell
+
+- (void)setActive:(BOOL)active
+{
+    _active = active;
+    self.textColor = _active
+        ? [NSColor alternateSelectedControlTextColor] // Contrasts with accent color
+        : [NSColor unemphasizedSelectedTextColor];
+}
 
 - (NSSize)cellSizeForBounds:(NSRect)rect
 {
@@ -46,8 +56,11 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
 {
     CGFloat radius = 10.0;
     NSBezierPath* path = [NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:radius yRadius:radius];
+    NSColor* fillColor = self.active
+        ? [NSColor controlAccentColor]
+        : [NSColor unemphasizedSelectedContentBackgroundColor];
 
-    [[NSColor controlAccentColor] setFill];
+    [fillColor setFill];
     [path fill];
     [path setClip];
 
@@ -59,8 +72,12 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
 @interface KatvanPreviewer ()
 
 @property (nonatomic) katvan::PreviewerView* previewerView;
+@property (nonatomic, weak) NSView* previewerNsView;
 @property (nonatomic) NSPopUpButton* zoomLevelsPopUp;
 @property (nonatomic) NSTextField* currentPageLabel;
+@property (nonatomic) NSButton* followCursorButton;
+
+@property (nonatomic) BOOL followEditorCursor;
 @property (nonatomic) QPointF pendingScrollPosition;
 
 @end
@@ -71,6 +88,8 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
 {
     self = [super init];
     if (self) {
+        _followEditorCursor = NO;
+
         self.identifier = [self className];
         self.previewerView = new katvan::PreviewerView(driver);
 
@@ -106,6 +125,8 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+
     delete self.previewerView;
 }
 
@@ -113,24 +134,28 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
 {
     [super viewDidLoad];
 
-    NSView* previewerNsView = (__bridge NSView *)reinterpret_cast<void*>(self.previewerView->winId());
+    self.previewerNsView = (__bridge NSView *)reinterpret_cast<void*>(self.previewerView->winId());
+    self.previewerNsView.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:self.previewerNsView];
 
-    [self.view addSubview:previewerNsView];
-
-    previewerNsView.translatesAutoresizingMaskIntoConstraints = NO;
+    KatvanAuxToolBar* toolbar = [self makePreviewToolbar];
+    toolbar.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:toolbar];
 
     self.currentPageLabel = [NSTextField labelWithString:@""];
     self.currentPageLabel.cell = [[PageNumberLabelCell alloc] init];
-    self.currentPageLabel.textColor = [NSColor alternateSelectedControlTextColor]; // Contrasts with accent color
     self.currentPageLabel.hidden = YES;
     self.currentPageLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:self.currentPageLabel];
 
     [NSLayoutConstraint activateConstraints:@[
-        [previewerNsView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [previewerNsView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-        [previewerNsView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
-        [previewerNsView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
+        [toolbar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
+        [toolbar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+        [toolbar.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
+        [self.previewerNsView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
+        [self.previewerNsView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+        [self.previewerNsView.topAnchor constraintEqualToAnchor:toolbar.bottomAnchor],
+        [self.previewerNsView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
         [self.currentPageLabel.centerXAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.centerXAnchor],
         [self.currentPageLabel.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor constant:-20],
         [self.view.widthAnchor constraintGreaterThanOrEqualToConstant:self.previewerView->minimumWidth()],
@@ -138,6 +163,93 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
     ]];
 
     self.previewerView->show();
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                          selector:@selector(windowDidUpdate:)
+                                          name:NSWindowDidUpdateNotification
+                                          object:self.view.window];
+}
+
+- (void)setupZoomLevelPopup
+{
+    NSMenu* levelsMenu = [[NSMenu alloc] init];
+    NSMenuItem* item;
+
+    // A pull-down button always displays its menu's first item on the button
+    // itself, so create a placeholder
+    [levelsMenu addItemWithTitle:@"[Placeholder]" action:nil keyEquivalent:@""];
+
+    item = [levelsMenu addItemWithTitle:NSLocalizedString(@"Fit Page", nil) action:@selector(setZoomLevel:) keyEquivalent:@""];
+    [item setTarget:self];
+    [item setTag:kZoomLevelFitPage];
+
+    item = [levelsMenu addItemWithTitle:NSLocalizedString(@"Fit Width", nil) action:@selector(setZoomLevel:) keyEquivalent:@""];
+    [item setTarget:self];
+    [item setTag:kZoomLevelFitWidth];
+
+    [levelsMenu addItem:[NSMenuItem separatorItem]];
+
+    NSArray* levels = @[@(50), @(75), @(100), @(125), @(150), @(200)];
+    for (NSNumber* level in levels) {
+        NSString* title = [NSString stringWithFormat:@"%d%%", [level intValue]];
+
+        item = [levelsMenu addItemWithTitle:title action:@selector(setZoomLevel:) keyEquivalent:@""];
+        [item setTarget:self];
+        [item setTag:[level intValue]];
+    }
+
+    self.zoomLevelsPopUp = [[NSPopUpButton alloc] init];
+    self.zoomLevelsPopUp.pullsDown = YES;
+    self.zoomLevelsPopUp.menu = levelsMenu;
+    self.zoomLevelsPopUp.bordered = NO;
+    self.zoomLevelsPopUp.toolTip = NSLocalizedString(@"Zoom level", "Tooltip for preview zoom pull-down");
+
+    [self.zoomLevelsPopUp setTitle:@"100%"];
+}
+
+- (KatvanAuxToolBar*)makePreviewToolbar
+{
+    KatvanAuxToolBar* toolbar = [[KatvanAuxToolBar alloc] init];
+
+    NSImage* zoomOutIcon = [NSImage imageWithSystemSymbolName:@"minus.magnifyingglass"
+                                    accessibilityDescription:@"Magnifying glass with minus"];
+    NSImage* zoomInIcon = [NSImage imageWithSystemSymbolName:@"plus.magnifyingglass"
+                                   accessibilityDescription:@"Magnifying glass with plus"];
+    NSImage* invertColorsIcon = [NSImage imageWithSystemSymbolName:@"circle.lefthalf.filled"
+                                         accessibilityDescription:@"Circle half filled"];
+    NSImage* followCursorIcon = [NSImage imageWithSystemSymbolName:@"character.cursor.ibeam"
+                                         accessibilityDescription:@"Text cursor"];
+
+    [toolbar addButtonWithIcon:zoomOutIcon
+             toolTip:NSLocalizedString(@"Zoom out preview", "Tooltip for command button")
+             inGravity:NSStackViewGravityLeading
+             target:self
+             action:@selector(zoomOut:)];
+
+    [self setupZoomLevelPopup];
+    [toolbar addView:self.zoomLevelsPopUp inGravity:NSStackViewGravityLeading];
+
+    [toolbar addButtonWithIcon:zoomInIcon
+             toolTip:NSLocalizedString(@"Zoom in preview", "Tooltip for command button")
+             inGravity:NSStackViewGravityLeading
+             target:self
+             action:@selector(zoomIn:)];
+
+    [toolbar addButtonWithIcon:invertColorsIcon
+             toolTip:NSLocalizedString(@"Invert preview colors", "Tooltip for command button")
+             inGravity:NSStackViewGravityTrailing
+             target:self
+             action:@selector(invertPreviewColors:)];
+
+    self.followCursorButton = [toolbar addButtonWithIcon:followCursorIcon
+             toolTip:NSLocalizedString(@"Follow editor cursor", "Tooltip for command button")
+             inGravity:NSStackViewGravityTrailing
+             target:self
+             action:@selector(toggleFollowEditorCursor:)];
+
+    self.followCursorButton.buttonType = NSButtonTypePushOnPushOff;
+
+    return toolbar;
 }
 
 - (void)restoreStateWithCoder:(NSCoder*)coder
@@ -152,6 +264,12 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
     if ([coder containsValueForKey:@"invertColors"]) {
         BOOL invert = [coder decodeBoolForKey:@"invertColors"];
         self.previewerView->setInvertColors(invert);
+    }
+
+    // Decode follow cursor flag
+    if ([coder containsValueForKey:@"followCursor"]) {
+        BOOL followCursor = [coder decodeBoolForKey:@"followCursor"];
+        [self setFollowEditorCursor:followCursor];
     }
 
     // Decode scroll position
@@ -184,6 +302,9 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
     // Encode color invert flag
     [coder encodeBool:self.previewerView->areColorsInverted() forKey:@"invertColors"];
 
+    // Encode follow cursor flag
+    [coder encodeBool:_followEditorCursor forKey:@"followCursor"];
+
     // Encode scroll position
     int scrollX = self.previewerView->horizontalScrollBar()->value();
     int scrollY = self.previewerView->verticalScrollBar()->value();
@@ -192,41 +313,27 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
     [super encodeRestorableStateWithCoder:coder];
 }
 
-- (NSPopUpButton*)makeZoomLevelPopup
+- (void)windowDidUpdate:(NSNotification*)notification
 {
-    NSMenu* levelsMenu = [[NSMenu alloc] init];
-    NSMenuItem* item;
-
-    // A pull-down button always displays its menu's first item on the button
-    // itself, so create a placeholder
-    [levelsMenu addItemWithTitle:@"[Placeholder]" action:nil keyEquivalent:@""];
-
-    item = [levelsMenu addItemWithTitle:NSLocalizedString(@"Fit Page", nil) action:@selector(setZoomLevel:) keyEquivalent:@""];
-    [item setTarget:self];
-    [item setTag:kZoomLevelFitPage];
-
-    item = [levelsMenu addItemWithTitle:NSLocalizedString(@"Fit Width", nil) action:@selector(setZoomLevel:) keyEquivalent:@""];
-    [item setTarget:self];
-    [item setTag:kZoomLevelFitWidth];
-
-    [levelsMenu addItem:[NSMenuItem separatorItem]];
-
-    NSArray* levels = @[@(50), @(75), @(100), @(125), @(150), @(200)];
-    for (NSNumber* level in levels) {
-        NSString* title = [NSString stringWithFormat:@"%d%%", [level intValue]];
-
-        item = [levelsMenu addItemWithTitle:title action:@selector(setZoomLevel:) keyEquivalent:@""];
-        [item setTarget:self];
-        [item setTag:[level intValue]];
+    BOOL active = self.view.window.firstResponder == self.previewerNsView;
+    PageNumberLabelCell* cell = (PageNumberLabelCell*)self.currentPageLabel.cell;
+    if (cell.active != active) {
+        cell.active = active;
+        [self.currentPageLabel setNeedsDisplay:YES];
     }
+}
 
-    self.zoomLevelsPopUp = [[NSPopUpButton alloc] init];
-    self.zoomLevelsPopUp.pullsDown = YES;
-    self.zoomLevelsPopUp.menu = levelsMenu;
+- (int)currentPage
+{
+    return self.previewerView->currentPage();
+}
 
-    [self.zoomLevelsPopUp setTitle:@"100%"];
-
-    return self.zoomLevelsPopUp;
+- (void)setFollowEditorCursor:(BOOL)follow
+{
+    _followEditorCursor = follow;
+    self.followCursorButton.state = follow ? NSControlStateValueOn : NSControlStateValueOff;
+    self.followCursorButton.contentTintColor = follow ? [NSColor controlAccentColor] : nil;
+    [self invalidateRestorableState];
 }
 
 - (void)setPreviewPages:(QList<katvan::typstdriver::PreviewPageData>)pages
@@ -328,6 +435,11 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
     self.previewerView->setInvertColors(inverted);
 
     [self invalidateRestorableState];
+}
+
+- (void)toggleFollowEditorCursor:(id)sender
+{
+    [self setFollowEditorCursor:(self.followCursorButton.state == NSControlStateValueOn)];
 }
 
 @end

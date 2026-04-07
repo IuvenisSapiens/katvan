@@ -18,6 +18,18 @@
  */
 #import <AppKit/AppKit.h>
 
+@interface KatvanAuxToolBar : NSView
+
+- (void)addView:(NSView* _Nonnull)view inGravity:(NSStackViewGravity)gravity;
+
+- (NSButton* _Nonnull)addButtonWithIcon:(NSImage* _Nonnull)icon
+                      toolTip:(NSString* _Nullable)toolTip
+                      inGravity:(NSStackViewGravity)gravity
+                      target:(id _Nullable)target
+                      action:(SEL _Nullable)selector;
+
+@end
+
 @interface KatvanSpinBox : NSView <NSTextFieldDelegate>
 
 @property (nonatomic, assign) NSInteger minimum;
