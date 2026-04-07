@@ -44,6 +44,11 @@
 @property (nonatomic) KatvanIssueList* issueList;
 @property (nonatomic) KatvanExporter* exporter;
 @property (nonatomic) NSToolbarItem* compilationStatusItem;
+@property (nonatomic) NSToolbarItemGroup* previewLayoutItem;
+
+@property (nonatomic) NSSplitViewItem* sidebarSplitItem;
+@property (nonatomic) NSSplitViewItem* editorSplitItem;
+@property (nonatomic) NSSplitViewItem* previewerSplitItem;
 
 @property (nonatomic) katvan::Document* textDocument;
 @property (nonatomic) katvan::TypstDriverWrapper* driver;
@@ -79,7 +84,7 @@
         [self setupViewsWithDocument:textDocument];
         [self setupUI];
         [self readSettings];
-        [self resizeInitialUiWithFrameRect:frame andURL:url];
+        [self resizeInitialUiWithFrameRect:frame];
 
         [self documentDidExplicitlySaveInURL:url forced:YES];
     }
@@ -164,7 +169,7 @@
     });
 }
 
-- (void)resizeInitialUiWithFrameRect:(NSRect)frame andURL:(NSURL*)url
+- (void)resizeInitialUiWithFrameRect:(NSRect)frame
 {
     // Need to resize the window, as splitViewController overrides its initial size
     [self.window setContentSize:frame.size];
@@ -177,10 +182,6 @@
     CGFloat totalWidth = NSWidth(splitView.frame);
     [splitView setPosition:round(totalWidth * 0.2) ofDividerAtIndex:0];
     [splitView setPosition:round(totalWidth * 0.6) ofDividerAtIndex:1];
-
-    if (url) {
-        splitView.autosaveName = [NSString stringWithFormat:@"MainSplitView-%@", url.path];
-    }
 }
 
 - (void)setupUI
@@ -190,19 +191,19 @@
     self.splitViewController = [[NSSplitViewController alloc] init];
     self.splitViewController.splitView.dividerStyle = NSSplitViewDividerStyleThin;
 
-    NSSplitViewItem* sidebarItem = [NSSplitViewItem sidebarWithViewController:self.sidebar];
-    [sidebarItem setPreferredThicknessFraction:0.2];
-    [sidebarItem setTitlebarSeparatorStyle:NSTitlebarSeparatorStyleLine];
-    [self.splitViewController addSplitViewItem:sidebarItem];
+    self.sidebarSplitItem = [NSSplitViewItem sidebarWithViewController:self.sidebar];
+    [self.sidebarSplitItem setPreferredThicknessFraction:0.2];
+    [self.sidebarSplitItem setTitlebarSeparatorStyle:NSTitlebarSeparatorStyleLine];
+    [self.splitViewController addSplitViewItem:self.sidebarSplitItem];
 
-    NSSplitViewItem* editorItem = [NSSplitViewItem splitViewItemWithViewController:self.editorView];
-    [editorItem setPreferredThicknessFraction:0.4];
-    [self.splitViewController addSplitViewItem:editorItem];
+    self.editorSplitItem = [NSSplitViewItem splitViewItemWithViewController:self.editorView];
+    [self.editorSplitItem setPreferredThicknessFraction:0.4];
+    [self.splitViewController addSplitViewItem:self.editorSplitItem];
 
-    NSSplitViewItem* previewerItem = [NSSplitViewItem splitViewItemWithViewController:self.previewer];
-    [previewerItem setPreferredThicknessFraction:0.4];
-    [previewerItem setCanCollapse:YES];
-    [self.splitViewController addSplitViewItem:previewerItem];
+    self.previewerSplitItem = [NSSplitViewItem splitViewItemWithViewController:self.previewer];
+    [self.previewerSplitItem setPreferredThicknessFraction:0.4];
+    [self.previewerSplitItem setCanCollapse:YES];
+    [self.splitViewController addSplitViewItem:self.previewerSplitItem];
 
     [self.window setContentViewController:self.splitViewController];
 
@@ -240,7 +241,8 @@
     return @[
         NSToolbarToggleSidebarItemIdentifier,
         NSToolbarSidebarTrackingSeparatorItemIdentifier,
-        @"katvan.toolbar.compilation.status",
+        @"katvan.toolbar.status",
+        @"katvan.toolbar.layout",
     ];
 }
 
@@ -253,7 +255,7 @@
                   itemForItemIdentifier:(NSString*)itemIdentifier
                   willBeInsertedIntoToolbar:(BOOL)flag
 {
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.compilation.status"]) {
+    if ([itemIdentifier isEqualToString:@"katvan.toolbar.status"]) {
         NSToolbarItem* item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
         item.label = NSLocalizedString(@"Compilation Status", "Details about the result of the last compilation");
 
@@ -267,6 +269,27 @@
 
         if (flag) {
             self.compilationStatusItem = item;
+        }
+        return item;
+    }
+    if ([itemIdentifier isEqualToString:@"katvan.toolbar.layout"]) {
+        NSToolbarItemGroup* item =
+            [NSToolbarItemGroup groupWithItemIdentifier:itemIdentifier
+                                images:@[
+                                    [NSImage imageWithSystemSymbolName:@"rectangle.lefthalf.filled" accessibilityDescription:@"On the left"],
+                                    [NSImage imageWithSystemSymbolName:@"rectangle" accessibilityDescription:@"No preview"],
+                                    [NSImage imageWithSystemSymbolName:@"rectangle.righthalf.filled" accessibilityDescription:@"On the right"],
+                                ]
+                                selectionMode:NSToolbarItemGroupSelectionModeSelectOne
+                                labels:@[]
+                                target:self
+                                action:@selector(applyPreviewLocation:)];
+
+        item.label = NSLocalizedString(@"Preview Location", "Segment control for choosing where the preview will be");
+        item.selectedIndex = 2;
+
+        if (flag) {
+            self.previewLayoutItem = item;
         }
         return item;
     }
@@ -297,6 +320,46 @@
     self.editorView.editor->checkForModelines();
 }
 
+- (void)restoreStateWithCoder:(NSCoder*)coder
+{
+    // Decode preview location
+    if ([coder containsValueForKey:@"previewLocation"]) {
+        NSInteger previewLocation = [coder decodeIntegerForKey:@"previewLocation"];
+
+        [self.previewLayoutItem setSelectedIndex:previewLocation];
+        [self applyPreviewLocation:nil];
+    }
+
+    // Decode splitter positions
+    NSArray<NSNumber*>* positions = [coder decodeArrayOfObjectsOfClass:[NSNumber class] forKey:@"splitterPositions"];
+    if (positions) {
+        NSSplitView* splitView = self.splitViewController.splitView;
+        for (NSUInteger i = 0; i < positions.count && i + 1 < splitView.subviews.count; i++) {
+            [splitView setPosition:positions[i].doubleValue ofDividerAtIndex:i];
+        }
+    }
+
+    [super restoreStateWithCoder:coder];
+}
+
+- (void)encodeRestorableStateWithCoder:(NSCoder*)coder
+{
+    // Encode preview layout
+    NSInteger previewLocation = self.previewLayoutItem.selectedIndex;
+    [coder encodeInteger:previewLocation forKey:@"previewLocation"];
+
+    // Encode splitter positions
+    NSSplitView* splitView = self.splitViewController.splitView;
+    NSMutableArray<NSNumber*>* positions = [NSMutableArray array];
+    NSArray<NSView*>* subviews = splitView.subviews;
+    for (NSUInteger i = 0; i + 1 < subviews.count; i++) {
+        [positions addObject:@(NSMaxX(subviews[i].frame))];
+    }
+    [coder encodeObject:positions forKey:@"splitterPositions"];
+
+    [super encodeRestorableStateWithCoder:coder];
+}
+
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)item
 {
     SEL action = [item action];
@@ -315,6 +378,23 @@
         return [self.exporter canExport];
     }
     return YES;
+}
+
+- (void)applyPreviewLocation:(id)sender
+{
+    NSInteger index = self.previewLayoutItem.selectedIndex;
+    if (index == 0) { // Preview on the left
+        self.splitViewController.splitViewItems = @[self.sidebarSplitItem, self.previewerSplitItem, self.editorSplitItem];
+    }
+    else if (index == 1) { // No preview
+        self.splitViewController.splitViewItems = @[self.sidebarSplitItem, self.editorSplitItem];
+    }
+    else if (index == 2) { // Preview on the right
+        self.splitViewController.splitViewItems = @[self.sidebarSplitItem, self.editorSplitItem, self.previewerSplitItem];
+    }
+
+    [self.splitViewController.splitView adjustSubviews];
+    [self invalidateRestorableState];
 }
 
 - (void)exportAsPdf:(id)sender
