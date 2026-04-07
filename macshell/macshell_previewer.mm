@@ -16,6 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #import "macshell_previewer.h"
+#import "macshell_widgets.h"
 
 #include <QScrollBar>
 
@@ -114,10 +115,12 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
     [super viewDidLoad];
 
     NSView* previewerNsView = (__bridge NSView *)reinterpret_cast<void*>(self.previewerView->winId());
-
+    previewerNsView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.view addSubview:previewerNsView];
 
-    previewerNsView.translatesAutoresizingMaskIntoConstraints = NO;
+    KatvanAuxToolBar* toolbar = [self makePreviewToolbar];
+    toolbar.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:toolbar];
 
     self.currentPageLabel = [NSTextField labelWithString:@""];
     self.currentPageLabel.cell = [[PageNumberLabelCell alloc] init];
@@ -127,9 +130,12 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
     [self.view addSubview:self.currentPageLabel];
 
     [NSLayoutConstraint activateConstraints:@[
+        [toolbar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
+        [toolbar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+        [toolbar.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
         [previewerNsView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
         [previewerNsView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-        [previewerNsView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
+        [previewerNsView.topAnchor constraintEqualToAnchor:toolbar.bottomAnchor],
         [previewerNsView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
         [self.currentPageLabel.centerXAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.centerXAnchor],
         [self.currentPageLabel.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor constant:-20],
@@ -138,6 +144,78 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
     ]];
 
     self.previewerView->show();
+}
+
+- (void)setupZoomLevelPopup
+{
+    NSMenu* levelsMenu = [[NSMenu alloc] init];
+    NSMenuItem* item;
+
+    // A pull-down button always displays its menu's first item on the button
+    // itself, so create a placeholder
+    [levelsMenu addItemWithTitle:@"[Placeholder]" action:nil keyEquivalent:@""];
+
+    item = [levelsMenu addItemWithTitle:NSLocalizedString(@"Fit Page", nil) action:@selector(setZoomLevel:) keyEquivalent:@""];
+    [item setTarget:self];
+    [item setTag:kZoomLevelFitPage];
+
+    item = [levelsMenu addItemWithTitle:NSLocalizedString(@"Fit Width", nil) action:@selector(setZoomLevel:) keyEquivalent:@""];
+    [item setTarget:self];
+    [item setTag:kZoomLevelFitWidth];
+
+    [levelsMenu addItem:[NSMenuItem separatorItem]];
+
+    NSArray* levels = @[@(50), @(75), @(100), @(125), @(150), @(200)];
+    for (NSNumber* level in levels) {
+        NSString* title = [NSString stringWithFormat:@"%d%%", [level intValue]];
+
+        item = [levelsMenu addItemWithTitle:title action:@selector(setZoomLevel:) keyEquivalent:@""];
+        [item setTarget:self];
+        [item setTag:[level intValue]];
+    }
+
+    self.zoomLevelsPopUp = [[NSPopUpButton alloc] init];
+    self.zoomLevelsPopUp.pullsDown = YES;
+    self.zoomLevelsPopUp.menu = levelsMenu;
+    self.zoomLevelsPopUp.bordered = NO;
+    self.zoomLevelsPopUp.toolTip = NSLocalizedString(@"Zoom level", "Tooltip for preview zoom pull-down");
+
+    [self.zoomLevelsPopUp setTitle:@"100%"];
+}
+
+- (KatvanAuxToolBar*)makePreviewToolbar
+{
+    KatvanAuxToolBar* toolbar = [[KatvanAuxToolBar alloc] init];
+
+    NSImage* zoomOutIcon = [NSImage imageWithSystemSymbolName:@"minus.magnifyingglass"
+                                    accessibilityDescription:@"Magnifying glass with minus"];
+    NSImage* zoomInIcon = [NSImage imageWithSystemSymbolName:@"plus.magnifyingglass"
+                                   accessibilityDescription:@"Magnifying glass with plus"];
+    NSImage* invertColorsIcon = [NSImage imageWithSystemSymbolName:@"circle.lefthalf.filled"
+                                         accessibilityDescription:@"Circle half filled"];
+
+    [toolbar addButtonWithIcon:zoomOutIcon
+             toolTip:NSLocalizedString(@"Zoom out preview", "Tooltip for command button")
+             inGravity:NSStackViewGravityLeading
+             target:self
+             action:@selector(zoomOut:)];
+
+    [self setupZoomLevelPopup];
+    [toolbar addView:self.zoomLevelsPopUp inGravity:NSStackViewGravityLeading];
+
+    [toolbar addButtonWithIcon:zoomInIcon
+             toolTip:NSLocalizedString(@"Zoom in preview", "Tooltip for command button")
+             inGravity:NSStackViewGravityLeading
+             target:self
+             action:@selector(zoomIn:)];
+
+    [toolbar addButtonWithIcon:invertColorsIcon
+             toolTip:NSLocalizedString(@"Invert preview colors", "Tooltip for command button")
+             inGravity:NSStackViewGravityTrailing
+             target:self
+             action:@selector(invertPreviewColors:)];
+
+    return toolbar;
 }
 
 - (void)restoreStateWithCoder:(NSCoder*)coder
@@ -190,43 +268,6 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
     [coder encodePoint:NSMakePoint(scrollX, scrollY) forKey:@"scrollPos"];
 
     [super encodeRestorableStateWithCoder:coder];
-}
-
-- (NSPopUpButton*)makeZoomLevelPopup
-{
-    NSMenu* levelsMenu = [[NSMenu alloc] init];
-    NSMenuItem* item;
-
-    // A pull-down button always displays its menu's first item on the button
-    // itself, so create a placeholder
-    [levelsMenu addItemWithTitle:@"[Placeholder]" action:nil keyEquivalent:@""];
-
-    item = [levelsMenu addItemWithTitle:NSLocalizedString(@"Fit Page", nil) action:@selector(setZoomLevel:) keyEquivalent:@""];
-    [item setTarget:self];
-    [item setTag:kZoomLevelFitPage];
-
-    item = [levelsMenu addItemWithTitle:NSLocalizedString(@"Fit Width", nil) action:@selector(setZoomLevel:) keyEquivalent:@""];
-    [item setTarget:self];
-    [item setTag:kZoomLevelFitWidth];
-
-    [levelsMenu addItem:[NSMenuItem separatorItem]];
-
-    NSArray* levels = @[@(50), @(75), @(100), @(125), @(150), @(200)];
-    for (NSNumber* level in levels) {
-        NSString* title = [NSString stringWithFormat:@"%d%%", [level intValue]];
-
-        item = [levelsMenu addItemWithTitle:title action:@selector(setZoomLevel:) keyEquivalent:@""];
-        [item setTarget:self];
-        [item setTag:[level intValue]];
-    }
-
-    self.zoomLevelsPopUp = [[NSPopUpButton alloc] init];
-    self.zoomLevelsPopUp.pullsDown = YES;
-    self.zoomLevelsPopUp.menu = levelsMenu;
-
-    [self.zoomLevelsPopUp setTitle:@"100%"];
-
-    return self.zoomLevelsPopUp;
 }
 
 - (void)setPreviewPages:(QList<katvan::typstdriver::PreviewPageData>)pages

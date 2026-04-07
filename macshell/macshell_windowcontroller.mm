@@ -68,8 +68,7 @@
 
     self = [super initWithWindow:window];
     if (self) {
-        [window setTabbingMode:NSWindowTabbingModeDisallowed];
-        [window center];
+        window.tabbingMode = NSWindowTabbingModeDisallowed;
 
         self.textDocument = textDocument;
         self.driver = new katvan::TypstDriverWrapper();
@@ -224,7 +223,7 @@
                   toolTip:NSLocalizedString(@"Document Outline", nil)];
 
     [self.sidebar addTabController:self.labelsView
-                  icon:[NSImage imageWithSystemSymbolName:@"tag.fill"
+                  icon:[NSImage imageWithSystemSymbolName:@"tag"
                                 accessibilityDescription:@"Tag"]
                   toolTip:NSLocalizedString(@"Labels", nil)];
 
@@ -241,14 +240,7 @@
     return @[
         NSToolbarToggleSidebarItemIdentifier,
         NSToolbarSidebarTrackingSeparatorItemIdentifier,
-        @"katvan.toolbar.editor.insert",
         @"katvan.toolbar.compilation.status",
-        @"katvan.toolbar.separator",
-        @"katvan.toolbar.previewer.zoomout",
-        @"katvan.toolbar.previewer.zoomlevel",
-        @"katvan.toolbar.previewer.zoomin",
-        NSToolbarFlexibleSpaceItemIdentifier,
-        @"katvan.toolbar.previewer.invertcolors",
     ];
 }
 
@@ -276,55 +268,6 @@
         if (flag) {
             self.compilationStatusItem = item;
         }
-        return item;
-    }
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.editor.insert"]) {
-        NSMenuToolbarItem* item = [[NSMenuToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-        item.label = NSLocalizedString(@"Insert", "Opens insert menu for the editor");
-        item.toolTip = NSLocalizedString(@"Insert", nil);
-        item.image = [NSImage imageWithSystemSymbolName:@"plus" accessibilityDescription:@"Plus sign"];
-        item.menu = [self.editorView createInsertMenu];
-        return item;
-    }
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.separator"]) {
-        NSTrackingSeparatorToolbarItem* item = [NSTrackingSeparatorToolbarItem
-            trackingSeparatorToolbarItemWithIdentifier:itemIdentifier
-            splitView:self.splitViewController.splitView
-            dividerIndex:(self.splitViewController.splitViewItems.count - 2)];
-        return item;
-    }
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.previewer.zoomout"]) {
-        NSToolbarItem* item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-        item.label = NSLocalizedString(@"Zoom Out", nil);
-        item.toolTip = NSLocalizedString(@"Zoom out the preview", nil);
-        item.image = [NSImage imageWithSystemSymbolName:@"minus.magnifyingglass" accessibilityDescription:@"Magnifying glass with minus"];
-        item.target = self.previewer;
-        item.action = @selector(zoomOut:);
-        return item;
-    }
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.previewer.zoomlevel"]) {
-        NSToolbarItem* item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-        item.label = NSLocalizedString(@"Zoom Level", nil);
-        item.toolTip = NSLocalizedString(@"Set the zoom level of the preview", nil);
-        item.view = [self.previewer makeZoomLevelPopup];
-        return item;
-    }
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.previewer.zoomin"]) {
-        NSToolbarItem* item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-        item.label = NSLocalizedString(@"Zoom In", nil);
-        item.toolTip = NSLocalizedString(@"Zoom in the preview", nil);
-        item.image = [NSImage imageWithSystemSymbolName:@"plus.magnifyingglass" accessibilityDescription:@"Magnifying glass with plus"];
-        item.target = self.previewer;
-        item.action = @selector(zoomIn:);
-        return item;
-    }
-    if ([itemIdentifier isEqualToString:@"katvan.toolbar.previewer.invertcolors"]) {
-        NSToolbarItem* item = [[NSToolbarItem alloc] initWithItemIdentifier:itemIdentifier];
-        item.label = NSLocalizedString(@"Invert Colors", nil);
-        item.toolTip = NSLocalizedString(@"Invert the colors of the document preview", nil);
-        item.image = [NSImage imageWithSystemSymbolName:@"circle.lefthalf.filled" accessibilityDescription:@"Circle half filled"];
-        item.target = self.previewer;
-        item.action = @selector(invertPreviewColors:);
         return item;
     }
     return nil;

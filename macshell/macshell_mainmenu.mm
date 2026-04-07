@@ -186,7 +186,7 @@
     menuItem = [menu addItemWithTitle:NSLocalizedString(@"Zoom In", nil) action:@selector(zoomIn:) keyEquivalent:@"."];
     [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagCommand | NSEventModifierFlagShift];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Zoom In", nil) action:@selector(zoomOut:) keyEquivalent:@","];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Zoom Out", nil) action:@selector(zoomOut:) keyEquivalent:@","];
     [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagCommand | NSEventModifierFlagShift];
 
     [menu addItem:[NSMenuItem separatorItem]];

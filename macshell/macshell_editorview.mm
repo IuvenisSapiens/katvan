@@ -17,6 +17,7 @@
  */
 #import "macshell_editorview.h"
 #import "macshell_textfinderclient.h"
+#import "macshell_widgets.h"
 
 #include "katvan_completionmanager.h"
 #include "katvan_highlighter.h"
@@ -36,6 +37,8 @@
 @property (nonatomic) KatvanTextFinderClient* textFinderClient;
 @property (nonatomic) NSView* findBarContainerView;
 @property (nonatomic) NSLayoutConstraint* findBarContainerHeightConstraint;
+
+@property (nonatomic, weak) NSView* editorNsView;
 
 @end
 
@@ -85,9 +88,13 @@
 
     //self.editor->setWindowFlags(self.editor->windowFlags() | Qt::SubWindow);
 
-    NSView* editorView = (__bridge NSView *)reinterpret_cast<void*>(self.editor->winId());
-    editorView.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.view addSubview:editorView];
+    self.editorNsView = (__bridge NSView *)reinterpret_cast<void*>(self.editor->winId());
+    self.editorNsView.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:self.editorNsView];
+
+    KatvanAuxToolBar* toolbar = [self makeEditorToolbar];
+    toolbar.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:toolbar];
 
     self.findBarContainerView = [NSView new];
     self.findBarContainerView.hidden = YES;
@@ -102,13 +109,16 @@
     self.findBarContainerHeightConstraint = [self.findBarContainerView.heightAnchor constraintEqualToConstant:0];
 
     [NSLayoutConstraint activateConstraints:@[
+        [toolbar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
+        [toolbar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+        [toolbar.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
         [self.findBarContainerView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
         [self.findBarContainerView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-        [self.findBarContainerView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
-        [editorView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
-        [editorView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
-        [editorView.topAnchor constraintEqualToAnchor:self.findBarContainerView.bottomAnchor],
-        [editorView.bottomAnchor constraintEqualToAnchor:self.statusBar.topAnchor],
+        [self.findBarContainerView.topAnchor constraintEqualToAnchor:toolbar.bottomAnchor],
+        [self.editorNsView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
+        [self.editorNsView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
+        [self.editorNsView.topAnchor constraintEqualToAnchor:self.findBarContainerView.bottomAnchor],
+        [self.editorNsView.bottomAnchor constraintEqualToAnchor:self.statusBar.topAnchor],
         [self.statusBar.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
         [self.statusBar.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
         [self.statusBar.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
@@ -118,6 +128,17 @@
     ]];
 
     self.editor->show();
+}
+
+- (KatvanAuxToolBar*)makeEditorToolbar
+{
+    KatvanAuxToolBar* toolbar = [[KatvanAuxToolBar alloc] init];
+    [toolbar addButtonWithIcon:[NSImage imageWithSystemSymbolName:@"plus" accessibilityDescription:@"Plus sign"]
+             toolTip:NSLocalizedString(@"Insert", "Opens insert menu for the editor")
+             inGravity:NSStackViewGravityTrailing
+             target:self
+             action:@selector(showInsertMenu:)];
+    return toolbar;
 }
 
 - (void)restoreStateWithCoder:(NSCoder*)coder
@@ -165,12 +186,7 @@
     }
 }
 
-- (NSMenu*)createInsertMenu
-{
-    return self.editor->createInsertMenu()->toNSMenu();
-}
-
-- (BOOL)validateUserInterfaceItem:(id <NSValidatedUserInterfaceItem>)item
+- (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)item
 {
     SEL action = [item action];
 
@@ -206,6 +222,16 @@
         [self setFindBarVisible:YES];
     }
     [self.textFinder performAction:action];
+}
+
+- (void)showInsertMenu:(id)sender
+{
+    // Ensure we have focus
+    [self.view.window makeFirstResponder:self.editorNsView];
+
+    NSMenu* menu = self.editor->createInsertMenu()->toNSMenu();
+    [menu setAutoenablesItems:NO];
+    [menu popUpMenuPositioningItem:nil atLocation:NSMakePoint(0, 0) inView:sender];
 }
 
 - (void)performUndo:(id)sender
@@ -408,7 +434,7 @@ static QTextCursor findMisspellingFromCursor(QTextCursor from)
 
 - (NSView*)contentView
 {
-    return (__bridge NSView *)reinterpret_cast<void*>(self.editor->winId());
+    return self.editorNsView;
 }
 
 - (NSView*)findBarView

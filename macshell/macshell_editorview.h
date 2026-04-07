@@ -29,7 +29,6 @@
 
 - (instancetype)initWithDocument:(katvan::Document*)textDocument;
 
-- (NSMenu*)createInsertMenu;
 - (void)showColorPicker;
 - (void)updateWordCount:(NSUInteger)count;
 
