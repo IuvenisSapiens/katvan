@@ -151,8 +151,7 @@
 
     QObject::connect(self.editorView.editor, &QTextEdit::cursorPositionChanged,
                      self.editorView.editor, [weakSelf]() {
-        int line = weakSelf.editorView.editor->textCursor().blockNumber();
-        [weakSelf.outlineView selectEntryForLine:line];
+        [weakSelf textCursorPositionChanged];
     });
     QObject::connect(self.editorView.editor, &katvan::Editor::showSymbolPicker,
                      self.editorView.editor, [weakSelf]() {
@@ -422,6 +421,12 @@
     self.editorView.editor->goToBlock(line, column);
 }
 
+- (void)invertPreviewColors:(id)sender
+{
+    // Answer the action here in case the previewer isn't first responder
+    [self.previewer performSelector:@selector(invertPreviewColors:) withObject:sender];
+}
+
 - (void)compilationStatusClicked:(id)sender
 {
     // Make sure sidebar is visible
@@ -472,6 +477,18 @@
         button.contentTintColor = symbolColor;
         button.toolTip = toolTip;
     }
+}
+
+- (void)textCursorPositionChanged
+{
+    QTextCursor cursor = self.editorView.editor->textCursor();
+    int line = cursor.blockNumber();
+    int column = cursor.positionInBlock();
+
+    if (self.previewer.followEditorCursor) {
+        self.driver->forwardSearch(line, column, self.previewer.currentPage);
+    }
+    [self.outlineView selectEntryForLine:line];
 }
 
 - (void)showSymbolPicker

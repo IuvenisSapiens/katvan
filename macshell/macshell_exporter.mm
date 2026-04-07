@@ -60,9 +60,11 @@ static void addControlRow(NSGridView* grid, NSView* control, NSString* label)
         @[@"PDF 2.0", @"2.0"],
     ]);
 
-    self.pdfVersionPopup = [NSPopUpButton popUpButtonWithMenu:versionsMenu
-                                          target:self
-                                          action:@selector(pdfVersionChanged:)];
+    self.pdfVersionPopup = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+    self.pdfVersionPopup.target = self;
+    self.pdfVersionPopup.action = @selector(pdfVersionChanged:);
+    self.pdfVersionPopup.menu = versionsMenu;
+
     [self.pdfVersionPopup selectItemWithTitle:@"PDF 1.7"];
 
     self.pdfaStandardPopup = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];

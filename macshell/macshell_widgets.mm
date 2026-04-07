@@ -60,7 +60,7 @@
     [self.stackView addView:view inGravity:gravity];
 }
 
-- (void)addButtonWithIcon:(NSImage*)icon
+- (NSButton*)addButtonWithIcon:(NSImage*)icon
         toolTip:(NSString*)toolTip
         inGravity:(NSStackViewGravity)gravity
         target:(id)target
@@ -74,6 +74,7 @@
     button.symbolConfiguration = [NSImageSymbolConfiguration configurationWithScale:NSImageSymbolScaleLarge];
 
     [self.stackView addView:button inGravity:gravity];
+    return button;
 }
 
 @end

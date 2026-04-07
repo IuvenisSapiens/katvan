@@ -22,11 +22,11 @@
 
 - (void)addView:(NSView* _Nonnull)view inGravity:(NSStackViewGravity)gravity;
 
-- (void)addButtonWithIcon:(NSImage* _Nonnull)icon
-        toolTip:(NSString* _Nullable)toolTip
-        inGravity:(NSStackViewGravity)gravity
-        target:(id _Nullable)target
-        action:(SEL _Nullable)selector;
+- (NSButton* _Nonnull)addButtonWithIcon:(NSImage* _Nonnull)icon
+                      toolTip:(NSString* _Nullable)toolTip
+                      inGravity:(NSStackViewGravity)gravity
+                      target:(id _Nullable)target
+                      action:(SEL _Nullable)selector;
 
 @end
 
