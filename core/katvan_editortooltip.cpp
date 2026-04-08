@@ -65,6 +65,7 @@ EditorToolTipFrame::EditorToolTipFrame(bool byKeyboard, QWidget* parent)
     d_browser->setContextMenuPolicy(Qt::NoContextMenu);
     d_browser->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     d_browser->setFrameStyle(QFrame::NoFrame);
+    d_browser->setAutoFillBackground(true);
 
     d_extraInfoLabel = new QLabel(this);
     d_extraInfoLabel->setOpenExternalLinks(true);
@@ -342,6 +343,7 @@ bool EditorToolTipFrame::eventFilter(QObject* obj, QEvent* e)
             }
             break;
         case QEvent::ApplicationPaletteChange:
+        case QEvent::ThemeChange:
             updatePalette();
             break;
     }

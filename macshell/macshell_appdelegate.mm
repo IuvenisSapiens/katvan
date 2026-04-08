@@ -19,6 +19,7 @@
 #import "macshell_colorconverter.h"
 #import "macshell_mainmenu.h"
 #import "macshell_settingsdialog.h"
+#import "macshell_settingsmanager.h"
 
 #include "katvan_aboutdialog.h"
 #include "katvan_text_utils.h"
@@ -61,6 +62,8 @@
 
         new ColorUtiMimeConverter();
         katvan::utils::loadAuxiliaryFonts();
+
+        KatvanSettingsManager::instance().reloadSettings();
 
         d_app->setQuitOnLastWindowClosed(false);
     }

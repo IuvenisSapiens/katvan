@@ -226,8 +226,7 @@
 
 - (void)showInsertMenu:(id)sender
 {
-    // Ensure we have focus
-    [self.view.window makeFirstResponder:self.editorNsView];
+    [self ensureFocused];
 
     NSMenu* menu = self.editor->createInsertMenu()->toNSMenu();
     [menu setAutoenablesItems:NO];
@@ -326,6 +325,11 @@
     self.goToLineDialog->setLabelText(QString::fromNSString(msg));
     self.goToLineDialog->setIntRange(1, lineCount);
     self.goToLineDialog->open();
+}
+
+- (void)ensureFocused
+{
+    [self.view.window makeFirstResponder:self.editorNsView];
 }
 
 - (void)showColorPicker
