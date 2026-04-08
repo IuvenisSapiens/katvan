@@ -42,15 +42,11 @@ set(SOURCES
 
 qt_add_resources(SOURCES themes/themes.qrc)
 
-if(APPLE)
-    list(APPEND SOURCES
-        katvan_spellchecker_macos.mm
-    )
-elseif(WIN32)
+if(WIN32)
     list(APPEND SOURCES
         katvan_spellchecker_windows.cpp
     )
-else()
+elseif(NOT APPLE)
     list(APPEND SOURCES
         katvan_spellchecker_hunspell.cpp
     )

@@ -17,10 +17,6 @@
  */
 #include "katvan_utils.h"
 
-#if defined(Q_OS_MACOS)
-#include "katvan_utils_macos.h"
-#endif
-
 #include "katvan_text_utils.h"
 
 #include <QDir>
@@ -34,38 +30,9 @@
 
 namespace katvan::utils {
 
-QString getApplicationDir(bool& isInstalled)
-{
-#if defined(Q_OS_MACOS)
-    QString path = macos::getApplicationDir();
-    isInstalled = (
-        path == "/Applications" ||
-        path == QDir::homePath() + "/Applications");
-
-    return path;
-#else
-    isInstalled = false;
-    return QCoreApplication::applicationDirPath();
-#endif
-}
-
 QIcon themeIcon(const char* xdgIcon)
 {
     return QIcon::fromTheme(QLatin1String(xdgIcon));
-}
-
-QIcon themeIcon(const char* xdgIcon, const char* macIcon)
-{
-#if !defined(Q_OS_MACOS)
-    Q_UNUSED(macIcon)
-    return themeIcon(xdgIcon);
-#else
-    QIcon icon = QIcon::fromTheme(QLatin1String(macIcon));
-    if (icon.isNull()) {
-        icon = themeIcon(xdgIcon);
-    }
-    return icon;
-#endif
 }
 
 QString getHostPath(QString path)
@@ -107,9 +74,6 @@ QString formatFilePath(QString path)
 
 QString showPdfExportDialog(QWidget* parent, const QString& sourceFilePath)
 {
-#if defined(Q_OS_MACOS)
-    return macos::showPdfExportDialog(parent, sourceFilePath);
-#else
     QFileDialog dialog(parent, QObject::tr("Export to PDF"));
     dialog.setAcceptMode(QFileDialog::AcceptSave);
     dialog.setNameFilter(QObject::tr("PDF files (*.pdf)"));
@@ -125,7 +89,6 @@ QString showPdfExportDialog(QWidget* parent, const QString& sourceFilePath)
         return QString();
     }
     return dialog.selectedFiles().at(0);
-#endif
 }
 
 }

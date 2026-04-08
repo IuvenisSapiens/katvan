@@ -17,9 +17,7 @@
  */
 #include "katvan_spellchecker.h"
 
-#if defined(Q_OS_MACOS)
-#include "katvan_spellchecker_macos.h"
-#elif defined(Q_OS_WINDOWS)
+#if defined(Q_OS_WINDOWS)
 #include "katvan_spellchecker_windows.h"
 #else
 #include "katvan_spellchecker_hunspell.h"
@@ -45,7 +43,8 @@ SpellChecker::~SpellChecker()
 SpellChecker* SpellChecker::createPlatformSpellChecker(QObject* parent)
 {
 #if defined(Q_OS_MACOS)
-    return new MacOsSpellChecker(parent);
+    Q_UNUSED(parent)
+    return nullptr;
 #elif defined(Q_OS_WINDOWS)
     return new WindowsSpellChecker(parent);
 #else

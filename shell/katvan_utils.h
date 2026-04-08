@@ -26,10 +26,7 @@ QT_END_NAMESPACE
 
 namespace katvan::utils {
 
-QString getApplicationDir(bool& isInstalled);
-
 QIcon themeIcon(const char* xdgIcon);
-QIcon themeIcon(const char* xdgIcon, const char* macIcon);
 
 QString getHostPath(QString path);
 QString formatFilePath(QString path);

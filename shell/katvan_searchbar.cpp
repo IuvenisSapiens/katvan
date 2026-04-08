@@ -128,13 +128,13 @@ void SearchBar::setupUI()
     connect(d_replaceWith, &QLineEdit::returnPressed, this, &SearchBar::replaceNext);
 
     QToolButton* findNextButton = new QToolButton();
-    findNextButton->setIcon(utils::themeIcon("go-down", "chevron.right"));
+    findNextButton->setIcon(utils::themeIcon("go-down"));
     findNextButton->setShortcut(QKeySequence::FindNext);
     findNextButton->setToolTip(processToolTip(tr("Go to next match (%1)"), QKeySequence::FindNext));
     connect(findNextButton, &QToolButton::clicked, this, &SearchBar::findNext);
 
     QToolButton* findPrevButton = new QToolButton();
-    findPrevButton->setIcon(utils::themeIcon("go-up", "chevron.left"));
+    findPrevButton->setIcon(utils::themeIcon("go-up"));
     findPrevButton->setShortcut(QKeySequence::FindPrevious);
     findPrevButton->setToolTip(processToolTip(tr("Go to previous match (%1)"), QKeySequence::FindPrevious));
     connect(findPrevButton, &QToolButton::clicked, this, &SearchBar::findPrevious);
@@ -142,7 +142,7 @@ void SearchBar::setupUI()
     QToolButton* settingsButton = new QToolButton();
     settingsButton->setMenu(settingsMenu);
     settingsButton->setPopupMode(QToolButton::InstantPopup);
-    settingsButton->setIcon(utils::themeIcon("settings-configure", "gear"));
+    settingsButton->setIcon(utils::themeIcon("settings-configure"));
     settingsButton->setToolTip(tr("Find settings"));
 
     QToolButton* replaceButton = new QToolButton();
@@ -156,19 +156,14 @@ void SearchBar::setupUI()
     connect(replaceAllButton, &QToolButton::clicked, this, &SearchBar::replaceAll);
 
     QToolButton* closeButton = new QToolButton();
-    closeButton->setIcon(utils::themeIcon("window-close", "xmark.circle"));
+    closeButton->setIcon(utils::themeIcon("window-close"));
     closeButton->setToolTip(tr("Close search bar"));
     connect(closeButton, &QToolButton::clicked, this, &QWidget::hide);
 
     QHBoxLayout* findLayout = new QHBoxLayout();
     findLayout->addWidget(d_searchTerm, 1);
-#if defined(Q_OS_MACOS)
-    findLayout->addWidget(findPrevButton);
-    findLayout->addWidget(findNextButton);
-#else
     findLayout->addWidget(findNextButton);
     findLayout->addWidget(findPrevButton);
-#endif
     findLayout->addWidget(settingsButton);
 
     QHBoxLayout* replaceLayout = new QHBoxLayout();

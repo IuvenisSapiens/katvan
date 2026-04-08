@@ -16,12 +16,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #import "macshell_editorview.h"
+#import "macshell_spellchecker.h"
 #import "macshell_textfinderclient.h"
 #import "macshell_widgets.h"
 
 #include "katvan_completionmanager.h"
 #include "katvan_highlighter.h"
-#include "katvan_spellchecker_macos.h"
 
 #include <QInputDialog>
 #include <QMenu>
@@ -29,7 +29,7 @@
 @interface KatvanEditorView ()
 
 @property (nonatomic) katvan::Editor* editor;
-@property (nonatomic) katvan::MacOsSpellChecker* spellChecker;
+@property (nonatomic) KatvanMacSpellChecker* spellChecker;
 @property (nonatomic) QInputDialog* goToLineDialog;
 @property (nonatomic) KatvanEditorStatusBar* statusBar;
 
@@ -52,7 +52,7 @@
     self = [super init];
     if (self) {
         self.identifier = [self className];
-        self.spellChecker = new katvan::MacOsSpellChecker;
+        self.spellChecker = new KatvanMacSpellChecker;
         self.editor = new katvan::Editor(textDocument, self.spellChecker);
         self.goToLineDialog = nullptr;
 
@@ -428,7 +428,7 @@ static QTextCursor findMisspellingFromCursor(QTextCursor from)
 {
     NSString* ignored = [[sender selectedCell] stringValue];
 
-    self.spellChecker->ignoreWord(QString::fromNSString(ignored));
+    self.spellChecker->ignoreWord(ignored);
     self.editor->forceRehighlighting();
 }
 

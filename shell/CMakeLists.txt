@@ -20,14 +20,6 @@ if(WIN32)
     file(COPY ${PROJECT_SOURCE_DIR}/assets/katvan.ico DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     configure_file(${PROJECT_SOURCE_DIR}/assets/katvan.rc.in katvan.rc @ONLY)
     list(APPEND SOURCES ${CMAKE_CURRENT_BINARY_DIR}/katvan.rc)
-elseif(APPLE)
-    list(APPEND SOURCES
-        katvan_utils_macos.mm
-    )
-
-    set(macos_icon "${PROJECT_SOURCE_DIR}/assets/katvan.icns")
-    set_source_files_properties(${macos_icon} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-    list(APPEND SOURCES ${macos_icon})
 endif()
 
 add_executable(katvan ${SOURCES})
@@ -46,10 +38,6 @@ endif()
 set_target_properties(katvan PROPERTIES
     OUTPUT_NAME $<IF:$<PLATFORM_ID:Darwin>,Katvan,katvan>
     WIN32_EXECUTABLE ON
-    MACOSX_BUNDLE ON
-    MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/assets/Info.plist.in
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
-    XCODE_EMBED_FRAMEWORKS typstdriver
 )
 
 qt_add_translations(katvan

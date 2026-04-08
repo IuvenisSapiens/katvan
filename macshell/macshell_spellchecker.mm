@@ -15,56 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include "katvan_spellchecker_macos.h"
-
-#include <QDebug>
+#import "macshell_spellchecker.h"
 
 #import <AppKit/AppKit.h>
 
-namespace katvan {
-
-MacOsSpellChecker::MacOsSpellChecker(QObject* parent)
-    : SpellChecker(parent)
+KatvanMacSpellChecker::KatvanMacSpellChecker(QObject* parent)
+    : katvan::SpellChecker(parent)
     , d_documentTag(0)
 {
     d_documentTag = [NSSpellChecker uniqueSpellDocumentTag];
 }
 
-MacOsSpellChecker::~MacOsSpellChecker()
+KatvanMacSpellChecker::~KatvanMacSpellChecker()
 {
     [[NSSpellChecker sharedSpellChecker] closeSpellDocumentWithTag:d_documentTag];
 }
 
-QMap<QString, QString> MacOsSpellChecker::findDictionaries()
+QMap<QString, QString> KatvanMacSpellChecker::findDictionaries()
 {
-    NSSpellChecker* checker = [NSSpellChecker sharedSpellChecker];
-    NSArray<NSString*>* languages = [checker availableLanguages];
-
-    QMap<QString, QString> result;
-    for (NSString* lang in languages) {
-        result.insert(QString::fromNSString(lang), QString());
-    }
-    return result;
+    return QMap<QString, QString>();
 }
 
-void MacOsSpellChecker::setCurrentDictionary(const QString& dictName, const QString& dictPath)
+void KatvanMacSpellChecker::setCurrentDictionary(const QString& dictName, const QString& dictPath)
 {
-    if (dictName.isEmpty()) {
-        SpellChecker::setCurrentDictionary(dictName, dictPath);
-        return;
-    }
-
-    NSSpellChecker* checker = [NSSpellChecker sharedSpellChecker];
-
-    BOOL ok = [checker setLanguage: dictName.toNSString()];
-    if (!ok) {
-        qWarning() << "Failed to set macOS spell checking dictionary to" << dictName;
-        return;
-    }
-    SpellChecker::setCurrentDictionary(dictName, dictPath);
+    Q_UNUSED(dictName)
+    Q_UNUSED(dictPath)
 }
 
-SpellChecker::MisspelledWordRanges MacOsSpellChecker::checkSpelling(const QString& text)
+katvan::SpellChecker::MisspelledWordRanges KatvanMacSpellChecker::checkSpelling(const QString& text)
 {
     SpellChecker::MisspelledWordRanges result;
 
@@ -90,19 +68,19 @@ SpellChecker::MisspelledWordRanges MacOsSpellChecker::checkSpelling(const QStrin
     return result;
 }
 
-void MacOsSpellChecker::addToPersonalDictionary(const QString& word)
+void KatvanMacSpellChecker::addToPersonalDictionary(const QString& word)
 {
     NSSpellChecker* checker = [NSSpellChecker sharedSpellChecker];
     [checker learnWord:word.toNSString()];
 }
 
-void MacOsSpellChecker::ignoreWord(const QString& word)
+void KatvanMacSpellChecker::ignoreWord(NSString* word)
 {
     NSSpellChecker* checker = [NSSpellChecker sharedSpellChecker];
-    [checker ignoreWord:word.toNSString() inSpellDocumentWithTag:d_documentTag];
+    [checker ignoreWord:word inSpellDocumentWithTag:d_documentTag];
 }
 
-void MacOsSpellChecker::requestSuggestionsImpl(const QString& word, int position)
+void KatvanMacSpellChecker::requestSuggestionsImpl(const QString& word, int position)
 {
     NSSpellChecker* checker = [NSSpellChecker sharedSpellChecker];
     NSString* str = word.toNSString();
@@ -120,6 +98,4 @@ void MacOsSpellChecker::requestSuggestionsImpl(const QString& word, int position
     suggestionsCalculated(word, position, suggestions);
 }
 
-}
-
-#include "moc_katvan_spellchecker_macos.cpp"
+#include "moc_macshell_spellchecker.cpp"

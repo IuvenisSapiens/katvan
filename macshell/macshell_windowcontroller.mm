@@ -120,8 +120,6 @@
 
     QObject::connect(self.driver, &katvan::TypstDriverWrapper::jumpToPreview,
                      self.previewer.previewerView, &katvan::PreviewerView::jumpTo);
-    QObject::connect(self.driver, &katvan::TypstDriverWrapper::jumpToEditor,
-                     self.editorView.editor, qOverload<int, int>(&katvan::Editor::goToBlock));
     QObject::connect(self.driver, &katvan::TypstDriverWrapper::showEditorToolTip,
                      self.editorView.editor, &katvan::Editor::showToolTip);
     QObject::connect(self.driver, &katvan::TypstDriverWrapper::showEditorToolTipAtLocation,
@@ -129,6 +127,10 @@
     QObject::connect(self.driver, &katvan::TypstDriverWrapper::completionsReady,
                      self.editorView.editor->completionManager(), &katvan::CompletionManager::completionsReady);
 
+    QObject::connect(self.driver, &katvan::TypstDriverWrapper::jumpToEditor,
+                     self.driver, [weakSelf](int line, int column) {
+        [weakSelf goToBlock:line column:column];
+    });
     QObject::connect(self.driver, &katvan::TypstDriverWrapper::compilationStatusChanged,
                      self.driver, [weakSelf]() {
         [weakSelf compilationStatusChanged];
@@ -419,6 +421,7 @@
 - (void)goToBlock:(int)line column:(int)column
 {
     self.editorView.editor->goToBlock(line, column);
+    [self.editorView ensureFocused];
 }
 
 - (void)invertPreviewColors:(id)sender
