@@ -12,6 +12,7 @@ set(SOURCES
     macshell_settingsdialog.mm
     macshell_settingsmanager.mm
     macshell_sidebar.mm
+    macshell_spellchecker.mm
     macshell_textfinderclient.mm
     macshell_typstdocument.mm
     macshell_widgets.mm

@@ -199,14 +199,12 @@ void MainWindow::setupActions()
     QAction* newFileAction = fileMenu->addAction(tr("&New"), this, &MainWindow::newFile);
     newFileAction->setIcon(utils::themeIcon("document-new"));
     newFileAction->setShortcut(QKeySequence::New);
-    newFileAction->setMenuRole(QAction::NoRole);
 
     fileMenu->addSeparator();
 
     QAction* openFileAction = fileMenu->addAction(tr("&Open..."), this, &MainWindow::openFile);
     openFileAction->setIcon(utils::themeIcon("document-open"));
     openFileAction->setShortcut(QKeySequence::Open);
-    openFileAction->setMenuRole(QAction::NoRole);
 
     d_recentFiles->setMenu(fileMenu->addMenu(tr("&Recent Files")));
 
@@ -215,30 +213,25 @@ void MainWindow::setupActions()
     QAction* saveFileAction = fileMenu->addAction(tr("&Save"), this, &MainWindow::saveFile);
     saveFileAction->setIcon(utils::themeIcon("document-save"));
     saveFileAction->setShortcut(QKeySequence::Save);
-    saveFileAction->setMenuRole(QAction::NoRole);
     connect(d_document, &QTextDocument::modificationChanged, saveFileAction, &QAction::setEnabled);
 
     QAction* saveFileAsAction = fileMenu->addAction(tr("Save &As..."), this, &MainWindow::saveFileAs);
     saveFileAsAction->setIcon(utils::themeIcon("document-save-as"));
     saveFileAsAction->setShortcut(QKeySequence::SaveAs);
-    saveFileAsAction->setMenuRole(QAction::NoRole);
 
     fileMenu->addSeparator();
 
     QAction* exportAsAction = fileMenu->addAction(tr("&Export As..."), this, &MainWindow::exportAs);
     exportAsAction->setIcon(utils::themeIcon("document-send"));
-    exportAsAction->setMenuRole(QAction::NoRole);
 
     QAction* exportPdfAction = fileMenu->addAction(tr("Quick Export &PDF..."), this, &MainWindow::exportPdf);
     exportPdfAction->setIcon(utils::themeIcon("application-pdf"));
-    exportPdfAction->setMenuRole(QAction::NoRole);
 
     fileMenu->addSeparator();
 
     QAction* quitAction = fileMenu->addAction(tr("&Quit"), qApp, &QCoreApplication::quit, Qt::QueuedConnection);
     quitAction->setIcon(utils::themeIcon("application-exit"));
     quitAction->setShortcut(QKeySequence::Quit);
-    quitAction->setMenuRole(QAction::QuitRole);
 
     /*
      * Edit Menu
@@ -248,14 +241,12 @@ void MainWindow::setupActions()
     QAction* undoAction = editMenu->addAction(tr("&Undo"), d_editor, &QTextEdit::undo);
     undoAction->setIcon(utils::themeIcon("edit-undo"));
     undoAction->setShortcut(QKeySequence::Undo);
-    undoAction->setMenuRole(QAction::NoRole);
     undoAction->setEnabled(false);
     connect(d_editor, &QTextEdit::undoAvailable, undoAction, &QAction::setEnabled);
 
     QAction* redoAction = editMenu->addAction(tr("&Redo"), d_editor, &QTextEdit::redo);
     redoAction->setIcon(utils::themeIcon("edit-redo"));
     redoAction->setShortcut(QKeySequence::Redo);
-    redoAction->setMenuRole(QAction::NoRole);
     redoAction->setEnabled(false);
     connect(d_editor, &QTextEdit::redoAvailable, redoAction, &QAction::setEnabled);
 
@@ -264,21 +255,18 @@ void MainWindow::setupActions()
     QAction* cutAction = editMenu->addAction(tr("Cu&t"), d_editor, &QTextEdit::cut);
     cutAction->setIcon(utils::themeIcon("edit-cut"));
     cutAction->setShortcut(QKeySequence::Cut);
-    cutAction->setMenuRole(QAction::NoRole);
     cutAction->setEnabled(false);
     connect(d_editor, &QTextEdit::copyAvailable, cutAction, &QAction::setEnabled);
 
     QAction* copyAction = editMenu->addAction(tr("&Copy"), d_editor, &QTextEdit::copy);
     copyAction->setIcon(utils::themeIcon("edit-copy"));
     copyAction->setShortcut(QKeySequence::Copy);
-    copyAction->setMenuRole(QAction::NoRole);
     copyAction->setEnabled(false);
     connect(d_editor, &QTextEdit::copyAvailable, copyAction, &QAction::setEnabled);
 
     QAction* pasteAction = editMenu->addAction(tr("&Paste"), d_editor, &QTextEdit::paste);
     pasteAction->setIcon(utils::themeIcon("edit-paste"));
     pasteAction->setShortcut(QKeySequence::Paste);
-    pasteAction->setMenuRole(QAction::NoRole);
     pasteAction->setEnabled(d_editor->canPaste());
     connect(QApplication::clipboard(), &QClipboard::dataChanged, this, [this, pasteAction]() {
         pasteAction->setEnabled(d_editor->canPaste());
@@ -295,12 +283,10 @@ void MainWindow::setupActions()
     QAction* findAction = editMenu->addAction(tr("&Find..."), d_searchBar, &SearchBar::ensureFindVisible);
     findAction->setIcon(utils::themeIcon("edit-find"));
     findAction->setShortcut(QKeySequence::Find);
-    findAction->setMenuRole(QAction::NoRole);
 
     QAction* replaceAction = editMenu->addAction(tr("&Replace..."), d_searchBar, &SearchBar::ensureReplaceVisible);
     replaceAction->setIcon(utils::themeIcon("edit-find-replace"));
     replaceAction->setShortcut(QKeySequence::Replace);
-    replaceAction->setMenuRole(QAction::NoRole);
 
     /*
      * Go Menu
@@ -310,14 +296,12 @@ void MainWindow::setupActions()
     QAction* goBackAction = goMenu->addAction(tr("&Back"), d_editor, &Editor::goBack);
     goBackAction->setIcon(utils::themeIcon("go-previous"));
     goBackAction->setShortcut(QKeySequence::Back);
-    goBackAction->setMenuRole(QAction::NoRole);
     goBackAction->setEnabled(false);
     connect(d_editor, &Editor::goBackAvailable, goBackAction, &QAction::setEnabled);
 
     QAction* goForwardAction = goMenu->addAction(tr("&Forward"), d_editor, &Editor::goForward);
     goForwardAction->setIcon(utils::themeIcon("go-next"));
     goForwardAction->setShortcut(QKeySequence::Forward);
-    goForwardAction->setMenuRole(QAction::NoRole);
     goForwardAction->setEnabled(false);
     connect(d_editor, &Editor::goForwardAvailable, goForwardAction, &QAction::setEnabled);
 
@@ -325,15 +309,12 @@ void MainWindow::setupActions()
 
     QAction* gotoLineAction = goMenu->addAction(tr("Go to &Line..."), this, &MainWindow::goToLine);
     gotoLineAction->setShortcut(Qt::CTRL | Qt::Key_G);
-    gotoLineAction->setMenuRole(QAction::NoRole);
 
     QAction* jumpToPreviewAction = goMenu->addAction(tr("&Jump to Preview"), this, &MainWindow::jumpToPreview);
     jumpToPreviewAction->setShortcut(Qt::CTRL | Qt::Key_J);
-    jumpToPreviewAction->setMenuRole(QAction::NoRole);
 
     QAction* gotoDefinitionAction = goMenu->addAction(tr("Go to &Definition"), this, &MainWindow::goToDefinition);
     gotoDefinitionAction->setShortcut(Qt::Key_F12);
-    gotoDefinitionAction->setMenuRole(QAction::NoRole);
 
     /*
      * View Menu
@@ -343,17 +324,14 @@ void MainWindow::setupActions()
     QAction* enlargeFontAction = viewMenu->addAction(tr("&Enlarge Font"), d_editor, &Editor::increaseFontSize);
     enlargeFontAction->setIcon(utils::themeIcon("zoom-in"));
     enlargeFontAction->setShortcut(QKeySequence::ZoomIn);
-    enlargeFontAction->setMenuRole(QAction::NoRole);
 
     QAction* shrinkFontAction = viewMenu->addAction(tr("&Shrink Font"), d_editor, &Editor::decreaseFontSize);
     shrinkFontAction->setIcon(utils::themeIcon("zoom-out"));
     shrinkFontAction->setShortcut(QKeySequence::ZoomOut);
-    shrinkFontAction->setMenuRole(QAction::NoRole);
 
     QAction* resetFontSizeAction = viewMenu->addAction(tr("&Reset Font Size"), d_editor, &Editor::resetFontSize);
     resetFontSizeAction->setIcon(utils::themeIcon("zoom-original"));
     resetFontSizeAction->setShortcut(Qt::CTRL | Qt::Key_0);
-    resetFontSizeAction->setMenuRole(QAction::NoRole);
 
     viewMenu->addSeparator();
 
@@ -367,12 +345,10 @@ void MainWindow::setupActions()
      */
     QMenu* toolsMenu = menuBar()->addMenu(tr("&Tools"));
 
-    QAction* settingsAction = toolsMenu->addAction(tr("&Settings..."), this, &MainWindow::showSettingsDialog);
-    settingsAction->setMenuRole(QAction::PreferencesRole);
+    toolsMenu->addAction(tr("&Settings..."), this, &MainWindow::showSettingsDialog);
 
     QAction* spellingAction = toolsMenu->addAction(tr("Spell &Checking..."), this, &MainWindow::changeSpellCheckingDictionary);
     spellingAction->setIcon(utils::themeIcon("tools-check-spelling"));
-    spellingAction->setMenuRole(QAction::NoRole);
 
     /*
      * Help Menu
@@ -381,13 +357,11 @@ void MainWindow::setupActions()
 
     QAction* docsAction = helpMenu->addAction(tr("Typst &Documentation..."), this, &MainWindow::showTypstDocs);
     docsAction->setIcon(utils::themeIcon("help-contents"));
-    docsAction->setMenuRole(QAction::NoRole);
 
     helpMenu->addSeparator();
 
     QAction* aboutAction = helpMenu->addAction(tr("&About..."), this, &MainWindow::showAbout);
     aboutAction->setIcon(utils::themeIcon("help-about"));
-    aboutAction->setMenuRole(QAction::AboutRole);
 }
 
 void MainWindow::setupStatusBar()
@@ -947,6 +921,10 @@ void MainWindow::setIconTheme()
 
 void MainWindow::restoreSpellingDictionary(const QSettings& settings)
 {
+    if (!d_spellChecker) {
+        return;
+    }
+
     QString dictName = settings.value(SETTING_SPELLING_DICT, QString()).toString();
     QString dictPath;
 
@@ -966,6 +944,9 @@ void MainWindow::restoreSpellingDictionary(const QSettings& settings)
 
 void MainWindow::changeSpellCheckingDictionary()
 {
+    if (!d_spellChecker) {
+        return;
+    }
     QMap<QString, QString> dicts = d_spellChecker->findDictionaries();
 
     QStringList dictNames = { "" };

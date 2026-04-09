@@ -16,7 +16,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include "katvan_mainwindow.h"
-#include "katvan_utils.h"
 
 #include "katvan_spellchecker_hunspell.h"
 #include "katvan_text_utils.h"
@@ -35,13 +34,7 @@
 
 void setupPortableMode()
 {
-    bool isInstalled;
-    QString settingsPath = katvan::utils::getApplicationDir(isInstalled);
-
-    if (isInstalled) {
-        qWarning() << "Application is considered installed at" << settingsPath << "- not enabling portable mode!";
-        return;
-    }
+    QString settingsPath = QCoreApplication::applicationDirPath();
     qDebug() << "Running in portable mode, settings stored at" << settingsPath;
 
     QSettings::setDefaultFormat(QSettings::IniFormat);
@@ -82,10 +75,6 @@ void loadTranslations(const QLocale& locale)
 
 int main(int argc, char** argv)
 {
-#ifdef Q_OS_MACOS
-    QCoreApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
-#endif
-
     QApplication app(argc, argv);
     QCoreApplication::setOrganizationDomain("katvan.app");
     QCoreApplication::setOrganizationName("Katvan");

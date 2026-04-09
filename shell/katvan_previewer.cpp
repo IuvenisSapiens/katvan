@@ -89,12 +89,12 @@ Previewer::Previewer(TypstDriverWrapper* driver, QWidget* parent)
     d_zoomComboBox->addItem("200%", "2.0");
 
     QAction* zoomOutAction = new QAction(this);
-    zoomOutAction->setIcon(utils::themeIcon("zoom-out", "minus.magnifyingglass"));
+    zoomOutAction->setIcon(utils::themeIcon("zoom-out"));
     zoomOutAction->setToolTip(tr("Zoom Out Preview"));
     connect(zoomOutAction, &QAction::triggered, this, &Previewer::zoomOut);
 
     QAction* zoomInAction = new QAction(this);
-    zoomInAction->setIcon(utils::themeIcon("zoom-in", "plus.magnifyingglass"));
+    zoomInAction->setIcon(utils::themeIcon("zoom-in"));
     zoomInAction->setToolTip(tr("Zoom In Preview"));
     connect(zoomInAction, &QAction::triggered, this, &Previewer::zoomIn);
 
@@ -103,13 +103,13 @@ Previewer::Previewer(TypstDriverWrapper* driver, QWidget* parent)
     d_currentPageLabel->setAlignment(Qt::AlignCenter);
 
     d_invertColorsAction = new QAction(this);
-    d_invertColorsAction->setIcon(utils::themeIcon("color-mode-invert-text", "circle.lefthalf.filled"));
+    d_invertColorsAction->setIcon(utils::themeIcon("color-mode-invert-text"));
     d_invertColorsAction->setToolTip(tr("Invert Preview Colors"));
     d_invertColorsAction->setCheckable(true);
     connect(d_invertColorsAction, &QAction::toggled, d_view, &PreviewerView::setInvertColors);
 
     d_followEditorCursorAction = new QAction(this);
-    d_followEditorCursorAction->setIcon(utils::themeIcon("debug-execute-from-cursor", "text.cursor"));
+    d_followEditorCursorAction->setIcon(utils::themeIcon("debug-execute-from-cursor"));
     d_followEditorCursorAction->setToolTip(tr("Follow Editor Cursor"));
     d_followEditorCursorAction->setCheckable(true);
     connect(d_followEditorCursorAction, &QAction::toggled, this, &Previewer::followEditorCursorChanged);

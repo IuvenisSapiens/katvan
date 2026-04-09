@@ -1,3 +1,4 @@
+// -*- mode: objective-cpp -*-
 /*
  * This file is part of Katvan
  * Copyright (c) 2024 - 2026 Igor Khanin
@@ -15,18 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#pragma once
+#include "katvan_spellchecker.h"
 
-#include <QString>
+#import <Foundation/Foundation.h>
 
-QT_BEGIN_NAMESPACE
-class QWidget;
-QT_END_NAMESPACE
+class KatvanMacSpellChecker : public katvan::SpellChecker
+{
+    Q_OBJECT
 
-namespace katvan::utils::macos {
+public:
+    KatvanMacSpellChecker(QObject* parent = nullptr);
+    ~KatvanMacSpellChecker();
 
-QString getApplicationDir();
+    QMap<QString, QString> findDictionaries() override;
+    void setCurrentDictionary(const QString& dictName, const QString& dictPath) override;
 
-QString showPdfExportDialog(QWidget* parent, const QString& sourceFilePath);
+    MisspelledWordRanges checkSpelling(const QString& text) override;
 
-}
+    void addToPersonalDictionary(const QString& word) override;
+    void ignoreWord(NSString* word);
+
+private:
+    void requestSuggestionsImpl(const QString& word, int position) override;
+
+    unsigned long d_documentTag;
+};
