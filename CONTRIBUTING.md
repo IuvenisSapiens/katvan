@@ -12,7 +12,7 @@ This section describes the design goals behind Katvan. They should help you unde
 
 ### Typst First
 
-Katvan is an editor for Typst files, and only Typst files. Not LaTeX, not Markdown, not HTML, etc. Tight integration with the Typst language and compiler is not only allowed, it is preferred.
+Katvan is an editor for Typst files, and only Typst files. Not LaTeX, not Markdown, not HTML, etc. Tight integration with the Typst language and compiler is not only allowed, it is preferred. Furthermore the project aims for a high degree of compatibility with the larger Typst ecosystem; to the largest extent possible, the result of typesetting a document in Katvan should be identical to the result using the CLI or other similar tools.
 
 ### Simple and Familiar
 
@@ -101,7 +101,7 @@ Therefore this project does not outright ban the use of such tools. However, we 
     - You should be able to explain the purpose and reasoning behind every line code, should this be requested of you.
     - Remember that you also must sign off on a DCO - make sure you are comfortable making this commitment.
 
-This policy does not apply for the use of AI tools for research purposes only or for non-significant use (e.g. just as single line code autocomplete).
+This policy does not apply for the use of AI tools for research purposes only or for non-significant use (e.g. just for tab completion of short snippets).
 
 ### Other Guidelines
 
