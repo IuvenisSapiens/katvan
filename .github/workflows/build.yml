@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4
+        uses: jurplel/install-qt-action@48d3ad6db93f3627c8ee7a0454bc6f3744f7e730 # v4.3.1
         with:
           version: 6.8.*
           cache: true
@@ -29,7 +29,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Setup Rust cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
           shared-key: 'build'
           workspaces: |
@@ -49,22 +49,22 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4
+        uses: jurplel/install-qt-action@48d3ad6db93f3627c8ee7a0454bc6f3744f7e730 # v4.3.1
         with:
           version: 6.8.*
           cache: true
 
       - name: Setup vcpkg
-        uses: lukka/run-vcpkg@v11
+        uses: lukka/run-vcpkg@7d259227a1fb6471a0253dd5ab7419835228f7d7 # v11
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
       - name: Setup Rust cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
           shared-key: 'build'
           workspaces: |
@@ -84,10 +84,10 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4
+        uses: jurplel/install-qt-action@48d3ad6db93f3627c8ee7a0454bc6f3744f7e730 # v4.3.1
         with:
           version: 6.8.*
           cache: true
@@ -100,7 +100,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Setup Rust cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
           shared-key: 'build'
           workspaces: |
@@ -120,10 +120,10 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4
+        uses: jurplel/install-qt-action@48d3ad6db93f3627c8ee7a0454bc6f3744f7e730 # v4.3.1
         with:
           version: 6.10.*
           arch: linux_gcc_64
@@ -141,7 +141,7 @@ jobs:
           components: clippy
 
       - name: Setup Rust cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
           workspaces: |
             typstdriver/rust -> ../../build/cargo/build
@@ -156,7 +156,7 @@ jobs:
           cargo clippy --no-deps --manifest-path typstdriver/rust/Cargo.toml --target-dir build/cargo/build
 
       - name: Install typos
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@5939f3337e40968c39aa70f5ecb1417a92fb25a0 # v2.75.15
         with:
           tool: typos
 
