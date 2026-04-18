@@ -263,7 +263,7 @@
     if (self) {
         _font = [NSFont userFontOfSize:[NSFont systemFontSize]];
 
-        self.selectorButton = [NSButton buttonWithTitle:NSLocalizedString(@"Change...", nil)
+        self.selectorButton = [NSButton buttonWithTitle:NSLocalizedString(@"Change...", "Button to select another font")
                                         target:self
                                         action:@selector(selectFont:)];
 

@@ -26,8 +26,35 @@
 #include "katvan_version.h"
 
 #include <QApplication>
+#include <QLibraryInfo>
+#include <QTranslator>
 
-#include <AppKit/AppKit.h>
+#import <AppKit/AppKit.h>
+
+void loadQtTranslations()
+{
+    // We only need to load Qt Ligusit translations for the core library and Qt
+    // itself. Translations for macshell strings are automatically loaded by
+    // AppKit from strings files in the application bundle.
+    QLocale locale = QLocale::system();
+
+    static QTranslator coreTranslator;
+    if (coreTranslator.load(locale, "core", "_", ":/i18n")) {
+        QCoreApplication::installTranslator(&coreTranslator);
+    }
+
+    QString qtTranslationPath = QLibraryInfo::path(QLibraryInfo::TranslationsPath);
+
+    static QTranslator qtTranslator;
+    bool ok = qtTranslator.load(locale, "qtbase", "_", qtTranslationPath);
+    if (!ok) {
+        ok = qtTranslator.load(locale, "qt", "_", qtTranslationPath);
+    }
+
+    if (ok) {
+        QCoreApplication::installTranslator(&qtTranslator);
+    }
+}
 
 @implementation KatvanAppDelegate
 {
@@ -62,6 +89,7 @@
 
         new ColorUtiMimeConverter();
         katvan::utils::loadAuxiliaryFonts();
+        loadQtTranslations();
 
         KatvanSettingsManager::instance().reloadSettings();
 

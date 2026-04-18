@@ -222,17 +222,17 @@
     [self.sidebar addTabController:self.outlineView
                   icon:[NSImage imageWithSystemSymbolName:@"document.viewfinder.fill"
                                 accessibilityDescription:@"Document page in a targeting frame"]
-                  toolTip:NSLocalizedString(@"Document Outline", nil)];
+                  toolTip:NSLocalizedString(@"Document Outline", "Tooltip for sidebar tab")];
 
     [self.sidebar addTabController:self.labelsView
                   icon:[NSImage imageWithSystemSymbolName:@"tag"
                                 accessibilityDescription:@"Tag"]
-                  toolTip:NSLocalizedString(@"Labels", nil)];
+                  toolTip:NSLocalizedString(@"Labels", "Tooltip for sidebar tab")];
 
     [self.sidebar addTabController:self.issueList
                   icon:[NSImage imageWithSystemSymbolName:@"exclamationmark.triangle"
                                 accessibilityDescription:@"Exclamation mark in a triangle"]
-                  toolTip:NSLocalizedString(@"Issues", nil)];
+                  toolTip:NSLocalizedString(@"Issues", "Tooltip for sidebar tab")];
 
     [self.sidebar ensureControllerSelected:self.outlineView];
 }
@@ -451,24 +451,24 @@
         switch (self.driver->status()) {
             case katvan::TypstDriverWrapper::Status::SUCCESS:
                 symbolColor = NSColor.systemGreenColor;
-                toolTip = NSLocalizedString(@"Compiled successfully", "compilation status");
+                toolTip = NSLocalizedString(@"Compiled successfully", "Compilation status");
                 statusSymbol = [NSImage imageWithSystemSymbolName:@"checkmark.circle"
                                         accessibilityDescription:@"Checkmark in a circle"];
                 break;
             case katvan::TypstDriverWrapper::Status::SUCCESS_WITH_WARNINGS:
-                toolTip = NSLocalizedString(@"Compiled with warnings", "compilation status");
+                toolTip = NSLocalizedString(@"Compiled with warnings", "Compilation status");
                 symbolColor = NSColor.systemYellowColor;
                 statusSymbol = [NSImage imageWithSystemSymbolName:@"exclamationmark.circle"
                                         accessibilityDescription:@"Exclamation mark in a circle"];
                 break;
             case katvan::TypstDriverWrapper::Status::FAILED:
-                toolTip = NSLocalizedString(@"Compiled with errors", "compilation status");
+                toolTip = NSLocalizedString(@"Compiled with errors", "Compilation status");
                 symbolColor = NSColor.systemRedColor;
                 statusSymbol = [NSImage imageWithSystemSymbolName:@"xmark.circle"
                                         accessibilityDescription:@"X mark in a circle"];
                 break;
             default:
-                toolTip = NSLocalizedString(@"Compiling...", "compilation status");
+                toolTip = NSLocalizedString(@"Compiling...", "Compilation status");
                 symbolColor = NSColor.systemGrayColor;
                 statusSymbol = [NSImage imageWithSystemSymbolName:@"clock"
                                         accessibilityDescription:@"Clock"];

@@ -33,33 +33,33 @@
     [mainMenu setSubmenu:submenu forItem:menuItem];
 
     menuItem = [mainMenu addItemWithTitle:@"File" action:nil keyEquivalent:@""];
-    submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"File", nil)];
+    submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"File", "Menu title")];
     [self setupFileMenu: submenu];
     [mainMenu setSubmenu:submenu forItem:menuItem];
 
     menuItem = [mainMenu addItemWithTitle:@"Edit" action:nil keyEquivalent:@""];
-    submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"Edit", nil)];
+    submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"Edit", "Menu title")];
     [self setupEditMenu: submenu];
     [mainMenu setSubmenu:submenu forItem:menuItem];
 
     menuItem = [mainMenu addItemWithTitle:@"View" action:nil keyEquivalent:@""];
-    submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"View", nil)];
+    submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"View", "Menu title")];
     [self setupViewMenu: submenu];
     [mainMenu setSubmenu:submenu forItem:menuItem];
 
     menuItem = [mainMenu addItemWithTitle:@"Go" action:nil keyEquivalent:@""];
-    submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"Go", nil)];
+    submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"Go", "Menu title")];
     [self setupGoMenu: submenu];
     [mainMenu setSubmenu:submenu forItem:menuItem];
 
     menuItem = [mainMenu addItemWithTitle:@"Window" action:nil keyEquivalent:@""];
-    submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"Window", nil)];
+    submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"Window", "Menu title")];
     [self setupWindowMenu: submenu];
     [mainMenu setSubmenu:submenu forItem:menuItem];
     [NSApp setWindowsMenu: submenu];
 
     menuItem = [mainMenu addItemWithTitle:@"Help" action:nil keyEquivalent:@""];
-    submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"Help", nil)];
+    submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"Help", "Menu title")];
     [self setupHelpMenu: submenu];
     [mainMenu setSubmenu:submenu forItem:menuItem];
     [NSApp setHelpMenu: submenu];
@@ -67,19 +67,25 @@
     [NSApp setMainMenu: mainMenu];
 }
 
-+ (void)setupApplicationMenu: (NSMenu*)menu
++ (void)setupApplicationMenu:(NSMenu*)menu
 {
     NSMenuItem* menuItem;
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"About Katvan", nil) action:@selector(showAboutDialog:) keyEquivalent:@""];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"About Katvan", "Application menu item")
+                     action:@selector(showAboutDialog:)
+                     keyEquivalent:@""];
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Preferences...", nil) action:@selector(showPreferences:) keyEquivalent:@","];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Preferences...", "Application menu item")
+                     action:@selector(showPreferences:)
+                     keyEquivalent:@","];
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Services", nil) action:nil keyEquivalent:@""];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Services", "Application menu submenu title")
+                     action:nil
+                     keyEquivalent:@""];
 
     NSMenu* servicesMenu = [[NSMenu alloc] initWithTitle:@"Services"];
     [menu setSubmenu:servicesMenu forItem:menuItem];
@@ -87,43 +93,67 @@
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Hide Katvan", nil) action:@selector(hide:) keyEquivalent:@"h"];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Hide Katvan", "Application menu item")
+                     action:@selector(hide:)
+                     keyEquivalent:@"h"];
     [menuItem setTarget:NSApp];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Hide Others", nil) action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Hide Others", "Application menu item")
+                     action:@selector(hideOtherApplications:)
+                     keyEquivalent:@"h"];
     [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagCommand | NSEventModifierFlagOption];
     [menuItem setTarget:NSApp];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Show All", nil) action:@selector(unhideAllApplications:) keyEquivalent:@""];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Show All", "Application menu item")
+                     action:@selector(unhideAllApplications:)
+                     keyEquivalent:@""];
     [menuItem setTarget:NSApp];
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Quit Katvan", nil) action:@selector(terminate:) keyEquivalent:@"q"];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Quit Katvan", "Application menu item")
+                     action:@selector(terminate:)
+                     keyEquivalent:@"q"];
     [menuItem setTarget:NSApp];
 }
 
-+ (void)setupFileMenu: (NSMenu*)menu
++ (void)setupFileMenu:(NSMenu*)menu
 {
-    [menu addItemWithTitle:NSLocalizedString(@"New", nil) action:@selector(newDocument:) keyEquivalent:@"n"];
+    [menu addItemWithTitle:NSLocalizedString(@"New", "File menu item")
+          action:@selector(newDocument:)
+          keyEquivalent:@"n"];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Open...", nil) action:@selector(openDocument:) keyEquivalent:@"o"];
-
-    [menu addItem:[NSMenuItem separatorItem]];
-
-    [menu addItemWithTitle:NSLocalizedString(@"Close", nil) action:@selector(performClose:) keyEquivalent:@"w"];
-
-    [menu addItemWithTitle:NSLocalizedString(@"Save...", nil) action:@selector(saveDocument:) keyEquivalent:@"s"];
-
-    [menu addItemWithTitle:NSLocalizedString(@"Save As...", nil) action:@selector(saveDocumentAs:) keyEquivalent:@"S"];
-
-    [menu addItemWithTitle:NSLocalizedString(@"Save All", nil) action:@selector(saveAllDocuments:) keyEquivalent:@""];
-
-    [menu addItemWithTitle:NSLocalizedString(@"Revert to Saved", nil) action:@selector(revertDocumentToSaved:) keyEquivalent:@"r"];
+    [menu addItemWithTitle:NSLocalizedString(@"Open...", "File menu item")
+          action:@selector(openDocument:)
+          keyEquivalent:@"o"];
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Export as PDF...", nil) action:@selector(exportAsPdf:) keyEquivalent:@""];
+    [menu addItemWithTitle:NSLocalizedString(@"Close", "File menu item")
+          action:@selector(performClose:)
+          keyEquivalent:@"w"];
+
+    [menu addItemWithTitle:NSLocalizedString(@"Save...", "File menu item")
+          action:@selector(saveDocument:)
+          keyEquivalent:@"s"];
+
+    [menu addItemWithTitle:NSLocalizedString(@"Save As...", "File menu item")
+          action:@selector(saveDocumentAs:)
+          keyEquivalent:@"S"];
+
+    [menu addItemWithTitle:NSLocalizedString(@"Save All", "File menu item")
+          action:@selector(saveAllDocuments:)
+          keyEquivalent:@""];
+
+    [menu addItemWithTitle:NSLocalizedString(@"Revert to Saved", "File menu item")
+          action:@selector(revertDocumentToSaved:)
+          keyEquivalent:@"r"];
+
+    [menu addItem:[NSMenuItem separatorItem]];
+
+    [menu addItemWithTitle:NSLocalizedString(@"Export as PDF...", "File menu item")
+          action:@selector(exportAsPdf:)
+          keyEquivalent:@""];
 }
 
 + (void)setupEditMenu:(NSMenu*)menu
@@ -133,65 +163,99 @@
     // Selectors for undo and redo actions can't be the usual redo: and undo: because
     // they are intercepted by the NSUndoManager which is part of every responder chain.
 
-    [menu addItemWithTitle:NSLocalizedString(@"Undo", nil) action:@selector(performUndo:) keyEquivalent:@"z"];
+    [menu addItemWithTitle:NSLocalizedString(@"Undo", "Edit menu item")
+          action:@selector(performUndo:)
+          keyEquivalent:@"z"];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Redo", nil) action:@selector(performRedo:) keyEquivalent:@"Z"];
+    [menu addItemWithTitle:NSLocalizedString(@"Redo", "Edit menu item")
+          action:@selector(performRedo:)
+          keyEquivalent:@"Z"];
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Cut", nil) action:@selector(cut:) keyEquivalent:@"x"];
+    [menu addItemWithTitle:NSLocalizedString(@"Cut", "Edit menu item")
+          action:@selector(cut:)
+          keyEquivalent:@"x"];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Copy", nil) action:@selector(copy:) keyEquivalent:@"c"];
+    [menu addItemWithTitle:NSLocalizedString(@"Copy", "Edit menu item")
+          action:@selector(copy:)
+          keyEquivalent:@"c"];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Paste", nil) action:@selector(paste:) keyEquivalent:@"v"];
+    [menu addItemWithTitle:NSLocalizedString(@"Paste", "Edit menu item")
+          action:@selector(paste:)
+          keyEquivalent:@"v"];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Delete", nil) action:@selector(delete:) keyEquivalent:@""];
+    [menu addItemWithTitle:NSLocalizedString(@"Delete", "Edit menu item")
+          action:@selector(delete:)
+          keyEquivalent:@""];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Complete", nil) action:@selector(triggerAutocomplete:) keyEquivalent:@""];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Complete", "Edit menu item")
+                     action:@selector(triggerAutocomplete:)
+                     keyEquivalent:@""];
     [menuItem setKeyEquivalent:@"\u001B"]; // Esc
     [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagOption];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Select All", nil) action:@selector(selectAll:) keyEquivalent:@"a"];
+    [menu addItemWithTitle:NSLocalizedString(@"Select All", "Edit menu item")
+          action:@selector(selectAll:)
+          keyEquivalent:@"a"];
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Find", nil) action:nil keyEquivalent:@""];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Find", "Edit menu submenu title")
+                     action:nil
+                     keyEquivalent:@""];
 
     NSMenu* findMenu = [[NSMenu alloc] initWithTitle:@"Find"];
     [menu setSubmenu:findMenu forItem:menuItem];
 
-    menuItem = [findMenu addItemWithTitle:NSLocalizedString(@"Find...", nil) action:@selector(performTextFinderAction:) keyEquivalent:@"f"];
+    menuItem = [findMenu addItemWithTitle:NSLocalizedString(@"Find...", "Edit>Find menu item")
+                         action:@selector(performTextFinderAction:)
+                         keyEquivalent:@"f"];
     [menuItem setTag:NSTextFinderActionShowFindInterface];
 
-    menuItem = [findMenu addItemWithTitle:NSLocalizedString(@"Find and Replace...", nil) action:@selector(performTextFinderAction:) keyEquivalent:@"f"];
+    menuItem = [findMenu addItemWithTitle:NSLocalizedString(@"Find and Replace...", "Edit>Find menu item")
+                         action:@selector(performTextFinderAction:)
+                         keyEquivalent:@"f"];
     [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagCommand | NSEventModifierFlagOption];
     [menuItem setTag:NSTextFinderActionShowReplaceInterface];
 
-    menuItem = [findMenu addItemWithTitle:NSLocalizedString(@"Find Next", nil) action:@selector(performTextFinderAction:) keyEquivalent:@"g"];
+    menuItem = [findMenu addItemWithTitle:NSLocalizedString(@"Find Next", "Edit>Find menu item")
+                         action:@selector(performTextFinderAction:)
+                         keyEquivalent:@"g"];
     [menuItem setTag:NSTextFinderActionNextMatch];
 
-    menuItem = [findMenu addItemWithTitle:NSLocalizedString(@"Find Previous", nil) action:@selector(performTextFinderAction:) keyEquivalent:@"G"];
+    menuItem = [findMenu addItemWithTitle:NSLocalizedString(@"Find Previous", "Edit>Find menu item")
+                         action:@selector(performTextFinderAction:)
+                         keyEquivalent:@"G"];
     [menuItem setTag:NSTextFinderActionPreviousMatch];
 
     // AppKit magically modifies the title of this menu item
-    [menu addItemWithTitle:NSLocalizedString(@"Spelling and Grammar", nil) action:@selector(showGuessPanel:) keyEquivalent:@":"];
+    [menu addItemWithTitle:@"Spelling and Grammar" action:@selector(showGuessPanel:) keyEquivalent:@":"];
 }
 
 + (void)setupViewMenu:(NSMenu*)menu
 {
     NSMenuItem* menuItem;
 
-    [menu addItemWithTitle:NSLocalizedString(@"Actual Size", nil) action:@selector(zoomToActualSize:) keyEquivalent:@"0"];
+    [menu addItemWithTitle:NSLocalizedString(@"Actual Size", "View menu item")
+          action:@selector(zoomToActualSize:)
+          keyEquivalent:@"0"];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Zoom In", nil) action:@selector(zoomIn:) keyEquivalent:@"."];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Zoom In", "View menu item")
+                     action:@selector(zoomIn:)
+                     keyEquivalent:@"."];
     [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagCommand | NSEventModifierFlagShift];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Zoom Out", nil) action:@selector(zoomOut:) keyEquivalent:@","];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Zoom Out", "View menu item")
+                     action:@selector(zoomOut:)
+                     keyEquivalent:@","];
     [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagCommand | NSEventModifierFlagShift];
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Invert Preview Colors", nil) action:@selector(invertPreviewColors:) keyEquivalent:@""];
+    [menu addItemWithTitle:NSLocalizedString(@"Invert Preview Colors", "View menu item")
+          action:@selector(invertPreviewColors:)
+          keyEquivalent:@""];
 
     [menu addItem:[NSMenuItem separatorItem]];
 }
@@ -200,15 +264,27 @@
 {
     NSMenuItem* menuItem;
 
-    [menu addItemWithTitle:NSLocalizedString(@"Back", nil) action:@selector(goBack:) keyEquivalent:@"["];
-    [menu addItemWithTitle:NSLocalizedString(@"Forward", nil) action:@selector(goForward:) keyEquivalent:@"]"];
+    [menu addItemWithTitle:NSLocalizedString(@"Back", "Go menu item")
+          action:@selector(goBack:)
+          keyEquivalent:@"["];
+
+    [menu addItemWithTitle:NSLocalizedString(@"Forward", "Go menu item")
+          action:@selector(goForward:)
+          keyEquivalent:@"]"];
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Go to Line...", nil) action:@selector(goToLine:) keyEquivalent:@"l"];
-    [menu addItemWithTitle:NSLocalizedString(@"Jump to Preview", nil) action:@selector(goToPreview:) keyEquivalent:@"j"];
+    [menu addItemWithTitle:NSLocalizedString(@"Go to Line...", "Go menu item")
+          action:@selector(goToLine:)
+          keyEquivalent:@"l"];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Go to Definition", nil) action:@selector(goToDefinition:) keyEquivalent:@""];
+    [menu addItemWithTitle:NSLocalizedString(@"Jump to Preview", "Go menu item")
+          action:@selector(goToPreview:)
+          keyEquivalent:@"j"];
+
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Go to Definition", "Go menu item")
+                     action:@selector(goToDefinition:)
+                     keyEquivalent:@""];
     [menuItem setKeyEquivalent:@"\uF70F"]; // F12
     [menuItem setKeyEquivalentModifierMask:0];
 }
@@ -217,13 +293,19 @@
 {
     NSMenuItem* menuItem;
 
-    [menu addItemWithTitle:NSLocalizedString(@"Minimize", nil) action:@selector(performMiniaturize:) keyEquivalent:@"m"];
+    [menu addItemWithTitle:NSLocalizedString(@"Minimize", "Window menu item")
+          action:@selector(performMiniaturize:)
+          keyEquivalent:@"m"];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Zoom", nil) action:@selector(performZoom:) keyEquivalent:@""];
+    [menu addItemWithTitle:NSLocalizedString(@"Zoom", "Window menu item")
+          action:@selector(performZoom:)
+          keyEquivalent:@""];
 
     [menu addItem:[NSMenuItem separatorItem]];
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Bring All to Front", nil) action:@selector(arrangeInFront:) keyEquivalent:@""];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Bring All to Front", "Window menu item")
+                     action:@selector(arrangeInFront:)
+                     keyEquivalent:@""];
     [menuItem setTarget:NSApp];
 }
 
@@ -231,10 +313,14 @@
 {
     NSMenuItem* menuItem;
 
-    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Katvan Help", nil) action:@selector(showHelp:) keyEquivalent:@"?"];
+    menuItem = [menu addItemWithTitle:NSLocalizedString(@"Katvan Help", "Help menu item")
+                     action:@selector(showHelp:)
+                     keyEquivalent:@"?"];
     [menuItem setTarget:NSApp];
 
-    [menu addItemWithTitle:NSLocalizedString(@"Typst Documentation...", nil) action:@selector(openTypstDocs:) keyEquivalent:@""];
+    [menu addItemWithTitle:NSLocalizedString(@"Typst Documentation...", "Help menu item")
+          action:@selector(openTypstDocs:)
+          keyEquivalent:@""];
 }
 
 @end

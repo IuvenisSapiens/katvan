@@ -1,4 +1,3 @@
-// -*- mode: objective-cpp -*-
 /*
  * This file is part of Katvan
  * Copyright (c) 2024 - 2026 Igor Khanin
@@ -102,7 +101,7 @@ static void addControlRow(NSGridView* grid, NSView* control, NSString* label)
     }
 
     NSMutableArray<NSArray<NSString*>*>* standards = [[NSMutableArray alloc] init];
-    [standards addObject:@[NSLocalizedString(@"None", "Choice of PDF/A standard in PDF export options"), @""]];
+    [standards addObject:@[NSLocalizedString(@"None", nil), @""]];
 
     // FIXME: This duplicates a lot of static definitions with the Qt shell export
     // dialog. Find a way to unify at least the version/standard matrix.

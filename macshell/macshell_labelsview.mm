@@ -1,4 +1,3 @@
-// -*- mode: objective-cpp -*-
 /*
  * This file is part of Katvan
  * Copyright (c) 2024 - 2026 Igor Khanin
@@ -105,6 +104,7 @@
 
     self.filterField = [[NSSearchField alloc] init];
     self.filterField.translatesAutoresizingMaskIntoConstraints = NO;
+    self.filterField.placeholderString = NSLocalizedString(@"Filter", "Placeholder text in labels filter field");
     self.filterField.target = self;
     self.filterField.action = @selector(filterChanged:);
 

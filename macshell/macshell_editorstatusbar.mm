@@ -52,7 +52,7 @@ static constexpr CGFloat kSectionPadding = 8.0;
         _cursorMoveStyle = KatvanCursorMoveStyleLogical;
 
         self.cursorMoveStylePopup = [self createPopUpSection];
-        self.cursorMoveStylePopup.toolTip = NSLocalizedString(@"Cursor move style", "tooltip");
+        self.cursorMoveStylePopup.toolTip = NSLocalizedString(@"Cursor move style", "Tooltip of status bar item");
         self.cursorMoveStylePopup.target = self;
         self.cursorMoveStylePopup.action = @selector(cursorMoveStylePopupChanged:);
         [self.cursorMoveStylePopup addItemsWithTitles:@[
@@ -154,7 +154,7 @@ static constexpr CGFloat kSectionPadding = 8.0;
         NSFontAttributeName: [NSFont systemFontOfSize:NSFont.smallSystemFontSize]
     };
 
-    return [[NSAttributedString alloc] initWithString:NSLocalizedString(@"Line %1$@, Column %2$@", nil)
+    return [[NSAttributedString alloc] initWithString:NSLocalizedString(@"Line %1$@, Column %2$@", "Text cursor position")
                                        attributes:attrs];
 }
 

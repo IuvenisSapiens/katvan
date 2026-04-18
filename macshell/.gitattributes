@@ -1,1 +1,2 @@
 *.h linguist-language=objc++
+*.strings text working-tree-encoding=UTF-16

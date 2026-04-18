@@ -75,21 +75,21 @@ static void addSeparatorRow(NSGridView* grid)
     self.colorSchemePopup.target = self;
     self.colorSchemePopup.action = @selector(settingsChanged:);
     [self.colorSchemePopup addItemsWithTitles:@[
-        NSLocalizedString(@"Light", nil),
-        NSLocalizedString(@"Dark", nil),
-        NSLocalizedString(@"Follow system settings", nil)
+        NSLocalizedString(@"Light", "Editor color scheme option"),
+        NSLocalizedString(@"Dark", "Editor color scheme option"),
+        NSLocalizedString(@"Follow system settings", "Editor color scheme option")
     ]];
 
     self.lineNumberPopup = [[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
     self.lineNumberPopup.target = self;
     self.lineNumberPopup.action = @selector(settingsChanged:);
     [self.lineNumberPopup addItemsWithTitles:@[
-        NSLocalizedString(@"On both sides", nil),
-        NSLocalizedString(@"On primary side only", nil),
-        NSLocalizedString(@"Don't show", nil)
+        NSLocalizedString(@"On both sides", "Editor line number gutter option"),
+        NSLocalizedString(@"On primary side only", "Editor line number gutter option"),
+        NSLocalizedString(@"Don't show", "Editor line number gutter option")
     ]];
 
-    self.showControlCharsCheckbox = [NSButton checkboxWithTitle:NSLocalizedString(@"Show BiDi control characters", nil)
+    self.showControlCharsCheckbox = [NSButton checkboxWithTitle:NSLocalizedString(@"Show BiDi control characters", "Editor setting label")
                                               target:self
                                               action:@selector(settingsChanged:)];
 
@@ -97,15 +97,15 @@ static void addSeparatorRow(NSGridView* grid)
     self.indentModePopup.target = self;
     self.indentModePopup.action = @selector(settingsChanged:);
     [self.indentModePopup addItemsWithTitles:@[
-        NSLocalizedString(@"None", nil),
-        NSLocalizedString(@"Normal", nil),
-        NSLocalizedString(@"Smart", nil)
+        NSLocalizedString(@"None", "Editor indent mode option"),
+        NSLocalizedString(@"Normal", "Editor indent mode option"),
+        NSLocalizedString(@"Smart", "Editor indent mode option")
     ]];
 
-    self.indentWithSpacesRadio = [NSButton radioButtonWithTitle:NSLocalizedString(@"Spaces", nil)
+    self.indentWithSpacesRadio = [NSButton radioButtonWithTitle:NSLocalizedString(@"Spaces", "Editor indent style option")
                                            target:self
                                            action:@selector(indentStyleChanged:)];
-    self.indentWithTabsRadio = [NSButton radioButtonWithTitle:NSLocalizedString(@"Tabs", nil)
+    self.indentWithTabsRadio = [NSButton radioButtonWithTitle:NSLocalizedString(@"Tabs", "Editor indent style option")
                                          target:self
                                          action:@selector(indentStyleChanged:)];
 
@@ -117,11 +117,11 @@ static void addSeparatorRow(NSGridView* grid)
     self.tabWidthSpinBox.target = self;
     self.tabWidthSpinBox.action = @selector(settingsChanged:);
 
-    self.autoBracketsCheckbox = [NSButton checkboxWithTitle:NSLocalizedString(@"Automatically insert closing brackets", nil)
+    self.autoBracketsCheckbox = [NSButton checkboxWithTitle:NSLocalizedString(@"Automatically insert closing brackets", "Editor setting label")
                                           target:self
                                           action:@selector(settingsChanged:)];
 
-    self.autoCompletionsCheckbox = [NSButton checkboxWithTitle:NSLocalizedString(@"Automatically show autocomplete suggestions", nil)
+    self.autoCompletionsCheckbox = [NSButton checkboxWithTitle:NSLocalizedString(@"Automatically show autocomplete suggestions", "Editor setting label")
                                              target:self
                                              action:@selector(settingsChanged:)];
 
@@ -137,16 +137,16 @@ static void addSeparatorRow(NSGridView* grid)
     [grid columnAtIndex:0].xPlacement = NSGridCellPlacementTrailing;
     [grid columnAtIndex:1].xPlacement = NSGridCellPlacementFill;
 
-    addControlRow(grid, self.editorFontPicker, NSLocalizedString(@"Editor font:", nil));
-    addControlRow(grid, self.colorSchemePopup, NSLocalizedString(@"Color scheme:", nil));
-    addControlRow(grid, self.lineNumberPopup, NSLocalizedString(@"Show line numbers:", nil));
+    addControlRow(grid, self.editorFontPicker, NSLocalizedString(@"Editor font:", "Editor setting label"));
+    addControlRow(grid, self.colorSchemePopup, NSLocalizedString(@"Color scheme:", "Editor setting label"));
+    addControlRow(grid, self.lineNumberPopup, NSLocalizedString(@"Show line numbers:", "Editor setting label"));
     addControlRow(grid, self.showControlCharsCheckbox, nil);
     addSeparatorRow(grid);
-    addControlRow(grid, self.indentModePopup, NSLocalizedString(@"Automatic indentation:", nil));
-    addControlRow(grid, self.indentWithSpacesRadio, NSLocalizedString(@"Indent with:", nil));
+    addControlRow(grid, self.indentModePopup, NSLocalizedString(@"Automatic indentation:", "Editor setting label"));
+    addControlRow(grid, self.indentWithSpacesRadio, NSLocalizedString(@"Indent with:", "Editor setting label"));
     addControlRow(grid, self.indentWithTabsRadio, nil);
-    addControlRow(grid, self.indentWidthSpinBox, NSLocalizedString(@"Indent width:", nil));
-    addControlRow(grid, self.tabWidthSpinBox, NSLocalizedString(@"Tab display width:", nil));
+    addControlRow(grid, self.indentWidthSpinBox, NSLocalizedString(@"Indent width:", "Editor setting label"));
+    addControlRow(grid, self.tabWidthSpinBox, NSLocalizedString(@"Tab display width:", "Editor setting label"));
     addSeparatorRow(grid);
     addControlRow(grid, self.autoBracketsCheckbox, nil);
     addControlRow(grid, self.autoCompletionsCheckbox, nil);
@@ -336,17 +336,17 @@ static void addSeparatorRow(NSGridView* grid)
 
 - (void)loadView
 {
-    self.allowPreviewPackagesCheckbox = [NSButton checkboxWithTitle:NSLocalizedString(@"Allow download and use of @preview packages", nil)
+    self.allowPreviewPackagesCheckbox = [NSButton checkboxWithTitle:NSLocalizedString(@"Allow download and use of @preview packages", "Compiler setting label")
                                                   target:self
                                                   action:@selector(settingsChanged:)];
 
-    self.enableA11yCheckbox = [NSButton checkboxWithTitle:NSLocalizedString(@"Enable experimental accessibility features", nil)
+    self.enableA11yCheckbox = [NSButton checkboxWithTitle:NSLocalizedString(@"Enable experimental accessibility features", "Compiler setting label")
                                         target:self
                                         action:@selector(settingsChanged:)];
 
     self.cacheSizeLabel = [NSTextField labelWithString:@""];
 
-    NSButton* browseCacheButton = [NSButton buttonWithTitle:NSLocalizedString(@"Browse...", nil)
+    NSButton* browseCacheButton = [NSButton buttonWithTitle:NSLocalizedString(@"Browse...", "Button in compiler settings to open download cache")
                                             target:self
                                             action:@selector(browseCache)];
 
@@ -364,9 +364,9 @@ static void addSeparatorRow(NSGridView* grid)
     [grid columnAtIndex:0].xPlacement = NSGridCellPlacementTrailing;
     [grid columnAtIndex:1].xPlacement = NSGridCellPlacementFill;
 
-    addControlRow(grid, self.allowPreviewPackagesCheckbox, NSLocalizedString(@"Compiler flags:", nil));
+    addControlRow(grid, self.allowPreviewPackagesCheckbox, NSLocalizedString(@"Compiler flags:", "Compiler setting label"));
     addControlRow(grid, self.enableA11yCheckbox, nil);
-    addControlRow(grid, self.cacheSizeLabel, NSLocalizedString(@"Download cache:", nil));
+    addControlRow(grid, self.cacheSizeLabel, NSLocalizedString(@"Download cache:", "Compiler setting label"));
     addControlRow(grid, browseCacheButton, nil);
     addSeparatorRow(grid);
 
@@ -429,7 +429,7 @@ static void addSeparatorRow(NSGridView* grid)
 
     NSString* labelText = NSLocalizedString(
         @"Allow including resources also from the following directories and their subdirectories:",
-        nil);
+        "Introduction label for allowed paths list in compiler settings");
 
     NSTextField* label = [NSTextField wrappingLabelWithString:labelText];
     label.translatesAutoresizingMaskIntoConstraints = NO;
@@ -524,7 +524,7 @@ static void addSeparatorRow(NSGridView* grid)
     NSString* numPackageVersions = [numberFormatter stringFromNumber:@(stats.numPackageVersions)];
 
     NSString* label = [NSString
-        stringWithFormat:NSLocalizedString(@"%2$@ distinct versions of %1$@ packages (total %3$@)", nill),
+        stringWithFormat:NSLocalizedString(@"%2$@ distinct versions of %1$@ packages (total %3$@)", "Typst download cache statistics"),
         numPackages,
         numPackageVersions,
         size];
@@ -641,10 +641,10 @@ static void addSeparatorRow(NSGridView* grid)
 - (instancetype)init
 {
     KatvanEditorSettings* editorSettingsController = [[KatvanEditorSettings alloc] init];
-    editorSettingsController.title = NSLocalizedString(@"Editor", nil);
+    editorSettingsController.title = NSLocalizedString(@"Editor", "Settings dialog tab title");
 
     KatvanCompilerSettings* compilerSettingsController = [[KatvanCompilerSettings alloc] init];
-    compilerSettingsController.title = NSLocalizedString(@"Compiler", nil);
+    compilerSettingsController.title = NSLocalizedString(@"Compiler", "Settings dialog tab title");
 
     NSTabViewItem* editorTab = [NSTabViewItem tabViewItemWithViewController:editorSettingsController];
     editorTab.image = [NSImage imageWithSystemSymbolName:@"pencil" accessibilityDescription: nil];
