@@ -94,7 +94,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install googletest libarchive
+          brew install googletest libarchive bartycrouch
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable

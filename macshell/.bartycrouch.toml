@@ -1,0 +1,16 @@
+[update]
+tasks = ["code"]
+
+[update.code]
+codePaths = ["."]
+localizablePaths = ["translations"]
+defaultToKeys = false
+additive = true
+unstripped = false
+plistArguments = true
+overrideComments = false
+
+[lint]
+paths = ["."]
+duplicateKeys = true
+emptyValues = true

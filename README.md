@@ -94,6 +94,7 @@ To compile and install Katvan from source code, you'll need:
 - [libarchive](https://libarchive.org/)
 - [GoogleTest](https://google.github.io/googletest/) (optional, for running unit tests)
 - [python3-mistletoe](https://github.com/miyuchina/mistletoe) (optional, only on Linux, for generating AppStream metainfo)
+- [BartyCrouch](https://github.com/FlineDev/BartyCrouch) (optional, only on macOS, for updating translation strings)
 
 Get those from your distribution repositories, vcpkg, Homebrew, or wherever.
 

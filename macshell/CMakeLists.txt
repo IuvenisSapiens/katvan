@@ -52,17 +52,26 @@ qt_add_resources(macshell katvan_translations
     FILES ${KATVAN_CORE_QM_FILES}
 )
 
-# Update Apple string files for macshell strings
+# Collect Apple string files for macshell strings
 foreach(LANG IN LISTS TRANSLATION_LANGUAGES)
     set(LANG_STRINGS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/translations/${LANG}.lproj/Localizable.strings")
-
-    add_custom_command(
-        OUTPUT ${LANG_STRINGS_FILE}
-        DEPENDS ${SOURCES}
-        COMMAND xcrun genstrings -o ${CMAKE_CURRENT_SOURCE_DIR}/translations/${LANG}.lproj ${SOURCES}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    )
+    if(NOT EXISTS "${LANG_STRINGS_FILE}")
+        file(TOUCH "${LANG_STRINGS_FILE}/")
+    endif()
 
     set_source_files_properties(${LANG_STRINGS_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources/${LANG}.lproj")
     target_sources(macshell PRIVATE ${LANG_STRINGS_FILE})
 endforeach()
+
+# Update Apple string files as needed based on the code
+find_program(BARTYCROUCH NAMES bartycrouch)
+if (BARTYCROUCH)
+    add_custom_command(
+        OUTPUT bcstrings.stamp
+        DEPENDS ${SOURCES}
+        COMMAND ${BARTYCROUCH} update -v
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
+    add_custom_target(bcstrings ALL DEPENDS bcstrings.stamp)
+endif()
