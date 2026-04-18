@@ -27,7 +27,6 @@ static constexpr CGFloat kSectionPadding = 8.0;
 @property (nonatomic) NSPopUpButton* cursorMoveStylePopup;
 
 @property (nonatomic) NSAttributedString* cursorPositionLabelTemplate;
-@property (nonatomic) NSNumberFormatter* numberFormatter;
 
 @end
 
@@ -37,9 +36,6 @@ static constexpr CGFloat kSectionPadding = 8.0;
 {
     self = [super initWithFrame:frameRect];
     if (self) {
-        self.numberFormatter = [[NSNumberFormatter alloc] init];
-        self.numberFormatter.numberStyle = NSNumberFormatterDecimalStyle;
-
         self.cursorPositionLabelTemplate = [self makeCursorPositionLabelTemplate];
         self.cursorPositionLabel = [self createLabelSection];
 
@@ -185,10 +181,8 @@ static constexpr CGFloat kSectionPadding = 8.0;
 
 - (void)updateWordCount:(NSUInteger)count
 {
-    NSString* wordCountStr = [self.numberFormatter stringFromNumber:@(count)];
-
-    // FIXME: needs pluralization
-    NSString* label = [NSString stringWithFormat:@"%@ Words", wordCountStr];
+    NSString* labelFormat = NSLocalizedString(@"%lu Word(s)", "Number of words in document");
+    NSString* label = [NSString localizedStringWithFormat:labelFormat, count];
     self.wordCountLabel.stringValue = label;
 }
 

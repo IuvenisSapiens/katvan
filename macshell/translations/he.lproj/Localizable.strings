@@ -315,3 +315,6 @@
 
 /* Tooltip for command button */
 "Zoom out preview" = "הקטנת התצוגה המקדימה";
+
+/* Number of words in document */
+"%lu Word(s)" = "%lu מילים";
