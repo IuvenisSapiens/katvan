@@ -320,7 +320,8 @@
     }
 
     int lineCount = self.editor->document()->blockCount();
-    NSString* msg = [NSString stringWithFormat:NSLocalizedString(@"Enter a line number (up to %d):", nil), lineCount];
+    NSString* format = NSLocalizedString(@"Enter a line number (up to %d):", "Go to line dialog prompt");
+    NSString* msg = [NSString stringWithFormat:format, lineCount];
 
     self.goToLineDialog->setLabelText(QString::fromNSString(msg));
     self.goToLineDialog->setIntRange(1, lineCount);

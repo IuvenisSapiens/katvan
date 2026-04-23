@@ -1,0 +1,329 @@
+/* Typst download cache statistics */
+"%2$@ distinct versions of %1$@ packages (total %3$@)" = "%2$@ גרסאות שונות של %1$@ חבילות (סך הכל %3$@)";
+
+/* Application menu item */
+"About Katvan" = "מידע על כתבן";
+
+/* View menu item */
+"Actual Size" = "גודל אמיתי";
+
+/* Compiler setting label */
+"Allow download and use of @preview packages" = "אפשר הורדה ושימוש בחבילות חיצוניות";
+
+/* Introduction label for allowed paths list in compiler settings */
+"Allow including resources also from the following directories and their subdirectories:" = "אפשר הכללת משאבים גם מהנתיבים הבאים:";
+
+/* Editor setting label */
+"Automatic indentation:" = "הזחה אוטומטית:";
+
+/* Editor setting label */
+"Automatically insert closing brackets" = "הכנסת סוגרים באופן אוטומטי";
+
+/* Editor setting label */
+"Automatically show autocomplete suggestions" = "הצגת הצעות השלמה באופן אוטומטי";
+
+/* Go menu item */
+"Back" = "אחורה";
+
+/* Window menu item */
+"Bring All to Front" = "הבאת כל החלונות קדימה";
+
+/* Button in compiler settings to open download cache */
+"Browse..." = "סיור...";
+
+/* Button to select another font */
+"Change..." = "שינוי...";
+
+/* File menu item */
+"Close" = "סגירה";
+
+/* Editor setting label */
+"Color scheme:" = "ערכת צבעים:";
+
+/* Details about the result of the last compilation */
+"Compilation Status" = "מצב הידור";
+
+/* Compilation status */
+"Compiled successfully" = "הודר בהצלחה";
+
+/* Compilation status */
+"Compiled with errors" = "הודר עם שגיאות";
+
+/* Compilation status */
+"Compiled with warnings" = "הודר עם אזהרות";
+
+/* Settings dialog tab title */
+"Compiler" = "מהדר";
+
+/* Compiler setting label */
+"Compiler flags:" = "הגדרות מהדר:";
+
+/* Compilation status */
+"Compiling..." = "מהדר כעת...";
+
+/* Edit menu item */
+"Complete" = "השלמה";
+
+/* Edit menu item */
+"Copy" = "העתקה";
+
+/* Tooltip of status bar item */
+"Cursor move style" = "סגנון תנועת סמן";
+
+/* Edit menu item */
+"Cut" = "גזירה";
+
+/* Editor color scheme option */
+"Dark" = "כהה";
+
+/* Edit menu item */
+"Delete" = "מחיקה";
+
+/* Tooltip for sidebar tab */
+"Document Outline" = "תוכן עניינים";
+
+/* Editor line number gutter option */
+"Don't show" = "ללא הצגה";
+
+/* Compiler setting label */
+"Download cache:" = "מטמון הורדות:";
+
+/* Menu title */
+"Edit" = "עריכה";
+
+/* Settings dialog tab title */
+"Editor" = "עורך";
+
+/* Editor setting label */
+"Editor font:" = "גופן עורך:";
+
+/* Compiler setting label */
+"Enable experimental accessibility features" = "הפעלת תכונות נגישות נסיוניות";
+
+/* Go to line dialog prompt */
+"Enter a line number (up to %d):" = "הכנס מספר שורה (לכל היותר %d):";
+
+/* File menu item */
+"Export as PDF..." = "ייצוא כ-PDF...";
+
+/* Menu title */
+"File" = "קובץ";
+
+/* Placeholder text in labels filter field */
+"Filter" = "סינון";
+
+/* Edit menu submenu title */
+"Find" = "חיפוש";
+
+/* Edit>Find menu item */
+"Find and Replace..." = "חיפוש והחלפה...";
+
+/* Edit>Find menu item */
+"Find Next" = "מציאת הבא";
+
+/* Edit>Find menu item */
+"Find Previous" = "מציאת הקודם";
+
+/* Edit>Find menu item */
+"Find..." = "חיפוש...";
+
+/* Preview zoom level option */
+"Fit Page" = "התאמה לעמוד";
+
+/* Preview zoom level option */
+"Fit Width" = "התאמה לרוחב";
+
+/* Tooltip for command button */
+"Follow editor cursor" = "מעקב אחר סמן העורך";
+
+/* Editor color scheme option */
+"Follow system settings" = "לפי הגדרות המערכת";
+
+/* Go menu item */
+"Forward" = "קדימה";
+
+/* Checkbox in PDF export options */
+"Generate tagged PDF" = "הפקת PDF מתויג";
+
+/* Menu title */
+"Go" = "מעבר";
+
+/* Go menu item */
+"Go to Definition" = "מעבר להגדרה";
+
+/* Go menu item */
+"Go to Line..." = "מעבר לשורה...";
+
+/* Menu title */
+"Help" = "עזרה";
+
+/* Application menu item */
+"Hide Katvan" = "הסתרת כתבן";
+
+/* Application menu item */
+"Hide Others" = "הסתרת יישומים אחרים";
+
+/* Editor setting label */
+"Indent width:" = "רוחב הזחה:";
+
+/* Editor setting label */
+"Indent with:" = "הזחה באמצעות:";
+
+/* Opens insert menu for the editor */
+"Insert" = "הכנסה";
+
+/* Tooltip for command button */
+"Invert preview colors" = "היפוך צבעי תצוגה מקדימה";
+
+/* View menu item */
+"Invert Preview Colors" = "היפוך צבעי תצוגה מקדימה";
+
+/* Tooltip for sidebar tab */
+"Issues" = "בעיות";
+
+/* Go menu item */
+"Jump to Preview" = "קפיצה לתצוגה המקדימה";
+
+/* Help menu item */
+"Katvan Help" = "עזרה עבור כתבן";
+
+/* Tooltip for sidebar tab */
+"Labels" = "תוויות";
+
+/* Editor color scheme option */
+"Light" = "בהירה";
+
+/* Text cursor position */
+"Line %1$@, Column %2$@" = "שורה %1$@, עמודה %2$@";
+
+/* Cursor move style */
+"Logical" = "לוגי";
+
+/* Window menu item */
+"Minimize" = "מזעור";
+
+/* File menu item */
+"New" = "חדש";
+
+/* Editor indent mode option */
+"None" = "ללא";
+
+/* Editor indent mode option */
+"Normal" = "רגילה";
+
+/* Editor line number gutter option */
+"On both sides" = "בשני הצדדים";
+
+/* Editor line number gutter option */
+"On primary side only" = "בצד העיקרי בלבד";
+
+/* File menu item */
+"Open..." = "פתיחה...";
+
+/* Preview current page label */
+"Page %@ of %d" = "עמוד %1$@ מתוך %2$d";
+
+/* Edit menu item */
+"Paste" = "הדבקה";
+
+/* Field label in PDF export options */
+"PDF Version:" = "גירסת PDF:";
+
+/* Field label in PDF export options */
+"PDF/A Standard:" = "תקן ⁨PDF/A⁩:";
+
+/* Application menu item */
+"Preferences..." = "הגדרות...";
+
+/* Segment control for choosing where the preview will be */
+"Preview Location" = "מיקום תצוגה מקדימה";
+
+/* Application menu item */
+"Quit Katvan" = "סיום כתבן";
+
+/* Edit menu item */
+"Redo" = "שחזור הפעולה האחרונה";
+
+/* File menu item */
+"Revert to Saved" = "חזרה לגירסה שמורה";
+
+/* File menu item */
+"Save All" = "שמירת הכל";
+
+/* File menu item */
+"Save As..." = "שמירה בשם...";
+
+/* File menu item */
+"Save..." = "שמירה...";
+
+/* Edit menu item */
+"Select All" = "בחירת הכל";
+
+/* Application menu submenu title */
+"Services" = "שירותים";
+
+/* Application menu item */
+"Show All" = "הצגת כל היישומים";
+
+/* Editor setting label */
+"Show BiDi control characters" = "הצגת תווי בקרת כיווניות";
+
+/* Editor setting label */
+"Show line numbers:" = "הצגת מספרי שורה:";
+
+/* Editor indent mode option */
+"Smart" = "חכמה";
+
+/* Editor indent style option */
+"Spaces" = "רווחים";
+
+/* Editor setting label */
+"Tab display width:" = "רוחב טאב:";
+
+/* Editor indent style option */
+"Tabs" = "טאבים";
+
+/* Help menu item */
+"Typst Documentation..." = "מעבר לתיעוד של Typst...";
+
+/* Edit menu item */
+"Undo" = "ביטול הפעולה האחרונה";
+
+/* Menu title */
+"View" = "תצוגה";
+
+/* Cursor move style */
+"Visual" = "ויזואלי";
+
+/* Menu title */
+"Window" = "חלון";
+
+/* Window menu item */
+"Zoom" = "הקטנה/הגדלה";
+
+/* View menu item */
+"Zoom In" = "הגדלה";
+
+/* Tooltip for command button */
+"Zoom in preview" = "הגדלת התצוגה המקדימה";
+
+/* Tooltip for preview zoom pull-down */
+"Zoom level" = "רמת זום";
+
+/* View menu item */
+"Zoom Out" = "הקטנה";
+
+/* Tooltip for command button */
+"Zoom out preview" = "הקטנת התצוגה המקדימה";
+
+/* Number of words in document */
+"%lu Word(s)" = "%lu מילים";
+
+/* Preview position option */
+"No preview" = "ללא תצוגה מקדימה";
+
+/* Preview position option */
+"On the left" = "בצד ימין";
+
+/* Preview position option */
+"On the right" = "בצד שמאל";

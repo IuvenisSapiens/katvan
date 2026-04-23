@@ -22,7 +22,7 @@
 
 #import <AppKit/AppKit.h>
 
-@interface KatvanLabelsView : NSViewController <NSTableViewDelegate>
+@interface KatvanLabelsView : NSViewController <NSTableViewDelegate, NSTableViewDataSource>
 
 @property (nonatomic, weak) id<KatvanGoToBlockTarget> target;
 

@@ -1,4 +1,3 @@
-// -*- mode: objective-cpp -*-
 /*
  * This file is part of Katvan
  * Copyright (c) 2024 - 2026 Igor Khanin
@@ -32,10 +31,12 @@
     if (self) {
         NSTextField* label = [NSTextField wrappingLabelWithString:@""];
         label.translatesAutoresizingMaskIntoConstraints = NO;
+        label.alignment = NSTextAlignmentLeft;
         label.font = [NSFont systemFontOfSize:NSFont.systemFontSize];
 
         self.locationField = [NSTextField labelWithString:@""];
         self.locationField.translatesAutoresizingMaskIntoConstraints = NO;
+        self.locationField.alignment = NSTextAlignmentLeft;
         self.locationField.font = [NSFont systemFontOfSize:NSFont.smallSystemFontSize];
         self.locationField.textColor = NSColor.secondaryLabelColor;
 
@@ -56,18 +57,21 @@
         const CGFloat padding = 6.0;
         const CGFloat iconTextSpacing = 8.0;
 
+        // Explicitly use leftAnchor/rightAnchor here instead of leading/trailing, because
+        // issue labels are supposed to be LTR always (or at least until Typst has localized
+        // error messages, if ever)
         [NSLayoutConstraint activateConstraints:@[
-            [iconView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:padding],
+            [iconView.leftAnchor constraintEqualToAnchor:self.leftAnchor constant:padding],
             [iconView.bottomAnchor constraintEqualToAnchor:label.firstBaselineAnchor],
 
             [label.topAnchor constraintEqualToAnchor:self.topAnchor constant:padding],
-            [label.leadingAnchor constraintEqualToAnchor:iconView.trailingAnchor constant:iconTextSpacing],
-            [label.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-padding],
+            [label.leftAnchor constraintEqualToAnchor:iconView.rightAnchor constant:iconTextSpacing],
+            [label.rightAnchor constraintEqualToAnchor:self.rightAnchor constant:-padding],
 
             [self.locationField.topAnchor constraintEqualToAnchor:label.bottomAnchor constant:2.0],
             [self.locationField.bottomAnchor constraintEqualToAnchor:self.bottomAnchor constant:-padding],
-            [self.locationField.leadingAnchor constraintEqualToAnchor:iconView.trailingAnchor constant:iconTextSpacing],
-            [self.locationField.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-padding],
+            [self.locationField.leftAnchor constraintEqualToAnchor:iconView.rightAnchor constant:iconTextSpacing],
+            [self.locationField.rightAnchor constraintEqualToAnchor:self.rightAnchor constant:-padding],
         ]];
     }
     return self;

@@ -179,11 +179,15 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
     // itself, so create a placeholder
     [levelsMenu addItemWithTitle:@"[Placeholder]" action:nil keyEquivalent:@""];
 
-    item = [levelsMenu addItemWithTitle:NSLocalizedString(@"Fit Page", nil) action:@selector(setZoomLevel:) keyEquivalent:@""];
+    item = [levelsMenu addItemWithTitle:NSLocalizedString(@"Fit Page", "Preview zoom level option")
+                       action:@selector(setZoomLevel:)
+                       keyEquivalent:@""];
     [item setTarget:self];
     [item setTag:kZoomLevelFitPage];
 
-    item = [levelsMenu addItemWithTitle:NSLocalizedString(@"Fit Width", nil) action:@selector(setZoomLevel:) keyEquivalent:@""];
+    item = [levelsMenu addItemWithTitle:NSLocalizedString(@"Fit Width", "Preview zoom level option")
+                       action:@selector(setZoomLevel:)
+                       keyEquivalent:@""];
     [item setTarget:self];
     [item setTag:kZoomLevelFitWidth];
 
@@ -392,7 +396,8 @@ static const NSSize kPageNumberLabelPadding = NSMakeSize(8, 8);
     int currentPage = self.previewerView->currentPage();
     NSString* page = self.previewerView->pageLabel(currentPage).toNSString();
 
-    NSString* label = [NSString stringWithFormat:NSLocalizedString(@"Page %@ of %d", nil), page, pageCount];
+    NSString* format = NSLocalizedString(@"Page %@ of %d", "Preview current page label");
+    NSString* label = [NSString stringWithFormat:format, page, pageCount];
     self.currentPageLabel.stringValue = label;
 }
 

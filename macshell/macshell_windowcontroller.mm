@@ -93,6 +93,8 @@
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+
     delete self.wordCounter;
     delete self.driver;
 }
@@ -208,6 +210,11 @@
 
     [self.window setContentViewController:self.splitViewController];
 
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                          selector:@selector(splitViewDidMove:)
+                                          name:NSSplitViewDidResizeSubviewsNotification
+                                          object:self.splitViewController.splitView];
+
     NSToolbar* toolbar = [[NSToolbar alloc] initWithIdentifier:@"KatvanWindowToolbar"];
     toolbar.delegate = self;
     toolbar.allowsUserCustomization = NO;
@@ -222,17 +229,17 @@
     [self.sidebar addTabController:self.outlineView
                   icon:[NSImage imageWithSystemSymbolName:@"document.viewfinder.fill"
                                 accessibilityDescription:@"Document page in a targeting frame"]
-                  toolTip:NSLocalizedString(@"Document Outline", nil)];
+                  toolTip:NSLocalizedString(@"Document Outline", "Tooltip for sidebar tab")];
 
     [self.sidebar addTabController:self.labelsView
                   icon:[NSImage imageWithSystemSymbolName:@"tag"
                                 accessibilityDescription:@"Tag"]
-                  toolTip:NSLocalizedString(@"Labels", nil)];
+                  toolTip:NSLocalizedString(@"Labels", "Tooltip for sidebar tab")];
 
     [self.sidebar addTabController:self.issueList
                   icon:[NSImage imageWithSystemSymbolName:@"exclamationmark.triangle"
                                 accessibilityDescription:@"Exclamation mark in a triangle"]
-                  toolTip:NSLocalizedString(@"Issues", nil)];
+                  toolTip:NSLocalizedString(@"Issues", "Tooltip for sidebar tab")];
 
     [self.sidebar ensureControllerSelected:self.outlineView];
 }
@@ -274,15 +281,31 @@
         return item;
     }
     if ([itemIdentifier isEqualToString:@"katvan.toolbar.layout"]) {
+        NSArray* itemIcons;
+        if (NSApp.userInterfaceLayoutDirection == NSUserInterfaceLayoutDirectionLeftToRight) {
+            itemIcons = @[
+                [NSImage imageWithSystemSymbolName:@"rectangle.lefthalf.filled" accessibilityDescription:@"On the left"],
+                [NSImage imageWithSystemSymbolName:@"rectangle" accessibilityDescription:@"No preview"],
+                [NSImage imageWithSystemSymbolName:@"rectangle.righthalf.filled" accessibilityDescription:@"On the right"],
+            ];
+        }
+        else {
+            itemIcons = @[
+                [NSImage imageWithSystemSymbolName:@"rectangle.righthalf.filled" accessibilityDescription:@"On the right"],
+                [NSImage imageWithSystemSymbolName:@"rectangle" accessibilityDescription:@"No preview"],
+                [NSImage imageWithSystemSymbolName:@"rectangle.lefthalf.filled" accessibilityDescription:@"On the left"],
+            ];
+        }
+
         NSToolbarItemGroup* item =
             [NSToolbarItemGroup groupWithItemIdentifier:itemIdentifier
-                                images:@[
-                                    [NSImage imageWithSystemSymbolName:@"rectangle.lefthalf.filled" accessibilityDescription:@"On the left"],
-                                    [NSImage imageWithSystemSymbolName:@"rectangle" accessibilityDescription:@"No preview"],
-                                    [NSImage imageWithSystemSymbolName:@"rectangle.righthalf.filled" accessibilityDescription:@"On the right"],
-                                ]
+                                images:itemIcons
                                 selectionMode:NSToolbarItemGroupSelectionModeSelectOne
-                                labels:@[]
+                                labels:@[
+                                    NSLocalizedString(@"On the left", "Preview position option"),
+                                    NSLocalizedString(@"No preview", "Preview position option"),
+                                    NSLocalizedString(@"On the right", "Preview position option"),
+                                ]
                                 target:self
                                 action:@selector(applyPreviewLocation:)];
 
@@ -381,16 +404,23 @@
     return YES;
 }
 
+- (void)splitViewDidMove:(NSNotification*)notification
+{
+    if (notification.userInfo[@"NSSplitViewUserResizeKey"]) {
+        [self invalidateRestorableState];
+    }
+}
+
 - (void)applyPreviewLocation:(id)sender
 {
     NSInteger index = self.previewLayoutItem.selectedIndex;
-    if (index == 0) { // Preview on the left
+    if (index == 0) { // Preview on the left (in LTR mode)
         self.splitViewController.splitViewItems = @[self.sidebarSplitItem, self.previewerSplitItem, self.editorSplitItem];
     }
     else if (index == 1) { // No preview
         self.splitViewController.splitViewItems = @[self.sidebarSplitItem, self.editorSplitItem];
     }
-    else if (index == 2) { // Preview on the right
+    else if (index == 2) { // Preview on the right (in LTR mode)
         self.splitViewController.splitViewItems = @[self.sidebarSplitItem, self.editorSplitItem, self.previewerSplitItem];
     }
 
@@ -451,24 +481,24 @@
         switch (self.driver->status()) {
             case katvan::TypstDriverWrapper::Status::SUCCESS:
                 symbolColor = NSColor.systemGreenColor;
-                toolTip = NSLocalizedString(@"Compiled successfully", "compilation status");
+                toolTip = NSLocalizedString(@"Compiled successfully", "Compilation status");
                 statusSymbol = [NSImage imageWithSystemSymbolName:@"checkmark.circle"
                                         accessibilityDescription:@"Checkmark in a circle"];
                 break;
             case katvan::TypstDriverWrapper::Status::SUCCESS_WITH_WARNINGS:
-                toolTip = NSLocalizedString(@"Compiled with warnings", "compilation status");
+                toolTip = NSLocalizedString(@"Compiled with warnings", "Compilation status");
                 symbolColor = NSColor.systemYellowColor;
                 statusSymbol = [NSImage imageWithSystemSymbolName:@"exclamationmark.circle"
                                         accessibilityDescription:@"Exclamation mark in a circle"];
                 break;
             case katvan::TypstDriverWrapper::Status::FAILED:
-                toolTip = NSLocalizedString(@"Compiled with errors", "compilation status");
+                toolTip = NSLocalizedString(@"Compiled with errors", "Compilation status");
                 symbolColor = NSColor.systemRedColor;
                 statusSymbol = [NSImage imageWithSystemSymbolName:@"xmark.circle"
                                         accessibilityDescription:@"X mark in a circle"];
                 break;
             default:
-                toolTip = NSLocalizedString(@"Compiling...", "compilation status");
+                toolTip = NSLocalizedString(@"Compiling...", "Compilation status");
                 symbolColor = NSColor.systemGrayColor;
                 statusSymbol = [NSImage imageWithSystemSymbolName:@"clock"
                                         accessibilityDescription:@"Clock"];

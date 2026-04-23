@@ -23,11 +23,13 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(TRANSLATION_LANGUAGES he)
+
 find_package(Qt6 REQUIRED COMPONENTS Core)
 
 qt_standard_project_setup(
     REQUIRES 6.8
-    I18N_TRANSLATED_LANGUAGES he
+    I18N_TRANSLATED_LANGUAGES ${TRANSLATION_LANGUAGES}
 )
 
 add_subdirectory(typstdriver)
