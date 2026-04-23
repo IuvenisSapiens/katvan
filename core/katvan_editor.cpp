@@ -1274,6 +1274,12 @@ void Editor::insertFromMimeData(const QMimeData* source)
             insertLabelRef(label);
         }
     }
+    else if (source->hasText() && source->text().startsWith("katvan-label-ref:")) {
+        QString label = source->text().sliced(17);
+        if (!label.isEmpty()) {
+            insertLabelRef(label);
+        }
+    }
     else if (source->hasColor()) {
         insertColor(source->colorData().value<QColor>());
     }

@@ -83,6 +83,7 @@
     self.tableView.focusRingType = NSFocusRingTypeNone;
     self.tableView.usesAutomaticRowHeights = YES;
     self.tableView.delegate = self;
+    self.tableView.dataSource = self;
     self.tableView.target = self;
     self.tableView.action = @selector(labelSelected:);
 
@@ -155,6 +156,26 @@
     if (item.line >= 0 && item.column >= 0) {
         [self.target goToBlock:item.line column:item.column];
     }
+}
+
+- (NSInteger)numberOfRowsInTableView:(NSTableView*)tableView
+{
+    // NOTE: This method isn't actually used (the data comes to the table via
+    // KVB), but needed to satisfy the NSTableViewDataSource protocol (or else
+    // there is a runtime warning). The protocol is only adopted for drag and
+    // drop.
+    return [self.arrayController.arrangedObjects count];
+}
+
+- (id)tableView:(NSTableView*)tableView objectValueForTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row
+{
+    return [self.arrayController.arrangedObjects objectAtIndex:row];
+}
+
+- (id<NSPasteboardWriting>)tableView:(NSTableView*)tableView pasteboardWriterForRow:(NSInteger)row
+{
+    KatvanLabelItem* item = [self.arrayController.arrangedObjects objectAtIndex:row];
+    return [NSString stringWithFormat:@"katvan-label-ref:%@", item.labelName];
 }
 
 - (NSView*)tableView:(NSTableView*)tableView viewForTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row
