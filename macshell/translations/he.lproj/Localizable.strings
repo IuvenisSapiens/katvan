@@ -318,3 +318,12 @@
 
 /* Number of words in document */
 "%lu Word(s)" = "%lu מילים";
+
+/* Preview position option */
+"No preview" = "ללא תצוגה מקדימה";
+
+/* Preview position option */
+"On the left" = "בצד ימין";
+
+/* Preview position option */
+"On the right" = "בצד שמאל";

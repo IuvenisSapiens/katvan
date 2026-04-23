@@ -53,8 +53,8 @@ qt_add_resources(macshell katvan_translations
 )
 
 # Collect Apple string files for macshell strings
-set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/translations/en.lproj/Localizable.stringsdict" PROPERTIES MACOSX_PACKAGE_LOCATION "Resources/en.lproj")
-target_sources(macshell PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/translations/en.lproj/Localizable.stringsdict")
+set_source_files_properties(translations/en.lproj/Localizable.stringsdict PROPERTIES MACOSX_PACKAGE_LOCATION "Resources/en.lproj")
+target_sources(macshell PRIVATE translations/en.lproj/Localizable.stringsdict)
 
 foreach(LANG IN LISTS TRANSLATION_LANGUAGES)
     set(LANG_STRINGS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/translations/${LANG}.lproj/Localizable.strings")
