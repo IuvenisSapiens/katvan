@@ -57,8 +57,9 @@ jobs:
           version: 6.8.*
           cache: true
 
-      - name: Setup vcpkg
-        uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11.6
+      - name: Bootstrap vcpkg
+        run: |
+          & "$env:VCPKG_INSTALLATION_ROOT\bootstrap-vcpkg.bat" -disableMetrics
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -71,7 +72,7 @@ jobs:
             typstdriver/rust -> ../../build/x64/RelWithDebInfo/cargo/build
 
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake"
+        run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake"
 
       - name: Build
         run: cmake --build build -j --config RelWithDebInfo
@@ -106,11 +107,9 @@ jobs:
           workspaces: |
             typstdriver/rust -> ../../build/cargo/build
 
-      - name: Test path
-        run: |
-          echo $PATH
-          ls -l /opt/homebrew/bin
-          ls -l /opt/homebrew/Cellar/rustup/1.29.0/bin/
+      # Ensures that whatever rust-toolchain installed is before the Homebrew stubs
+      - name: Adjust PATH
+        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Configure
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0
