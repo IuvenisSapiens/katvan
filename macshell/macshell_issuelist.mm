@@ -17,6 +17,8 @@
  */
 #import "macshell_issuelist.h"
 
+#include "katvan_diagnosticsmodel.h"
+
 @interface IssueLabel : NSTableCellView
 
 @property (nonatomic) NSTextField* locationField;
@@ -84,28 +86,38 @@
 @property (nonatomic) NSScrollView* scrollView;
 @property (nonatomic) NSTableView* tableView;
 
-@property (nonatomic) katvan::DiagnosticsModel* model;
+@property (nonatomic) katvan::DiagnosticsModel* compilationModel;
+@property (nonatomic) katvan::DiagnosticsModel* exportModel;
 
 @end
 
 @implementation KatvanIssueList
 
-- (instancetype)initWithModel:(katvan::DiagnosticsModel*)model
+- (instancetype)initWithDriver:(katvan::TypstDriverWrapper*)driver
 {
     self = [super init];
     if (self) {
-        self.model = model;
+        self.compilationModel = driver->compilationDiagnosticsModel();
+        self.exportModel = driver->exportDiagnosticsModel();
 
         __weak __typeof__(self) weakSelf = self;
-        QObject::connect(self.model, &QAbstractItemModel::modelReset,
-                         self.model, [weakSelf]() {
+
+        QObject::connect(self.compilationModel, &QAbstractItemModel::modelReset,
+                         self.compilationModel, [weakSelf]() {
             [weakSelf.tableView reloadData];
         });
-        QObject::connect(self.model, &QAbstractItemModel::rowsInserted,
-                         self.model, [weakSelf](const QModelIndex&, int first, int last) {
-            NSRange range = NSMakeRange(first, last - first + 1);
-            NSIndexSet* indexSet = [NSIndexSet indexSetWithIndexesInRange:range];
-            [weakSelf.tableView insertRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectNone];
+        QObject::connect(self.compilationModel, &QAbstractItemModel::rowsInserted,
+                         self.compilationModel, [weakSelf](const QModelIndex&, int first, int last) {
+            [weakSelf relayAddedRowsFromFirst:first toLast:last withOffset:1];
+        });
+
+        QObject::connect(self.exportModel, &QAbstractItemModel::modelReset,
+                         self.exportModel, [weakSelf]() {
+            [weakSelf.tableView reloadData];
+        });
+        QObject::connect(self.exportModel, &QAbstractItemModel::rowsInserted,
+                         self.exportModel, [weakSelf](const QModelIndex&, int first, int last) {
+            [weakSelf relayAddedRowsFromFirst:first toLast:last withOffset:[weakSelf numberOfCompilationIssues] + 2];
         });
     }
     return self;
@@ -147,11 +159,57 @@
     ]];
 }
 
+- (void)scrollToExportIssues
+{
+    [self.tableView scrollRowToVisible:[self numberOfCompilationIssues] + 2];
+}
+
+- (NSInteger)numberOfCompilationIssues
+{
+    return self.compilationModel->rowCount(QModelIndex());
+}
+
+- (NSInteger)numberOfExportIssues
+{
+    return self.exportModel->rowCount(QModelIndex());
+}
+
+- (std::tuple<katvan::DiagnosticsModel*, int>)modelAndActualRowForRow:(NSInteger)row
+{
+    if (row > 0 && row <= [self numberOfCompilationIssues]) {
+        return std::make_tuple(self.compilationModel, row - 1);
+    }
+    if (row > [self numberOfCompilationIssues] + 1) {
+        return std::make_tuple(self.exportModel, row - [self numberOfCompilationIssues] - 2);
+    }
+    return std::make_tuple(nullptr, 0);
+}
+
+- (void)relayAddedRowsFromFirst:(int)first toLast:(int)last withOffset:(int)offset
+{
+    NSInteger location = first + offset;
+    NSInteger num = last - first + 1;
+    if (location > [self.tableView numberOfRows]) {
+        // In case this adds the optional "Export" group header
+        location -= 1;
+        num += 1;
+    }
+
+    NSRange range = NSMakeRange(location, num);
+    NSIndexSet* indexSet = [NSIndexSet indexSetWithIndexesInRange:range];
+    [self.tableView insertRowsAtIndexes:indexSet withAnimation:NSTableViewAnimationEffectNone];
+}
+
 - (void)issueSelected:(id)sender
 {
-    QModelIndex index = self.model->index(self.tableView.clickedRow, 0);
+    auto [model, actualRow] = [self modelAndActualRowForRow:self.tableView.clickedRow];
+    if (!model) {
+        return;
+    }
 
-    auto location = self.model->getSourceLocation(index);
+    QModelIndex index = model->index(actualRow, 0);
+
+    auto location = model->getSourceLocation(index);
     if (location) {
         const auto [line, column] = *location;
         [self.target goToBlock:line column:column];
@@ -160,7 +218,18 @@
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView*)tableView
 {
-    return self.model->rowCount(QModelIndex());
+    NSInteger count = 1 + [self numberOfCompilationIssues];
+
+    NSInteger exportIssuesCount = [self numberOfExportIssues];
+    if (exportIssuesCount > 0) {
+        count = count + 1 + exportIssuesCount;
+    }
+    return count;
+}
+
+- (BOOL)tableView:(NSTableView*)tableView isGroupRow:(NSInteger)row
+{
+    return row == 0 || row == ([self numberOfCompilationIssues] + 1);
 }
 
 - (id)tableView:(NSTableView*)tableView objectValueForTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row
@@ -168,17 +237,56 @@
     return nil;
 }
 
+- (NSView*)tableView:(NSTableView*)tableView viewForHeaderRow:(NSInteger)row
+{
+    NSTextField* view = [tableView makeViewWithIdentifier:@"headerView" owner:self];
+    if (!view) {
+        view = [NSTextField labelWithString:@""];
+        view.identifier = @"headerView";
+    }
+
+    if (row == 0) {
+        view.stringValue = NSLocalizedString(@"Compilation", "Issues section header");
+    }
+    else if (row == [self numberOfCompilationIssues] + 1) {
+        NSDate* timestamp = self.exportModel->lastTimestamp().toNSDate();
+
+        NSDateFormatterStyle dateStyle = NSDateFormatterShortStyle;
+        if ([[NSCalendar currentCalendar] isDateInToday:timestamp]) {
+            dateStyle = NSDateFormatterNoStyle;
+        }
+
+        NSString* timestampStr = [NSDateFormatter
+            localizedStringFromDate:timestamp
+            dateStyle:dateStyle
+            timeStyle:NSDateFormatterShortStyle];
+
+        NSString* label = NSLocalizedString(@"Last export", "Issues section header");
+        view.stringValue = [NSString stringWithFormat:@"%@ (%@)", label, timestampStr];
+    }
+    return view;
+}
+
 - (NSView*)tableView:(NSTableView*)tableView viewForTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row
 {
+    if ([self tableView:tableView isGroupRow:row]) {
+        return [self tableView:tableView viewForHeaderRow:row];
+    }
+
     IssueLabel* view = [tableView makeViewWithIdentifier:@"issueLabel" owner:self];
     if (view == nil) {
         view = [[IssueLabel alloc] init];
         view.identifier = @"issueLabel";
     }
 
-    QModelIndex messageIndex = self.model->index(row, katvan::DiagnosticsModel::COLUMN_MESSAGE);
-    QModelIndex locationIndex = self.model->index(row, katvan::DiagnosticsModel::COLUMN_SOURCE_LOCATION);
-    QModelIndex severityIndex = self.model->index(row, katvan::DiagnosticsModel::COLUMN_SEVERITY);
+    auto [model, actualRow] = [self modelAndActualRowForRow:row];
+    if (!model) {
+        return nil;
+    }
+
+    QModelIndex messageIndex = model->index(actualRow, katvan::DiagnosticsModel::COLUMN_MESSAGE);
+    QModelIndex locationIndex = model->index(actualRow, katvan::DiagnosticsModel::COLUMN_SOURCE_LOCATION);
+    QModelIndex severityIndex = model->index(actualRow, katvan::DiagnosticsModel::COLUMN_SEVERITY);
 
     view.textField.stringValue = messageIndex.data().toString().toNSString();
     [view.textField invalidateIntrinsicContentSize];
@@ -209,6 +317,11 @@
     view.imageView.toolTip = severityIndex.data(Qt::ToolTipRole).toString().toNSString();
 
     return view;
+}
+
+- (BOOL)tableView:(NSTableView*)tableView shouldSelectRow:(NSInteger)row
+{
+    return ![self tableView:tableView isGroupRow:row];
 }
 
 @end

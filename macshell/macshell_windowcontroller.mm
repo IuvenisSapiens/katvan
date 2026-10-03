@@ -113,7 +113,7 @@
     self.labelsView = [[KatvanLabelsView alloc] init];
     self.labelsView.target = self;
 
-    self.issueList = [[KatvanIssueList alloc] initWithModel:self.driver->diagnosticsModel()];
+    self.issueList = [[KatvanIssueList alloc] initWithDriver:self.driver];
     self.issueList.target = self;
 
     __weak __typeof__(self) weakSelf = self;
@@ -145,6 +145,10 @@
     QObject::connect(self.driver, &katvan::TypstDriverWrapper::labelsUpdated,
                      self.driver, [weakSelf](QList<katvan::typstdriver::DocumentLabel> labels) {
         [weakSelf.labelsView setLabels:labels];
+    });
+    QObject::connect(self.driver, &katvan::TypstDriverWrapper::exportFinished,
+                     self.driver, [weakSelf](bool success) {
+        [weakSelf exportFinished:success];
     });
 
     QObject::connect(self.editorView.editor, &katvan::Editor::toolTipRequested,
@@ -409,7 +413,8 @@
         }
         return NO;
     }
-    else if (action == @selector(exportAsPdf:)) {
+    else if (action == @selector(exportAsPdf:) || action == @selector(exportAsSinglePng:) ||
+             action == @selector(exportAsMultiplePng:)) {
         return [self.exporter canExport];
     }
     return YES;
@@ -455,6 +460,16 @@
     [self.exporter exportAsPdf];
 }
 
+- (void)exportAsSinglePng:(id)sender
+{
+    [self.exporter exportAsSinglePng];
+}
+
+- (void)exportAsMultiplePng:(id)sender
+{
+    [self.exporter exportAsMultiplePng];
+}
+
 - (void)goToPreview:(id)sender
 {
     QTextCursor cursor = self.editorView.editor->textCursor();
@@ -492,7 +507,7 @@
 
 - (void)compilationStatusChanged
 {
-    self.editorView.editor->setSourceDiagnostics(self.driver->diagnosticsModel()->sourceDiagnostics());
+    self.editorView.editor->setSourceDiagnostics(self.driver->compilationDiagnosticsModel()->sourceDiagnostics());
 
     if (self.compilationStatusItem) {
         NSImage* statusSymbol;
@@ -530,6 +545,16 @@
         button.image = statusSymbol;
         button.contentTintColor = symbolColor;
         button.toolTip = toolTip;
+    }
+}
+
+- (void)exportFinished:(BOOL)success
+{
+    if (!success) {
+        self.sidebarSplitItem.collapsed = NO;
+
+        [self.sidebar ensureControllerSelected:self.issueList];
+        [self.issueList scrollToExportIssues];
     }
 }
 

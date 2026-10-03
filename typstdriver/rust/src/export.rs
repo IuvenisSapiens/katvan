@@ -44,26 +44,19 @@ pub fn export_pdf(
 
         match std::fs::write(path, data) {
             Ok(()) => {
-                logger.log_note(&format!(
-                    "PDF exported successfully to {display_path} in {elapsed}"
-                ));
+                logger.log_note(
+                    ffi::LogCategory::Export,
+                    &format!("PDF exported successfully to {display_path} in {elapsed}"),
+                );
                 Ok(true)
             }
             Err(err) => {
-                logger.log_error(
-                    &format!("Unable to write to {display_path}: {err}"),
-                    "",
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    Vec::new(),
-                );
+                log_error(logger, &format!("Unable to write to {display_path}: {err}"));
                 Ok(false)
             }
         }
     } else {
-        logger.log_diagnostics(world, &result.unwrap_err());
+        logger.log_diagnostics(world, ffi::LogCategory::Export, &result.unwrap_err());
         Ok(false)
     }
 }
@@ -112,21 +105,14 @@ pub fn export_png(
 
     match pixmap.save_png(path) {
         Ok(()) => {
-            logger.log_note(&format!(
-                "PNG exported successfully to {display_path} in {elapsed}"
-            ));
+            logger.log_note(
+                ffi::LogCategory::Export,
+                &format!("PNG exported successfully to {display_path} in {elapsed}"),
+            );
             true
         }
         Err(err) => {
-            logger.log_error(
-                &format!("Unable to write to {display_path}: {err}"),
-                "",
-                -1,
-                -1,
-                -1,
-                -1,
-                Vec::new(),
-            );
+            log_error(logger, &format!("Unable to write to {display_path}: {err}"));
             false
         }
     }
@@ -142,6 +128,10 @@ pub fn export_png_multi(
     let opts = raster_options(dpi);
     let dir = Path::new(dir);
 
+    if !validate_name_pattern(name_pattern, logger) {
+        return false;
+    }
+
     let start = std::time::Instant::now();
 
     for page in document.pages() {
@@ -152,15 +142,7 @@ pub fn export_png_multi(
 
         if let Err(err) = pixmap.save_png(&path) {
             let display_path = get_display_path(&path);
-            logger.log_error(
-                &format!("Unable to write to {display_path}: {err}"),
-                "",
-                -1,
-                -1,
-                -1,
-                -1,
-                Vec::new(),
-            );
+            log_error(logger, &format!("Unable to write to {display_path}: {err}"));
             return false;
         }
     }
@@ -168,9 +150,10 @@ pub fn export_png_multi(
     let elapsed = format!("{:.2?}", start.elapsed());
     let display_path = get_display_path(dir);
 
-    logger.log_note(&format!(
-        "PNG set exported successfully to {display_path} in {elapsed}"
-    ));
+    logger.log_note(
+        ffi::LogCategory::Export,
+        &format!("PNG set exported successfully to {display_path} in {elapsed}"),
+    );
     true
 }
 
@@ -181,6 +164,18 @@ fn raster_options(dpi: u32) -> typst_render::RenderOptions {
         pixel_per_pt,
         ..Default::default()
     }
+}
+
+fn validate_name_pattern(pattern: &str, logger: &ffi::LoggerProxy) -> bool {
+    if pattern.is_empty() {
+        log_error(logger, "output name pattern is empty");
+        return false;
+    }
+    if !pattern.contains("{p}") && !pattern.contains("{n}") {
+        log_error(logger, "output name pattern does not include a page number token");
+        return false;
+    }
+    true
 }
 
 fn process_name_pattern(pattern: &str, page: u64, total_pages: usize) -> String {
@@ -200,4 +195,17 @@ fn get_display_path(path: impl AsRef<Path>) -> String {
     crate::pathmap::get_display_path(path)
         .to_string_lossy()
         .into_owned()
+}
+
+fn log_error(logger: &ffi::LoggerProxy, error: &str) {
+    logger.log_error(
+        ffi::LogCategory::Export,
+        error,
+        "",
+        -1,
+        -1,
+        -1,
+        -1,
+        Vec::new(),
+    );
 }
