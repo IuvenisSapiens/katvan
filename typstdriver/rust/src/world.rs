@@ -159,7 +159,7 @@ impl<'a> KatvanWorld<'a> {
             }
             VirtualRoot::Project => {
                 let path = id.vpath().realize(&self.root_prefix)?;
-                self.path_mapper.get_fs_file_path(&path)?
+                self.path_mapper.get_fs_file_path(&path, id.vpath())?
             }
         };
 

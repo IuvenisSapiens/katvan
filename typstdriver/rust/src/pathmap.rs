@@ -20,6 +20,7 @@ use std::path::{Path, PathBuf};
 use typst::{
     diag::{FileError, FileResult},
     ecow::EcoString,
+    syntax::VirtualPath,
 };
 
 pub struct PathMapper {
@@ -43,7 +44,11 @@ impl PathMapper {
             .collect();
     }
 
-    pub fn get_fs_file_path(&self, displayed_path: &Path) -> FileResult<PathBuf> {
+    pub fn get_fs_file_path(
+        &self,
+        displayed_path: &Path,
+        virtual_path: &VirtualPath,
+    ) -> FileResult<PathBuf> {
         if self.root.actual.as_os_str().is_empty() {
             return Err(FileError::Other(Some(EcoString::from(
                 "unsaved files cannot include external files",
@@ -61,15 +66,10 @@ impl PathMapper {
             }
         }
 
-        let roots = std::iter::once(&self.root)
-            .chain(self.allowed_paths.iter())
-            .map(|root| root.displayed.display().to_string())
-            .collect::<Vec<_>>()
-            .join(", ");
-        Err(FileError::Other(Some(EcoString::from(format!(
-            "access denied: '{}' is outside the configured directories ({roots})",
-            displayed_path.display()
-        )))))
+        // The virtual root is widened to the volume root to permit allowed
+        // parent-relative imports. Absolute Typst paths still refer to the
+        // document's project root, so retry them relative to the document dir.
+        Ok(virtual_path.realize(&self.root.actual)?)
     }
 }
 
@@ -104,4 +104,28 @@ pub fn get_display_path<P: AsRef<Path>>(path: P) -> PathBuf {
 #[cfg(not(feature = "flatpak"))]
 pub fn get_display_path<P: AsRef<Path>>(path: P) -> PathBuf {
     path.as_ref().to_owned()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn maps_project_root_paths_relative_to_document_dir() {
+        let project_root = std::env::temp_dir().join("katvan-pathmap-project");
+        let mapper = PathMapper::new(project_root.to_str().unwrap());
+        let virtual_path = VirtualPath::new("src/process.typ").unwrap();
+        let displayed_path = project_root
+            .parent()
+            .unwrap()
+            .join("src")
+            .join("process.typ");
+
+        assert_eq!(
+            mapper
+                .get_fs_file_path(&displayed_path, &virtual_path)
+                .unwrap(),
+            project_root.join("src").join("process.typ")
+        );
+    }
 }
