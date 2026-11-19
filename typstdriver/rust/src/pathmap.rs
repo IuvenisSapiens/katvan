@@ -60,7 +60,16 @@ impl PathMapper {
                 return Ok(root.actual.join(path_in_root));
             }
         }
-        Err(FileError::AccessDenied)
+
+        let roots = std::iter::once(&self.root)
+            .chain(self.allowed_paths.iter())
+            .map(|root| root.displayed.display().to_string())
+            .collect::<Vec<_>>()
+            .join(", ");
+        Err(FileError::Other(Some(EcoString::from(format!(
+            "access denied: '{}' is outside the configured directories ({roots})",
+            displayed_path.display()
+        )))))
     }
 }
 

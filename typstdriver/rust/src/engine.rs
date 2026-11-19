@@ -415,7 +415,7 @@ fn span_to_location(span: typst::syntax::DiagSpan, world: &dyn World) -> Diagnos
 
 fn get_diagnostic_hints(diag: &typst::diag::SourceDiagnostic) -> Vec<&str> {
     // As per https://github.com/typst/typst/blob/0.15/crates/typst-library/src/diag.rs#L652
-    if diag.message.contains("(access denied)") {
+    if diag.message.contains("(access denied") {
         if is_in_sandbox() {
             vec![
                 "by default external files can't be read when running in a sandbox",
