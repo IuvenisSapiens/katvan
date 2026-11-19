@@ -20,8 +20,9 @@ use std::pin::Pin;
 
 use anyhow::{Context, Result};
 use typst::layout::{Abs, Point};
-use typst::{World, WorldExt};
+use typst::{World, WorldExt, model::Document};
 use typst_layout::PagedDocument;
+use typst_render::{PngFormat, PngFormatOptions};
 
 use crate::analysis;
 use crate::bridge::ffi;
@@ -190,9 +191,12 @@ impl<'a> EngineImpl<'a> {
         let page = document.pages().get(page).context("No such page")?;
 
         let opts = typst_render::RenderOptions {
-            pixel_per_pt: point_size.into(),
+            format: PngFormatOptions {
+                ppi: Some((point_size * 72.0).into()),
+            },
             ..Default::default()
-        };
+        }
+        .resolve(document.options().get::<PngFormat>());
         let pixmap = typst_render::render(page, &opts);
 
         Ok(ffi::RenderedPage {

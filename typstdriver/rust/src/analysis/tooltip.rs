@@ -20,7 +20,9 @@ use std::{collections::HashMap, sync::LazyLock};
 use typst::{
     World,
     comemo::Track,
-    foundations::{Content, Func, IntoValue, Scope, Smart, Type, Value},
+    foundations::{
+        Content, Func, IntoValue, Scope, Smart, Type, Value, WorldBindingExt,
+    },
     syntax::{
         LinkedNode, Side, Source, SyntaxKind,
         ast::{self, AstNode},
@@ -276,7 +278,7 @@ fn process_docs_content(
         let path = link.target.resolve().to_string();
         let url = process_docs_internal_link(world, &path).unwrap_or_default();
 
-        let supplement = match link.supplement.get_ref(styles).clone() {
+        let supplement = match link.supplement.get_ref(styles).clone().v {
             Smart::Custom(Some(supplement)) => supplement.into_value(),
             _ => Value::None,
         };
@@ -423,7 +425,7 @@ fn process_docs_internal_link(world: &dyn IdeWorld, path: &str) -> Option<String
 fn get_reference_link(world: &dyn IdeWorld, mut path: Vec<&str>, is_math: bool) -> Option<String> {
     let scope = if matches!(path.first(), Some(&"std" | &"global")) {
         path.remove(0);
-        world.library().std.read().scope()?
+        world.library().std.read(world.silent_binding_guard()).ok()?.scope()?
     } else if is_math {
         world.library().math.scope()
     } else {
@@ -438,10 +440,14 @@ fn get_reference_link(world: &dyn IdeWorld, mut path: Vec<&str>, is_math: bool) 
         _ => {}
     }
 
-    get_reference_link_in_scope(scope, &path)
+    get_reference_link_in_scope(world, scope, &path)
 }
 
-fn get_reference_link_in_scope(scope: &Scope, path: &[&str]) -> Option<String> {
+fn get_reference_link_in_scope(
+    world: &dyn IdeWorld,
+    scope: &Scope,
+    path: &[&str],
+) -> Option<String> {
     let mut scope = scope;
     let empty_scope = Scope::new();
 
@@ -478,21 +484,21 @@ fn get_reference_link_in_scope(scope: &Scope, path: &[&str]) -> Option<String> {
             binding?
         };
 
-        match binding.read() {
-            Value::Module(m) => {
+        match binding.read(world.silent_binding_guard()) {
+            Ok(Value::Module(m)) => {
                 // Modules don't have full documentation attached, just move
                 // over to the next path element
                 in_func = None;
                 scope = m.scope();
             }
-            Value::Type(t) => {
+            Ok(Value::Type(t)) => {
                 in_func = None;
                 scope = t.scope();
 
                 let category = binding.category()?.name();
                 url = Some(format!("{ONLINE_DOCS_PREFIX}/reference/{category}/{elem}"));
             }
-            Value::Func(f) => {
+            Ok(Value::Func(f)) => {
                 in_func = Some(f);
                 scope = f.scope().unwrap_or(&empty_scope);
 

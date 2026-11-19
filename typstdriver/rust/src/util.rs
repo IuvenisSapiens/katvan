@@ -47,7 +47,7 @@ impl AuxWorld {
 
         let source = Source::new(*SOURCE_ID, String::from(content));
 
-        let library = Library::builder()
+        let library = Library::builder([typst_pdf::FORMAT, typst_render::FORMAT])
             .with_features(typst::Features::all())
             .build();
 

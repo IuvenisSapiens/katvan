@@ -18,8 +18,17 @@
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use typst::{World, layout::Abs, utils::Scalar, visualize::Color};
+use typst::{
+    World,
+    foundations::Smart,
+    layout::Abs,
+    model::Document,
+    utils::Scalar,
+    visualize::Color,
+};
 use typst_layout::PagedDocument;
+use typst_pdf::PdfFormatOptions;
+use typst_render::{PngFormat, PngFormatOptions};
 
 use crate::{bridge::ffi, engine::DiagnosticsLogger};
 
@@ -39,7 +48,7 @@ pub fn export_pdf(
 
     let elapsed = format!("{:.2?}", start.elapsed());
 
-    if let Ok(data) = result {
+    if let Ok(data) = result.output {
         let display_path = get_display_path(path);
 
         match std::fs::write(path, data) {
@@ -56,7 +65,11 @@ pub fn export_pdf(
             }
         }
     } else {
-        logger.log_diagnostics(world, ffi::LogCategory::Export, &result.unwrap_err());
+        logger.log_diagnostics(
+            world,
+            ffi::LogCategory::Export,
+            &result.output.unwrap_err(),
+        );
         Ok(false)
     }
 }
@@ -77,14 +90,17 @@ fn pdf_options(
     let standards = if standards.is_empty() {
         typst_pdf::PdfStandards::default()
     } else {
-        typst_pdf::PdfStandards::new(&standards)
+        typst_pdf::PdfStandards::new(standards)
             .ok()
             .context("Incompatible version and PDF/A standard")?
     };
 
     Ok(typst_pdf::PdfOptions {
-        standards,
-        tagged,
+        format: PdfFormatOptions {
+            standard: Some(standards),
+            tagged: Some(Smart::Custom(tagged)),
+            ..Default::default()
+        },
         ..Default::default()
     })
 }
@@ -133,6 +149,7 @@ pub fn export_png_multi(
     }
 
     let start = std::time::Instant::now();
+    let opts = opts.resolve(document.options().get::<PngFormat>());
 
     for page in document.pages() {
         let pixmap = typst_render::render(page, &opts);
@@ -158,10 +175,10 @@ pub fn export_png_multi(
 }
 
 fn raster_options(dpi: u32) -> typst_render::RenderOptions {
-    let pixel_per_pt = Scalar::new(convert_dpi(dpi));
-
     typst_render::RenderOptions {
-        pixel_per_pt,
+        format: PngFormatOptions {
+            ppi: Some(Scalar::new(f64::from(dpi))),
+        },
         ..Default::default()
     }
 }
@@ -185,10 +202,6 @@ fn process_name_pattern(pattern: &str, page: u64, total_pages: usize) -> String 
         .replace("{p}", &page.to_string())
         .replace("{n}", &format!("{page:0>total_pages_width$}"))
         .replace("{t}", &total_pages.to_string())
-}
-
-fn convert_dpi(dpi: u32) -> f64 {
-    f64::from(dpi) / 72.0
 }
 
 fn get_display_path(path: impl AsRef<Path>) -> String {

@@ -93,7 +93,9 @@ impl<'a> KatvanWorld<'a> {
             path_mapper: pathmap::PathMapper::new(root),
             package_manager: Mutex::new(PackageManagerWrapper::new(package_manager)),
             packages_list: once_cell::sync::OnceCell::new(),
-            library: LazyHash::new(Library::default()),
+            library: LazyHash::new(
+                Library::builder([typst_pdf::FORMAT, typst_render::FORMAT]).build(),
+            ),
             fonts,
             source,
             root_prefix,
@@ -130,7 +132,7 @@ impl<'a> KatvanWorld<'a> {
         }
 
         self.library = LazyHash::new(
-            Library::builder()
+            Library::builder([typst_pdf::FORMAT, typst_render::FORMAT])
                 .with_features(features.into_iter().collect())
                 .build(),
         );
